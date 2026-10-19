@@ -1,0 +1,12 @@
+# build output
+firmware/.pio/
+.pio/
+__pycache__/
+
+# full flash dump of the original firmware (may contain device data) - keep local only
+backup/
+
+# reference library, cloned separately (see README); never modified here
+libs/xiaozhi-esp32/
+
+*.bin
