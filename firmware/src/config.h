@@ -41,6 +41,7 @@ struct AppCfg {
   bool alarmOn = false;
   uint8_t alarmH = 6, alarmM = 30;
   uint8_t photoSec = 10;  // slideshow: seconds per picture
+  bool wallOn = false;    // a wallpaper is stored in flash and shown on the main screen
 };
 static AppCfg cfg;
 
@@ -109,6 +110,7 @@ static void cfgLoad() {
   cfg.alarmH = p.getUChar("alH", 6) % 24;
   cfg.alarmM = p.getUChar("alM", 30) % 60;
   cfg.photoSec = constrain(p.getUChar("phS", 10), 3, 120);
+  cfg.wallOn = p.getBool("wall", false);
   p.end();
   if (!cfg.qrOn && cfg.startTile == 1) cfg.startTile = 0;
 }
@@ -143,6 +145,7 @@ static void cfgSave() {
   p.putUChar("alH", cfg.alarmH);
   p.putUChar("alM", cfg.alarmM);
   p.putUChar("phS", cfg.photoSec);
+  p.putBool("wall", cfg.wallOn);
   p.putUChar("appsV", 2);
   p.end();
 }

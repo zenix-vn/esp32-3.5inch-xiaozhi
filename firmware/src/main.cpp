@@ -174,6 +174,7 @@ static void buildQr(lv_obj_t *tile) {
   lv_obj_align(h, LV_ALIGN_TOP_LEFT, 290, 238);
 }
 
+#include "wallpaper.h"
 #include "webconfig.h"
 
 // ---------- launcher ----------
@@ -360,6 +361,7 @@ void setup() {
 
   soundInit();
   buildUI();
+  if (cfg.wallOn && !wallpaperOn()) cfg.wallOn = false;
   statusbarBegin();
   dragonBegin();
   wifiBegin();
