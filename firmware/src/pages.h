@@ -4,6 +4,7 @@
 #include <esp_system.h>
 #include <nvs_flash.h>
 
+static const char *webHost();  // webconfig.h
 static uint8_t sleepMin = 0;  // screen-off timeout in minutes, 0 = never
 
 // ---------- generic page plumbing ----------
@@ -105,7 +106,7 @@ static lv_obj_t *smallBtn(lv_obj_t *parent, const char *text, lv_color_t color, 
 
 // ---------- confirm dialog ----------
 static void (*pendingAction)() = nullptr;
-static const char *confirmBtns[] = {"Cancel", "Confirm", ""};
+static const char *confirmBtns[3];
 static void confirmCb(lv_event_t *e) {
   lv_obj_t *m = lv_event_get_current_target(e);
   uint16_t idx = lv_msgbox_get_active_btn(m);
@@ -115,14 +116,19 @@ static void confirmCb(lv_event_t *e) {
 }
 static void confirmDialog(const char *title, const char *text, void (*action)()) {
   pendingAction = action;
-  lv_obj_t *m = lv_msgbox_create(nullptr, title, text, confirmBtns, false);
+  confirmBtns[0] = tr("Cancel");
+  confirmBtns[1] = tr("Confirm");
+  confirmBtns[2] = "";
+  lv_obj_t *m = lv_msgbox_create(nullptr, tr(title), tr(text), confirmBtns, false);
   lv_obj_set_width(m, 340);
   lv_obj_set_style_bg_color(m, C_CARD, 0);
   lv_obj_set_style_border_color(m, C_BORDER, 0);
   lv_obj_set_style_border_width(m, 1, 0);
   lv_obj_set_style_radius(m, 18, 0);
   lv_obj_set_style_text_color(m, C_TEXT, 0);
+  lv_obj_set_style_text_font(m, F_BODY, 0);
   lv_obj_t *btns = lv_msgbox_get_btns(m);
+  lv_obj_set_style_text_font(btns, F_BODY, LV_PART_ITEMS);
   lv_obj_set_style_bg_color(btns, C_BORDER, LV_PART_ITEMS);
   lv_obj_set_style_text_color(btns, C_TEXT, LV_PART_ITEMS);
   lv_obj_add_event_cb(m, confirmCb, LV_EVENT_VALUE_CHANGED, nullptr);
@@ -212,10 +218,10 @@ static void connPoll(lv_timer_t *t) {
   lv_timer_pause(t);
   lv_obj_add_flag(connSpinner, LV_OBJ_FLAG_HIDDEN);
   bool ok = r == 1;
-  lv_label_set_text(connLabel, ok ? "Connected" : "Could not connect. Check the password and try again.");
+  lv_label_set_text(connLabel, tr(ok ? "Connected" : "Could not connect. Check the password and try again."));
   lv_obj_set_style_text_color(connLabel, ok ? C_OK : C_WARN, 0);
   lv_obj_t *bl = lv_obj_get_child(connBtn, 0);
-  lv_label_set_text(bl, ok ? "Done" : "Try again");
+  lv_label_set_text(bl, tr(ok ? "Done" : "Try again"));
   lv_obj_remove_event_cb(connBtn, connDone);
   lv_obj_remove_event_cb(connBtn, connRetry);
   lv_obj_add_event_cb(connBtn, ok ? connDone : connRetry, LV_EVENT_CLICKED, nullptr);
@@ -237,7 +243,7 @@ static void startConnect(const char *ssid, const char *password) {
   lv_obj_set_style_arc_color(connSpinner, C_ACCENT, LV_PART_INDICATOR);
   lv_obj_set_style_arc_color(connSpinner, C_BORDER, LV_PART_MAIN);
   char buf[80];
-  snprintf(buf, sizeof(buf), "Connecting to %s...", ssid);
+  snprintf(buf, sizeof(buf), tr("Connecting to %s..."), ssid);
   connLabel = makeLabel(card, buf, F_BODY, C_TEXT);
   lv_obj_set_width(connLabel, 280);
   lv_label_set_long_mode(connLabel, LV_LABEL_LONG_WRAP);
@@ -264,7 +270,7 @@ static void fillNetworks(int n) {
   for (int i = 0; i < n && cnt < 40; i++) idx[cnt++] = i;
   for (int i = 1; i < cnt; i++) {  // insertion sort by signal, strongest first
     int k = idx[i], j = i - 1;
-    while (j >= 0 && WiFi.RSSI(idx[j]) < WiFi.RSSI(k)) {
+    while (j >= 0 && wifiScanAp(idx[j])->rssi < wifiScanAp(k)->rssi) {
       idx[j + 1] = idx[j];
       j--;
     }
@@ -272,14 +278,15 @@ static void fillNetworks(int n) {
   }
   netCount = 0;
   for (int i = 0; i < cnt && netCount < 14; i++) {
-    String s = WiFi.SSID(idx[i]);
+    const wifi_ap_record_t *ap = wifiScanAp(idx[i]);
+    String s = (const char *)ap->ssid;
     if (s.length() == 0 || s.length() > 32) continue;
     bool dup = false;
     for (int j = 0; j < netCount; j++) dup |= (s == nets[j].ssid);
     if (dup) continue;
     strlcpy(nets[netCount].ssid, s.c_str(), sizeof(nets[netCount].ssid));
-    nets[netCount].secure = WiFi.encryptionType(idx[i]) != WIFI_AUTH_OPEN;
-    nets[netCount].rssi = WiFi.RSSI(idx[i]);
+    nets[netCount].secure = ap->authmode != WIFI_AUTH_OPEN;
+    nets[netCount].rssi = ap->rssi;
     netCount++;
   }
   if (netCount == 0) {
@@ -314,8 +321,8 @@ static void scanPoll(lv_timer_t *t) {
     lv_timer_pause(t);
     return;
   }
-  int n = WiFi.scanComplete();
-  if (n == WIFI_SCAN_RUNNING) return;
+  int n = wifiScanResult();
+  if (n == -1) return;
   lv_timer_pause(t);
   if (n < 0) {
     lv_obj_clean(wifiList);
@@ -323,14 +330,12 @@ static void scanPoll(lv_timer_t *t) {
     return;
   }
   fillNetworks(n);
-  WiFi.scanDelete();
 }
 static void startScan(lv_event_t *) {
   if (!wifiList) return;
   lv_obj_clean(wifiList);
   infoRow(wifiList, "Networks", "Scanning...", C_MUTED);
-  WiFi.scanDelete();
-  WiFi.scanNetworks(true);
+  wifiScanStart();
   if (scanTimer) lv_timer_resume(scanTimer);
 }
 
@@ -349,7 +354,7 @@ static void showWifiPage(lv_scr_load_anim_t anim, bool delOld) {
   lv_obj_align(nm, LV_ALIGN_TOP_LEFT, 56, 10);
   char det[96];
   if (on) snprintf(det, sizeof(det), "%s   %d dBm   ch %d", WiFi.localIP().toString().c_str(), WiFi.RSSI(), WiFi.channel());
-  else snprintf(det, sizeof(det), "%s", wifiPortalActive() ? "Hotspot Zin100-Setup is open" : wifiStatus());
+  else snprintf(det, sizeof(det), "%s", tr(wifiPortalActive() ? "Hotspot Zin100-Setup is open" : wifiStatus()));
   lv_obj_t *dt = makeLabel(st, det, F_CAPTION, C_MUTED);
   lv_obj_set_width(dt, 290);
   lv_label_set_long_mode(dt, LV_LABEL_LONG_DOT);
@@ -405,7 +410,7 @@ static void pagePassword(const char *ssid) {
   lv_textarea_set_one_line(pwTa, true);
   lv_textarea_set_password_mode(pwTa, true);
   lv_textarea_set_max_length(pwTa, 63);
-  lv_textarea_set_placeholder_text(pwTa, "Password");
+  lv_textarea_set_placeholder_text(pwTa, tr("Password"));
   lv_obj_set_size(pwTa, 396, 44);
   lv_obj_set_pos(pwTa, 12, 58);
   lv_obj_set_style_bg_color(pwTa, C_CARD, 0);
@@ -450,7 +455,7 @@ static void brightnessEvent(lv_event_t *e) {
   }
 }
 
-static const char *sleepMap[] = {"Never", "1 min", "5 min", "10 min", ""};
+static const char *sleepMap[5];
 static const uint8_t sleepVals[] = {0, 1, 5, 10};
 static void sleepEvent(lv_event_t *e) {
   uint32_t id = lv_btnmatrix_get_selected_btn(lv_event_get_target(e));
@@ -460,6 +465,18 @@ static void sleepEvent(lv_event_t *e) {
   p.begin("ui", false);
   p.putUChar("sleep", sleepMin);
   p.end();
+}
+
+static uint8_t pendingLang = LANG_VI;
+static void doChangeLang() {
+  i18nSave(pendingLang);
+  ESP.restart();
+}
+static void askLang(lv_event_t *e) {
+  uint8_t l = (uint8_t)(intptr_t)lv_event_get_user_data(e);
+  if (l == gLang) return;
+  pendingLang = l;
+  confirmDialog("Change language?", "The device restarts to apply the new language.", doChangeLang);
 }
 
 static lv_obj_t *tzLabel;
@@ -496,6 +513,11 @@ static void pageSettings() {
   lv_obj_t *card2 = makeCard(c, 456, 86);
   lv_obj_t *st = makeLabel(card2, "Turn screen off after", F_BODY, C_MUTED);
   lv_obj_align(st, LV_ALIGN_TOP_LEFT, 16, 10);
+  sleepMap[0] = tr("Never");
+  sleepMap[1] = tr("1 min");
+  sleepMap[2] = tr("5 min");
+  sleepMap[3] = tr("10 min");
+  sleepMap[4] = "";
   lv_obj_t *bm = lv_btnmatrix_create(card2);
   lv_btnmatrix_set_map(bm, sleepMap);
   lv_btnmatrix_set_btn_ctrl_all(bm, LV_BTNMATRIX_CTRL_CHECKABLE);
@@ -508,6 +530,7 @@ static void pageSettings() {
   lv_obj_set_style_border_width(bm, 0, 0);
   lv_obj_set_style_pad_all(bm, 0, 0);
   lv_obj_set_style_pad_column(bm, 8, 0);
+  lv_obj_set_style_text_font(bm, F_BODY, LV_PART_ITEMS);
   lv_obj_set_style_bg_color(bm, C_BORDER, LV_PART_ITEMS);
   lv_obj_set_style_text_color(bm, C_TEXT, LV_PART_ITEMS);
   lv_obj_set_style_border_width(bm, 0, LV_PART_ITEMS);
@@ -532,7 +555,19 @@ static void pageSettings() {
   lv_obj_t *minus = smallBtn(tz, LV_SYMBOL_MINUS, C_ACCENT, tzStep, (void *)(intptr_t)-1);
   lv_obj_align(minus, LV_ALIGN_RIGHT_MID, -126, 0);
 
+  lv_obj_t *lg = makeCard(c, 456, 52);
+  lv_obj_t *ll = makeLabel(lg, "Language", F_BODY, C_MUTED);
+  lv_obj_align(ll, LV_ALIGN_LEFT_MID, 16, 0);
+  lv_obj_t *lEn = smallBtn(lg, "English", gLang == LANG_EN ? C_ACCENT : C_MUTED, askLang, (void *)(intptr_t)LANG_EN, 100);
+  lv_obj_align(lEn, LV_ALIGN_RIGHT_MID, -10, 0);
+  lv_obj_t *lVi = smallBtn(lg, "Tiếng Việt", gLang == LANG_VI ? C_ACCENT : C_MUTED, askLang, (void *)(intptr_t)LANG_VI, 110);
+  lv_obj_align(lVi, LV_ALIGN_RIGHT_MID, -118, 0);
+
   infoRow(c, "Wi-Fi", wifiConnected() ? WiFi.SSID().c_str() : "Not connected", wifiConnected() ? C_OK : C_WARN);
+  if (wifiConnected()) {
+    String url = String("http://") + webHost() + ".local";
+    infoRow(c, "Web setup", url.c_str(), C_ACCENT);
+  }
   infoRow(c, "Xiaozhi", xiaozhiState() == XZ_ACTIVATED ? "Connected" : xiaozhiMessage(),
           xiaozhiState() == XZ_ACTIVATED ? C_OK : C_WARN);
 
@@ -558,7 +593,7 @@ static void pageStorage() {
     lv_obj_t *t = makeLabel(card, "microSD", F_BODY, C_MUTED);
     lv_obj_align(t, LV_ALIGN_TOP_LEFT, 16, 10);
     char buf[40];
-    snprintf(buf, sizeof(buf), "%d%% used", pct);
+    snprintf(buf, sizeof(buf), tr("%d%% used"), pct);
     lv_obj_t *p = makeLabel(card, buf, F_BODY, C_TEXT);
     lv_obj_align(p, LV_ALIGN_TOP_RIGHT, -16, 10);
     lv_obj_t *bar = lv_bar_create(card);
@@ -601,7 +636,7 @@ static void aboutTick(lv_timer_t *) {
   snprintf(buf, sizeof(buf), "%lud %02luh %02lum %02lus", (unsigned long)(up / 86400), (unsigned long)((up / 3600) % 24),
            (unsigned long)((up / 60) % 60), (unsigned long)(up % 60));
   setRowValue(aboutUp, buf);
-  snprintf(buf, sizeof(buf), "%u KB free", (unsigned)(ESP.getFreeHeap() / 1024));
+  snprintf(buf, sizeof(buf), tr("%u KB free"), (unsigned)(ESP.getFreeHeap() / 1024));
   setRowValue(aboutHeap, buf);
 }
 
@@ -632,7 +667,7 @@ static void pageAbout() {
   }
   lv_obj_t *nm = makeLabel(id, "Zin100", F_HEADING, C_TEXT);
   lv_obj_align(nm, LV_ALIGN_TOP_LEFT, 88, 12);
-  snprintf(buf, sizeof(buf), "Firmware %s  -  built %s", FW_VERSION, __DATE__);
+  snprintf(buf, sizeof(buf), tr("Firmware %s  -  built %s"), FW_VERSION, __DATE__);
   lv_obj_t *fw = makeLabel(id, buf, F_CAPTION, C_MUTED);
   lv_obj_align(fw, LV_ALIGN_TOP_LEFT, 88, 52);
 
@@ -640,7 +675,7 @@ static void pageAbout() {
   infoRow(c, "Board", "ESP32-2432S035");
   snprintf(buf, sizeof(buf), "%s rev %d", ESP.getChipModel(), (int)ESP.getChipRevision());
   infoRow(c, "Chip", buf);
-  snprintf(buf, sizeof(buf), "%d MHz, %d cores", (int)ESP.getCpuFreqMHz(), (int)ESP.getChipCores());
+  snprintf(buf, sizeof(buf), tr("%d MHz, %d cores"), (int)ESP.getCpuFreqMHz(), (int)ESP.getChipCores());
   infoRow(c, "CPU", buf);
   snprintf(buf, sizeof(buf), "%u MB flash, %u KB RAM", (unsigned)(ESP.getFlashChipSize() / 1048576),
            (unsigned)(ESP.getHeapSize() / 1024));
@@ -648,7 +683,7 @@ static void pageAbout() {
   infoRow(c, "Display", "3.5-inch 480x320 ST7796");
   infoRow(c, "Touch", "Resistive XPT2046");
   if (sdOk) snprintf(buf, sizeof(buf), "%llu MB", (unsigned long long)(SD.cardSize() / 1048576ULL));
-  else snprintf(buf, sizeof(buf), "No card");
+  else snprintf(buf, sizeof(buf), "%s", tr("No card"));
   infoRow(c, "microSD", buf, sdOk ? C_TEXT : C_WARN);
 
   sectionLabel(c, "NETWORK");
@@ -678,7 +713,7 @@ static void pageSoon(const char *title, const char *icon) {
   makeLabel(c, icon, F_DISPLAY, C_MUTED);
   makeLabel(c, "Coming soon", F_HEADING, C_TEXT);
   char buf[64];
-  snprintf(buf, sizeof(buf), "%s is not available yet", title);
+  snprintf(buf, sizeof(buf), tr("%s is not available yet"), tr(title));
   makeLabel(c, buf, F_BODY, C_MUTED);
   pageShow(s);
 }

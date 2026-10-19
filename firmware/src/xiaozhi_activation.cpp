@@ -2,6 +2,7 @@
 //   POST <OTA_URL>           -> JSON with activation.code (6 digits) while the device is unbound
 //   POST <OTA_URL>/activate  -> 202 while waiting for the user to enter the code, 200 once bound
 #include "xiaozhi_activation.h"
+#include "i18n.h"
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
@@ -121,7 +122,7 @@ static void task(void *) {
     int status = post(OTA_URL, systemInfoJson(), resp);
     if (status != 200) {
       state = XZ_ERROR;
-      snprintf(message, sizeof(message), "Server error %d, retrying", status);
+      snprintf(message, sizeof(message), tr("Server error %d, retrying"), status);
       Serial.printf("XZ ota status=%d\n", status);
       vTaskDelay(pdMS_TO_TICKS(10000));
       continue;

@@ -4,6 +4,8 @@
 #include <Preferences.h>
 #include <lvgl.h>
 #include <TFT_eSPI.h>
+#include "i18n.h"
+#include "vi_fonts.h"
 
 extern TFT_eSPI tft;
 static const int XPT_IRQ = 36;  // touch shares the display SPI bus; CS is TOUCH_CS (33)
@@ -30,12 +32,9 @@ static bool xptSample(int &rx, int &ry) {
 // Resistive panels report noisy coordinates when the finger lands; LVGL would read that jump as a swipe
 // and drop the tap. So: wait 40 ms for the contact to settle, smooth the position, and tolerate
 // 30 ms of dropouts mid-press.
-static int dbgX = 0, dbgY = 0;  // last reported position (for the on-screen diagnostic)
-static uint32_t dbgPresses = 0;
 static uint32_t fakeUntil = 0;  // TEMP: synthetic touch for self-test
 static int fakeX = 0, fakeY = 0;
 
-static int dbgRawX = 0, dbgRawY = 0;
 
 static void touchRead(lv_indev_drv_t *, lv_indev_data_t *data) {
   static int16_t lx = 0, ly = 0;          // smoothed position
@@ -53,14 +52,11 @@ static void touchRead(lv_indev_drv_t *, lv_indev_data_t *data) {
     int h = cal.swap ? ry : rx, v = cal.swap ? rx : ry;
     int nx = constrain(map(h, cal.x0, cal.x1, 0, 479), 0, 479);
     int ny = constrain(map(v, cal.y0, cal.y1, 0, 319), 0, 319);
-    dbgRawX = rx;
-    dbgRawY = ry;
     lastSeen = millis();
     if (!down) {
       down = true;
       reporting = false;
       downAt = lastSeen;
-      dbgPresses++;
     }
     if (!reporting) {
       lx = nx;  // settle window: follow the latest sample, nothing is reported yet
@@ -87,8 +83,6 @@ static void touchRead(lv_indev_drv_t *, lv_indev_data_t *data) {
   data->state = (down && reporting) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
   data->point.x = px;
   data->point.y = py;
-  dbgX = px;
-  dbgY = py;
 }
 
 static bool touchLoadCal() {
@@ -124,10 +118,10 @@ static void touchCalibrate() {
   lv_obj_set_style_bg_opa(ov, LV_OPA_COVER, 0);
   lv_obj_set_style_bg_color(ov, lv_color_hex(0x070B1A), 0);
   lv_obj_t *title = lv_label_create(ov);
-  lv_label_set_text(title, "Touch calibration\nTap each circle");
+  lv_label_set_text(title, tr("Touch calibration\nTap each circle"));
   lv_obj_set_style_text_align(title, LV_TEXT_ALIGN_CENTER, 0);
   lv_obj_set_style_text_color(title, lv_color_hex(0xF2F5FF), 0);
-  lv_obj_set_style_text_font(title, &lv_font_montserrat_20, 0);
+  lv_obj_set_style_text_font(title, &vi_font_20, 0);
   lv_obj_align(title, LV_ALIGN_CENTER, 0, 0);
   lv_obj_t *dot = lv_obj_create(ov);
   lv_obj_remove_style_all(dot);

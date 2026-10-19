@@ -14,7 +14,44 @@ static portMUX_TYPE dataLock = portMUX_INITIALIZER_UNLOCKED;
 static volatile bool refreshRequested = false;
 static float lat = 21.0285f, lon = 105.8542f;
 static char city[40] = "Hanoi";
-static bool haveLocation = false;
+static bool haveLocation = false, manualLoc = false;
+
+// Location change requested from the web page; applied by the task so lat/lon/city never tear.
+static portMUX_TYPE pendLock = portMUX_INITIALIZER_UNLOCKED;
+static bool pendSet = false, pendAuto = false;
+static float pendLat = 0, pendLon = 0;
+static char pendCity[40] = "";
+
+static void applyPending() {
+  bool set, autoLoc;
+  float la, lo;
+  char c[40];
+  portENTER_CRITICAL(&pendLock);
+  set = pendSet;
+  autoLoc = pendAuto;
+  la = pendLat;
+  lo = pendLon;
+  strlcpy(c, pendCity, sizeof(c));
+  pendSet = pendAuto = false;
+  portEXIT_CRITICAL(&pendLock);
+  if (!set && !autoLoc) return;
+  Preferences p;
+  p.begin("weather", false);
+  if (set) {
+    lat = la;
+    lon = lo;
+    strlcpy(city, c, sizeof(city));
+    manualLoc = haveLocation = true;
+    p.putFloat("lat", lat);
+    p.putFloat("lon", lon);
+    p.putString("city", city);
+    p.putBool("manual", true);
+  } else {
+    manualLoc = haveLocation = false;
+    p.clear();
+  }
+  p.end();
+}
 
 static bool locate() {
   HTTPClient http;
@@ -85,6 +122,7 @@ static void task(void *) {
     lon = p.getFloat("lon", lon);
     p.getString("city", city, sizeof(city));
     haveLocation = true;
+    manualLoc = p.getBool("manual", false);
   }
   p.end();
 
@@ -93,6 +131,7 @@ static void task(void *) {
     vTaskDelay(pdMS_TO_TICKS(4000));  // DNS is not ready right after the link comes up
 
     bool ok;
+    applyPending();
     xSemaphoreTake(netMutex(), portMAX_DELAY);
     if (!haveLocation) haveLocation = locate();
     ok = fetch();
@@ -124,6 +163,33 @@ WeatherData weatherGet() {
 }
 
 void weatherRefresh() { refreshRequested = true; }
+
+void weatherSetLocation(float la, float lo, const char *c) {
+  portENTER_CRITICAL(&pendLock);
+  pendLat = la;
+  pendLon = lo;
+  strlcpy(pendCity, c, sizeof(pendCity));
+  pendSet = true;
+  pendAuto = false;
+  portEXIT_CRITICAL(&pendLock);
+  refreshRequested = true;
+}
+
+void weatherAutoLocate() {
+  portENTER_CRITICAL(&pendLock);
+  pendAuto = true;
+  pendSet = false;
+  portEXIT_CRITICAL(&pendLock);
+  refreshRequested = true;
+}
+
+bool weatherIsManual() { return manualLoc; }
+
+void weatherGetLocation(float &la, float &lo, char *c, size_t n) {
+  la = lat;
+  lo = lon;
+  strlcpy(c, city, n);
+}
 
 const char *weatherText(int c) {
   if (c == 0) return "Clear";

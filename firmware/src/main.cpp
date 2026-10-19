@@ -10,6 +10,9 @@
 #include <SD.h>
 #include <Preferences.h>
 #include "wifi_setup.h"
+#include "i18n.h"
+#include "vi_fonts.h"
+#include "config.h"
 #include "touch.h"
 #include "xiaozhi_activation.h"
 #include "weather.h"
@@ -34,11 +37,11 @@ static lv_color_t buf1[480 * 8], buf2[480 * 8];
 #define C_OK       lv_color_hex(0x3DEBA0)
 #define C_WARN     lv_color_hex(0xFFB84A)
 #define C_DANGER   lv_color_hex(0xFF5C7A)
-#define F_CAPTION  (&lv_font_montserrat_12)
-#define F_BODY     (&lv_font_montserrat_14)
-#define F_LABEL    (&lv_font_montserrat_16)
-#define F_TITLE    (&lv_font_montserrat_20)
-#define F_HEADING  (&lv_font_montserrat_28)
+#define F_CAPTION  (&vi_font_12)
+#define F_BODY     (&vi_font_14)
+#define F_LABEL    (&vi_font_16)
+#define F_TITLE    (&vi_font_20)
+#define F_HEADING  (&vi_font_28)
 #define F_DISPLAY  (&lv_font_montserrat_48)
 
 // ---------- display / backlight ----------
@@ -67,7 +70,8 @@ static void backlightInit() {
 }
 
 // ---------- shared UI helpers ----------
-static lv_obj_t *mainScr, *tv, *homeTile, *qrTile, *appsTile, *dots[3];
+static lv_obj_t *mainScr, *tv, *homeTile, *qrTile, *appsTile, *dots[3], *tileAt[3], *startTileObj;
+static int tileCount = 3;
 
 static void styleScreen(lv_obj_t *s) {
   lv_obj_set_style_bg_color(s, C_BG_TOP, 0);
@@ -79,7 +83,7 @@ static void styleScreen(lv_obj_t *s) {
 
 static lv_obj_t *makeLabel(lv_obj_t *parent, const char *text, const lv_font_t *font, lv_color_t color) {
   lv_obj_t *l = lv_label_create(parent);
-  lv_label_set_text(l, text);
+  lv_label_set_text(l, tr(text));
   lv_obj_set_style_text_font(l, font, 0);
   lv_obj_set_style_text_color(l, color, 0);
   return l;
@@ -102,7 +106,7 @@ static lv_obj_t *makeCard(lv_obj_t *parent, int w, int h) {
 
 // ---------- home (showcase) ----------
 static lv_obj_t *eyeL, *eyeR, *ring, *spinner;
-static lv_obj_t *lblWifi, *lblXz, *lblGreet, *lblTime, *lblDate, *lblStatus;
+static lv_obj_t *lblWifi, *lblXz, *lblGreet, *lblTime, *lblAmPm, *lblDate, *lblStatus;
 static lv_obj_t *clockBox, *codeBox, *lblCode;
 static bool listening = false;
 static uint32_t bannerUntil = 0;
@@ -232,11 +236,11 @@ static void refreshWeather() {
   int key = WK_NONE;
   if (!w.valid) {
     lv_label_set_text(wTemp, "--");
-    lv_label_set_text(wDesc, w.failed ? "Weather unavailable" : (wifiConnected() ? "Loading weather..." : "Waiting for network"));
+    lv_label_set_text(wDesc, tr(w.failed ? "Weather unavailable" : (wifiConnected() ? "Loading weather..." : "Waiting for network")));
   } else {
     key = iconKindFor(w);
-    lv_label_set_text_fmt(wTemp, "%d%sC", (int)lroundf(w.temp), DEG);
-    lv_label_set_text_fmt(wDesc, "%s - %s - %d%%", weatherText(w.code), w.city, w.humidity);
+    lv_label_set_text_fmt(wTemp, "%d%s%c", (int)lroundf(cfg.tempF ? w.temp * 9.0f / 5.0f + 32.0f : w.temp), DEG, cfg.tempF ? 'F' : 'C');
+    lv_label_set_text_fmt(wDesc, "%s - %s - %d%%", tr(weatherText(w.code)), w.city, w.humidity);
   }
   if (key != wIconKey) {
     drawWeatherIcon(key);
@@ -245,19 +249,20 @@ static void refreshWeather() {
 }
 static void weatherTapped(lv_event_t *) {
   weatherRefresh();
-  lv_label_set_text(wDesc, "Updating...");
+  lv_label_set_text(wDesc, tr("Updating..."));
 }
 
 // One idempotent pass that makes the home screen reflect the current state.
 static void refreshHome() {
-  static const char *days[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-  static const char *months[] = {"January", "February", "March",     "April",   "May",      "June",
-                                 "July",    "August",   "September", "October", "November", "December"};
+  static const char *daysEn[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+  static const char *daysVi[] = {"Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"};
+  static const char *monthsEn[] = {"January", "February", "March",     "April",   "May",      "June",
+                                   "July",    "August",   "September", "October", "November", "December"};
   XzState st = xiaozhiState();
 
   // top bar
   bool wifiOn = wifiConnected();
-  lv_label_set_text_fmt(lblWifi, LV_SYMBOL_WIFI "  %s", wifiOn ? WiFi.SSID().c_str() : "No Wi-Fi");
+  lv_label_set_text_fmt(lblWifi, LV_SYMBOL_WIFI "  %s", wifiOn ? WiFi.SSID().c_str() : tr("No Wi-Fi"));
   lv_obj_set_style_text_color(lblWifi, wifiOn ? C_OK : C_WARN, 0);
   const char *xz = "Offline";
   lv_color_t xzc = C_MUTED;
@@ -268,7 +273,7 @@ static void refreshHome() {
     case XZ_ERROR: xz = "Retrying"; xzc = C_WARN; break;
     default: break;
   }
-  lv_label_set_text(lblXz, xz);
+  lv_label_set_text(lblXz, tr(xz));
   lv_obj_set_style_text_color(lblXz, xzc, 0);
 
   // right panel: pairing code or clock
@@ -285,28 +290,42 @@ static void refreshHome() {
   bool timeOk = wifiOn && getLocalTime(&tmv, 0) && tmv.tm_year > 120;
   if (timeOk) {
     int h = tmv.tm_hour;
-    lv_label_set_text(lblGreet, h >= 5 && h < 12 ? "Good morning" : h < 18 && h >= 12 ? "Good afternoon" : h >= 18 && h < 22 ? "Good evening" : "Good night");
-    lv_label_set_text_fmt(lblTime, "%02d:%02d", h, tmv.tm_min);
-    lv_label_set_text_fmt(lblDate, "%s, %d %s", days[tmv.tm_wday], tmv.tm_mday, months[tmv.tm_mon]);
+    const char *g = h >= 5 && h < 12 ? "Good morning" : h < 18 && h >= 12 ? "Good afternoon" : h >= 18 && h < 22 ? "Good evening" : "Good night";
+    if (!cfg.greetOn) lv_label_set_text(lblGreet, "");
+    else if (cfg.userName.length()) lv_label_set_text_fmt(lblGreet, "%s, %s", tr(g), cfg.userName.c_str());
+    else lv_label_set_text(lblGreet, tr(g));
+    if (cfg.clock24) {
+      lv_label_set_text_fmt(lblTime, "%02d:%02d", h, tmv.tm_min);
+      lv_label_set_text(lblAmPm, "");
+    } else {
+      lv_label_set_text_fmt(lblTime, "%d:%02d", h % 12 ? h % 12 : 12, tmv.tm_min);
+      lv_label_set_text(lblAmPm, isVi() ? (h < 12 ? "SA" : "CH") : (h < 12 ? "AM" : "PM"));
+      lv_obj_align_to(lblAmPm, lblTime, LV_ALIGN_OUT_RIGHT_BOTTOM, 4, -8);
+    }
+    if (cfg.dateFmt == 2) lv_label_set_text(lblDate, "");
+    else if (cfg.dateFmt == 1) lv_label_set_text_fmt(lblDate, "%02d/%02d/%d", tmv.tm_mday, tmv.tm_mon + 1, tmv.tm_year + 1900);
+    else if (isVi()) lv_label_set_text_fmt(lblDate, "%s, %d tháng %d", daysVi[tmv.tm_wday], tmv.tm_mday, tmv.tm_mon + 1);
+    else lv_label_set_text_fmt(lblDate, "%s, %d %s", daysEn[tmv.tm_wday], tmv.tm_mday, monthsEn[tmv.tm_mon]);
   } else {
-    lv_label_set_text(lblGreet, "Hello");
+    lv_label_set_text(lblGreet, cfg.greetOn ? tr("Hello") : "");
     lv_label_set_text(lblTime, "--:--");
-    lv_label_set_text(lblDate, wifiOn ? "Syncing time..." : "Waiting for network");
+    lv_label_set_text(lblAmPm, "");
+    lv_label_set_text(lblDate, tr(wifiOn ? "Syncing time..." : "Waiting for network"));
   }
 
   // status line + mascot state
   bool banner = millis() < bannerUntil;
   if (banner) {
-    lv_label_set_text(lblStatus, "Device linked to xiaozhi.me");
+    lv_label_set_text(lblStatus, tr("Device linked to xiaozhi.me"));
     lv_obj_set_style_text_color(lblStatus, C_OK, 0);
   } else if (listening) {
-    lv_label_set_text(lblStatus, "Listening...");
+    lv_label_set_text(lblStatus, tr("Listening..."));
     lv_obj_set_style_text_color(lblStatus, C_OK, 0);
   } else if (st == XZ_ACTIVATED) {
-    lv_label_set_text(lblStatus, "Tap the face to talk");
+    lv_label_set_text(lblStatus, tr("Tap the face to talk"));
     lv_obj_set_style_text_color(lblStatus, C_MUTED, 0);
   } else {
-    lv_label_set_text(lblStatus, xiaozhiMessage());
+    lv_label_set_text(lblStatus, tr(xiaozhiMessage()));
     lv_obj_set_style_text_color(lblStatus, C_MUTED, 0);
   }
   setEyeColor(banner || listening ? C_OK : C_ACCENT);
@@ -379,6 +398,7 @@ static void buildHome(lv_obj_t *tile) {
   lv_obj_align(lblGreet, LV_ALIGN_TOP_LEFT, 0, 0);
   lblTime = makeLabel(clockBox, "--:--", F_DISPLAY, C_TEXT);
   lv_obj_align(lblTime, LV_ALIGN_TOP_LEFT, 0, 26);
+  lblAmPm = makeLabel(clockBox, "", F_LABEL, C_ACCENT);
   lblDate = makeLabel(clockBox, "", F_LABEL, C_ACCENT);
   lv_obj_align(lblDate, LV_ALIGN_TOP_LEFT, 0, 90);
   lblStatus = makeLabel(clockBox, "", F_BODY, C_MUTED);
@@ -419,11 +439,7 @@ static void buildHome(lv_obj_t *tile) {
   lv_obj_align(wDesc, LV_ALIGN_TOP_LEFT, 66, 40);
 }
 
-// ---------- payment QR (VietQR, MB Bank) ----------
-static const char *PAY_QR =
-    "00020101021138570010A000000727012700069704220113VQRQAHIZT41140208QRIBFTTA53037045802VN62150107NPS686908006304C8A9";
-static const char *PAY_NAME = "HO KINH DOANH ZPLUS";
-static const char *PAY_ACCOUNT = "1122100288";
+// ---------- payment QR (VietQR; details come from the web setup page) ----------
 
 static void buildQr(lv_obj_t *tile) {
   // white card = quiet zone around the code; 225 px = 45 modules x 5 px, so every module is crisp
@@ -436,24 +452,25 @@ static void buildQr(lv_obj_t *tile) {
   lv_obj_set_style_bg_color(card, lv_color_hex(0xFFFFFF), 0);
   lv_obj_clear_flag(card, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_t *qr = lv_qrcode_create(card, 225, lv_color_hex(0x000000), lv_color_hex(0xFFFFFF));
-  lv_qrcode_update(qr, PAY_QR, strlen(PAY_QR));
+  String qrData = cfg.qrPayload.length() ? cfg.qrPayload : String(QR_DEFAULT_PAYLOAD);
+  lv_qrcode_update(qr, qrData.c_str(), qrData.length());
   lv_obj_center(qr);
 
-  lv_obj_t *t = makeLabel(tile, "Scan to pay", F_HEADING, C_TEXT);
+  lv_obj_t *t = makeLabel(tile, cfg.qrTitle.length() ? cfg.qrTitle.c_str() : "Scan to pay", F_HEADING, C_TEXT);
   lv_obj_set_width(t, 184);
   lv_obj_align(t, LV_ALIGN_TOP_LEFT, 290, 36);
-  lv_obj_t *bank = makeLabel(tile, "VietQR  |  MB Bank", F_BODY, C_ACCENT);
+  lv_obj_t *bank = makeLabel(tile, cfg.qrBank.c_str(), F_BODY, C_ACCENT);
   lv_obj_align(bank, LV_ALIGN_TOP_LEFT, 290, 76);
 
   lv_obj_t *k1 = makeLabel(tile, "Account name", F_CAPTION, C_MUTED);
   lv_obj_align(k1, LV_ALIGN_TOP_LEFT, 290, 118);
-  lv_obj_t *v1 = makeLabel(tile, PAY_NAME, F_BODY, C_TEXT);
+  lv_obj_t *v1 = makeLabel(tile, cfg.qrName.c_str(), F_BODY, C_TEXT);
   lv_obj_set_width(v1, 184);
   lv_obj_align(v1, LV_ALIGN_TOP_LEFT, 290, 136);
 
   lv_obj_t *k2 = makeLabel(tile, "Account number", F_CAPTION, C_MUTED);
   lv_obj_align(k2, LV_ALIGN_TOP_LEFT, 290, 172);
-  lv_obj_t *v2 = makeLabel(tile, PAY_ACCOUNT, F_TITLE, C_TEXT);
+  lv_obj_t *v2 = makeLabel(tile, cfg.qrAcct.c_str(), F_TITLE, C_TEXT);
   lv_obj_set_style_text_letter_space(v2, 1, 0);
   lv_obj_align(v2, LV_ALIGN_TOP_LEFT, 290, 190);
 
@@ -461,6 +478,9 @@ static void buildQr(lv_obj_t *tile) {
   lv_obj_set_width(h, 184);
   lv_obj_align(h, LV_ALIGN_TOP_LEFT, 290, 238);
 }
+
+#include "dragon.h"
+#include "webconfig.h"
 
 // ---------- launcher ----------
 struct App {
@@ -477,37 +497,24 @@ static void goAssistant() {
   }
 }
 static void soonMusic() { pageSoon("Music", LV_SYMBOL_AUDIO); }
-static void soonGames() { pageSoon("Games", LV_SYMBOL_PLAY); }
 static void soonPhotos() { pageSoon("Photos", LV_SYMBOL_IMAGE); }
 
 static const App apps[] = {
     {LV_SYMBOL_VOLUME_MAX, "Assistant", 0x38E1FF, 0x2B6BFF, goAssistant},
     {LV_SYMBOL_AUDIO, "Music", 0xFF6B9A, 0xC2336B, soonMusic},
-    {LV_SYMBOL_PLAY, "Games", 0xA16BFF, 0x5B2BD6, soonGames},
+    {LV_SYMBOL_PLAY, "Dragon", 0xA16BFF, 0x5B2BD6, pageDragon},
     {LV_SYMBOL_IMAGE, "Photos", 0xFFB84A, 0xE8702A, soonPhotos},
     {LV_SYMBOL_WIFI, "Wi-Fi", 0x3DEBA0, 0x16A085, pageWifi},
     {LV_SYMBOL_SD_CARD, "Storage", 0x5AA9FF, 0x3B6FD6, pageStorage},
     {LV_SYMBOL_SETTINGS, "Settings", 0x9AA3C7, 0x4E5878, pageSettings},
     {LV_SYMBOL_LIST, "About", 0x7BDCB5, 0x2E8B8B, pageAbout},
 };
+static_assert(sizeof(apps) / sizeof(apps[0]) == APP_COUNT, "APP_COUNT must match apps[]");
+static const char *appName(int i) { return apps[i].name; }
 
-static const char *dbgClick = "-";
 static void appClicked(lv_event_t *e) {
   const App *a = (const App *)lv_event_get_user_data(e);
-  dbgClick = a->name;
   a->open();
-}
-
-// TEMP diagnostic strip on the top layer: last touch position, press count, last app clicked.
-static void buildDebugStrip() {
-  lv_obj_t *l = makeLabel(lv_layer_top(), "", F_CAPTION, lv_color_hex(0xFFD54A));
-  lv_obj_align(l, LV_ALIGN_BOTTOM_LEFT, 6, -2);
-  lv_timer_create(
-      [](lv_timer_t *t) {
-        lv_obj_t *lab = (lv_obj_t *)t->user_data;
-        lv_label_set_text_fmt(lab, "raw %d,%d  pos %d,%d  n=%u  click=%s", dbgRawX, dbgRawY, dbgX, dbgY, (unsigned)dbgPresses, dbgClick);
-      },
-      150, l);
 }
 
 static void buildLauncher(lv_obj_t *tile) {
@@ -523,7 +530,14 @@ static void buildLauncher(lv_obj_t *tile) {
   lv_obj_set_style_pad_row(grid, 14, 0);
   lv_obj_clear_flag(grid, LV_OBJ_FLAG_SCROLLABLE);
 
-  for (const App &a : apps) {
+  int from = 0;
+  while (from <= (int)cfg.apps.length()) {  // visible apps, in the order chosen on the web page
+    int to = cfg.apps.indexOf(',', from);
+    if (to < 0) to = cfg.apps.length();
+    int idx = cfg.apps.substring(from, to).toInt();
+    from = to + 1;
+    if (idx < 0 || idx >= APP_COUNT) continue;
+    const App &a = apps[idx];
     lv_obj_t *b = lv_obj_create(grid);
     lv_obj_remove_style_all(b);
     lv_obj_set_size(b, 100, 100);
@@ -545,17 +559,20 @@ static void buildLauncher(lv_obj_t *tile) {
 
 // ---------- page dots ----------
 static void updateDots(int active) {
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < tileCount; i++) {
     bool on = (i == active);
     lv_obj_set_size(dots[i], on ? 22 : 8, 8);
     lv_obj_set_style_bg_color(dots[i], on ? C_ACCENT : C_MUTED, 0);
     lv_obj_set_style_bg_opa(dots[i], on ? LV_OPA_COVER : LV_OPA_50, 0);
   }
 }
-static void tvEvent(lv_event_t *) {
+static int activeTileIndex() {
   lv_obj_t *act = lv_tileview_get_tile_act(tv);
-  updateDots(act == homeTile ? 0 : act == qrTile ? 1 : 2);
+  for (int i = 0; i < tileCount; i++)
+    if (tileAt[i] == act) return i;
+  return 0;
 }
+static void tvEvent(lv_event_t *) { updateDots(activeTileIndex()); }
 
 static void buildUI() {
   mainScr = lv_scr_act();
@@ -565,11 +582,15 @@ static void buildUI() {
   lv_obj_set_size(tv, 480, 320);
   lv_obj_set_style_bg_opa(tv, LV_OPA_TRANSP, 0);
   lv_obj_set_scrollbar_mode(tv, LV_SCROLLBAR_MODE_OFF);
+  tileCount = cfg.qrOn ? 3 : 2;
   homeTile = lv_tileview_add_tile(tv, 0, 0, LV_DIR_RIGHT);
-  qrTile = lv_tileview_add_tile(tv, 1, 0, LV_DIR_LEFT | LV_DIR_RIGHT);
-  appsTile = lv_tileview_add_tile(tv, 2, 0, LV_DIR_LEFT);
+  qrTile = cfg.qrOn ? lv_tileview_add_tile(tv, 1, 0, LV_DIR_LEFT | LV_DIR_RIGHT) : nullptr;
+  appsTile = lv_tileview_add_tile(tv, tileCount - 1, 0, LV_DIR_LEFT);
+  tileAt[0] = homeTile;
+  if (qrTile) tileAt[1] = qrTile;
+  tileAt[tileCount - 1] = appsTile;
   buildHome(homeTile);
-  buildQr(qrTile);
+  if (qrTile) buildQr(qrTile);
   buildLauncher(appsTile);
   lv_obj_add_event_cb(tv, tvEvent, LV_EVENT_VALUE_CHANGED, nullptr);
 
@@ -579,14 +600,16 @@ static void buildUI() {
   lv_obj_set_flex_flow(dotRow, LV_FLEX_FLOW_ROW);
   lv_obj_set_style_pad_column(dotRow, 6, 0);
   lv_obj_clear_flag(dotRow, LV_OBJ_FLAG_CLICKABLE);
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < tileCount; i++) {
     dots[i] = lv_obj_create(dotRow);
     lv_obj_remove_style_all(dots[i]);
     lv_obj_set_style_radius(dots[i], 4, 0);
     lv_obj_clear_flag(dots[i], LV_OBJ_FLAG_CLICKABLE);
   }
   lv_obj_align(dotRow, LV_ALIGN_BOTTOM_MID, 0, -12);
-  updateDots(0);
+  startTileObj = cfg.startTile == 2 ? appsTile : (cfg.startTile == 1 && qrTile) ? qrTile : homeTile;
+  lv_obj_set_tile(tv, startTileObj, LV_ANIM_OFF);
+  updateDots(activeTileIndex());
 
   lv_timer_create(homeTick, 1000, nullptr);
   refreshHome();
@@ -594,6 +617,8 @@ static void buildUI() {
 
 void setup() {
   Serial.begin(115200);
+  i18nLoad();
+  cfgLoad();
   tft.init();
   tft.setRotation(1);
   tft.fillScreen(TFT_BLACK);
@@ -614,7 +639,8 @@ void setup() {
   dd.ver_res = 320;
   dd.flush_cb = dispFlush;
   dd.draw_buf = &db;
-  lv_disp_drv_register(&dd);
+  lv_disp_t *disp = lv_disp_drv_register(&dd);
+  lv_disp_set_theme(disp, lv_theme_default_init(disp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), true, &vi_font_14));
 
   xptInit();
   static lv_indev_drv_t id;
@@ -631,7 +657,7 @@ void setup() {
   if (digitalRead(0) == LOW || !touchLoadCal()) touchCalibrate();
 
   buildUI();
-  buildDebugStrip();
+  dragonBegin();
   wifiBegin();
   xiaozhiBegin();
   weatherBegin();
@@ -650,9 +676,20 @@ static void sleepTick() {
   }
 }
 
+// Go back to the chosen start screen after the configured idle time.
+static void idleReturnTick() {
+  if (!cfg.idleReturn || lv_scr_act() != mainScr) return;
+  if (lv_disp_get_inactive_time(nullptr) > (uint32_t)cfg.idleReturn * 1000UL && lv_tileview_get_tile_act(tv) != startTileObj) {
+    lv_obj_set_tile(tv, startTileObj, LV_ANIM_ON);
+    updateDots(activeTileIndex());
+  }
+}
+
 void loop() {
   wifiLoop();
+  webTick();
   lv_timer_handler();
   sleepTick();
+  idleReturnTick();
   delay(5);
 }

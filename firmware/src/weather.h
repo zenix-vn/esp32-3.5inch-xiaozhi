@@ -16,3 +16,9 @@ void weatherBegin();
 WeatherData weatherGet();
 void weatherRefresh();  // fetch again soon (e.g. user tapped the card)
 const char *weatherText(int wmoCode);
+
+// Location: automatic (IP geolocation, the default) or set by hand from the web page.
+void weatherSetLocation(float lat, float lon, const char *city);  // applied by the weather task, then refreshes
+void weatherAutoLocate();                                         // forget the manual location
+bool weatherIsManual();
+void weatherGetLocation(float &lat, float &lon, char *city, size_t cityLen);

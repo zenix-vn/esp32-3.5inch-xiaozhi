@@ -1,10 +1,12 @@
 // Wi-Fi: saved-credentials connect, "Zin100-Setup" captive portal, in-app connect, NTP time zone.
 #include "wifi_setup.h"
+#include "i18n.h"
 #include <WiFi.h>
 #include <WebServer.h>
 #include <DNSServer.h>
 #include <Preferences.h>
 #include <time.h>
+#include <esp_wifi.h>
 
 static const char *AP_NAME = "Zin100-Setup";
 static const uint32_t CONNECT_TIMEOUT_MS = 20000;
@@ -142,14 +144,67 @@ void wifiLoop() {
     snprintf(statusBuf, sizeof(statusBuf), "%s  %s", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
     if (!ntpStarted) startNtp();
   } else if (attempting) {
-    snprintf(statusBuf, sizeof(statusBuf), "Connecting to %s...", newSsid.c_str());
+    snprintf(statusBuf, sizeof(statusBuf), tr("Connecting to %s..."), newSsid.c_str());
   } else if (portalOn) {
-    snprintf(statusBuf, sizeof(statusBuf), "Join Wi-Fi %s, open 192.168.4.1", AP_NAME);
+    snprintf(statusBuf, sizeof(statusBuf), tr("Join Wi-Fi %s, open 192.168.4.1"), AP_NAME);
   } else {
-    snprintf(statusBuf, sizeof(statusBuf), "Connecting to %s...", ssid.c_str());
+    snprintf(statusBuf, sizeof(statusBuf), tr("Connecting to %s..."), ssid.c_str());
     if (millis() - connectStart > CONNECT_TIMEOUT_MS) startPortal();
   }
 }
+
+// ---- scan ----
+// Arduino's async scan gives up after max_ms_per_chan * 20 (6 s), but while connected a full scan takes a bit
+// longer (the radio keeps returning to the home channel), so it always reported failure. Drive the IDF scan
+// directly and wait for its done event instead.
+static volatile bool scanDoneFlag = false;
+static int scanState = -2;
+static uint32_t scanAt = 0;
+static wifi_ap_record_t *scanRecs = nullptr;
+static uint16_t scanCount = 0;
+
+bool wifiScanStart() {
+  static bool hooked = false;
+  if (!hooked) {
+    hooked = true;
+    WiFi.onEvent([](arduino_event_id_t, arduino_event_info_t) { scanDoneFlag = true; }, ARDUINO_EVENT_WIFI_SCAN_DONE);
+  }
+  if (scanState == -1) return true;
+  wifi_scan_config_t c = {};
+  c.scan_type = WIFI_SCAN_TYPE_ACTIVE;
+  c.scan_time.active.min = 60;
+  c.scan_time.active.max = 150;
+  scanDoneFlag = false;
+  if (esp_wifi_scan_start(&c, false) != ESP_OK) {
+    scanState = -2;
+    return false;
+  }
+  scanState = -1;
+  scanAt = millis();
+  return true;
+}
+
+int wifiScanResult() {
+  if (scanState != -1) return scanState;
+  if (scanDoneFlag) {
+    free(scanRecs);
+    scanRecs = nullptr;
+    scanCount = 0;
+    uint16_t n = 0;
+    esp_wifi_scan_get_ap_num(&n);
+    if (n) {
+      scanRecs = (wifi_ap_record_t *)calloc(n, sizeof(wifi_ap_record_t));
+      if (scanRecs && esp_wifi_scan_get_ap_records(&n, scanRecs) == ESP_OK) scanCount = n;
+    }
+    scanState = scanCount;
+  } else if (millis() - scanAt > 15000) {
+    esp_wifi_scan_stop();
+    scanState = -2;
+  }
+  return scanState;
+}
+
+const wifi_ap_record_t *wifiScanAp(int i) { return (i >= 0 && i < scanCount) ? &scanRecs[i] : nullptr; }
 
 void wifiSetTimezone(int hours) {
   tzHours = hours;
