@@ -23,12 +23,12 @@ extern const lv_img_dsc_t egg_cold;
 
 // eye centre and radius per dragon stage (1..8), in sprite pixels
 static const float DRAGON_EYE[8][3] = {
-    {85.4f, 41.3f, 4.4f},
-    {95.1f, 40.3f, 4.4f},
-    {105.1f, 39.2f, 4.3f},
-    {115.5f, 39.6f, 4.4f},
-    {126.9f, 38.4f, 4.3f},
-    {136.6f, 39.9f, 4.6f},
-    {145.0f, 40.9f, 4.8f},
-    {150.4f, 40.9f, 4.9f},
+    {81.3f, 39.4f, 4.2f},
+    {90.5f, 38.3f, 4.2f},
+    {100.1f, 37.4f, 4.1f},
+    {110.0f, 37.7f, 4.1f},
+    {120.9f, 36.6f, 4.1f},
+    {130.1f, 38.0f, 4.3f},
+    {138.1f, 38.9f, 4.6f},
+    {143.2f, 38.9f, 4.7f},
 };

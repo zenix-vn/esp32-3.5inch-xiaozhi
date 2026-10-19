@@ -1,6 +1,17 @@
 #pragma once
 #include <Arduino.h>
 
+struct WxHour {
+  int8_t hour, pop;  // local hour, precipitation probability %
+  int16_t code;
+  float temp;
+};
+struct WxDay {
+  int8_t wday, mday, mon, pop;
+  int16_t code;
+  float tmax, tmin;
+};
+
 struct WeatherData {
   bool valid = false;   // at least one successful fetch
   bool failed = false;  // last attempt failed
@@ -10,6 +21,10 @@ struct WeatherData {
   float wind = 0;
   bool isDay = true;
   char city[40] = "";
+  WxHour hours[12];  // forecast from the current hour
+  uint8_t nHours = 0;
+  WxDay days[5];  // today + 4
+  uint8_t nDays = 0;
 };
 
 void weatherBegin();

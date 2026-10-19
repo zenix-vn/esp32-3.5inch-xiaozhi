@@ -87,7 +87,10 @@ static bool fetch() {
   http.setTimeout(10000);
   String url = String("https://api.open-meteo.com/v1/forecast?latitude=") + String(lat, 3) +
                "&longitude=" + String(lon, 3) +
-               "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day&timezone=auto";
+               "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day"
+               "&hourly=temperature_2m,weather_code,precipitation_probability&forecast_hours=12"
+               "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=5"
+               "&timezone=auto";
   if (!http.begin(client, url)) return false;
   int st = http.GET();
   if (st != 200) {
@@ -107,6 +110,31 @@ static bool fetch() {
   w.wind = d["current"]["wind_speed_10m"] | 0.0f;
   w.isDay = (d["current"]["is_day"] | 1) != 0;
   strlcpy(w.city, city, sizeof(w.city));
+  JsonArray ht = d["hourly"]["time"];
+  for (size_t i = 0; i < ht.size() && w.nHours < 12; i++) {
+    const char *s = ht[i] | "";
+    if (strlen(s) < 13) continue;
+    WxHour &h = w.hours[w.nHours++];
+    h.hour = atoi(s + 11);
+    h.temp = d["hourly"]["temperature_2m"][i] | 0.0f;
+    h.code = d["hourly"]["weather_code"][i] | 0;
+    h.pop = d["hourly"]["precipitation_probability"][i] | 0;
+  }
+  JsonArray dt = d["daily"]["time"];
+  for (size_t i = 0; i < dt.size() && w.nDays < 5; i++) {
+    int y = 0, m = 0, dd = 0;
+    if (sscanf(dt[i] | "", "%d-%d-%d", &y, &m, &dd) != 3) continue;
+    static const int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};  // Sakamoto's weekday
+    int yy = m < 3 ? y - 1 : y;
+    WxDay &x = w.days[w.nDays++];
+    x.wday = (yy + yy / 4 - yy / 100 + yy / 400 + t[m - 1] + dd) % 7;
+    x.mday = dd;
+    x.mon = m;
+    x.code = d["daily"]["weather_code"][i] | 0;
+    x.tmax = d["daily"]["temperature_2m_max"][i] | 0.0f;
+    x.tmin = d["daily"]["temperature_2m_min"][i] | 0.0f;
+    x.pop = d["daily"]["precipitation_probability_max"][i] | 0;
+  }
   portENTER_CRITICAL(&dataLock);
   data = w;
   portEXIT_CRITICAL(&dataLock);

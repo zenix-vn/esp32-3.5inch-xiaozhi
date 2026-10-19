@@ -5,12 +5,13 @@
 #include <nvs_flash.h>
 
 static const char *webHost();  // webconfig.h
-static uint8_t sleepMin = 0;  // screen-off timeout in minutes, 0 = never
+static uint8_t sleepMin = 0;
+static bool pageReplace = false;  // set while opening a page from another page: the old one is deleted  // screen-off timeout in minutes, 0 = never
 
 // ---------- generic page plumbing ----------
 static void goBack(lv_event_t *) { lv_scr_load_anim(mainScr, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 250, 0, true); }
 static void pageShow(lv_obj_t *s, lv_scr_load_anim_t anim = LV_SCR_LOAD_ANIM_MOVE_LEFT, bool delOld = false) {
-  lv_scr_load_anim(s, anim, 250, 0, delOld);
+  lv_scr_load_anim(s, anim, 250, 0, delOld || pageReplace);
 }
 
 // Timer that lives exactly as long as the given page screen.
@@ -27,7 +28,7 @@ static lv_obj_t *pageBegin(const char *title, lv_obj_t **content, lv_event_cb_t 
   styleScreen(s);
   lv_obj_t *b = lv_btn_create(s);
   lv_obj_set_size(b, 48, 38);
-  lv_obj_align(b, LV_ALIGN_TOP_LEFT, 12, 10);
+  lv_obj_align(b, LV_ALIGN_TOP_LEFT, 12, SB_H + 6);
   lv_obj_set_style_radius(b, 19, 0);
   lv_obj_set_style_bg_color(b, C_CARD, 0);
   lv_obj_set_style_border_width(b, 1, 0);
@@ -39,12 +40,12 @@ static lv_obj_t *pageBegin(const char *title, lv_obj_t **content, lv_event_cb_t 
   lv_obj_t *t = makeLabel(s, title, F_TITLE, C_TEXT);
   lv_obj_set_width(t, 380);
   lv_label_set_long_mode(t, LV_LABEL_LONG_DOT);
-  lv_obj_align(t, LV_ALIGN_TOP_LEFT, 72, 17);
+  lv_obj_align(t, LV_ALIGN_TOP_LEFT, 72, SB_H + 13);
 
   lv_obj_t *c = lv_obj_create(s);
   lv_obj_remove_style_all(c);
-  lv_obj_set_size(c, 456, 252);
-  lv_obj_set_pos(c, 12, 58);
+  lv_obj_set_size(c, 456, 320 - (SB_H + 52));
+  lv_obj_set_pos(c, 12, SB_H + 52);
   lv_obj_set_flex_flow(c, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_row(c, 8, 0);
   lv_obj_set_style_pad_bottom(c, 12, 0);
@@ -412,7 +413,7 @@ static void pagePassword(const char *ssid) {
   lv_textarea_set_max_length(pwTa, 63);
   lv_textarea_set_placeholder_text(pwTa, tr("Password"));
   lv_obj_set_size(pwTa, 396, 44);
-  lv_obj_set_pos(pwTa, 12, 58);
+  lv_obj_set_pos(pwTa, 12, SB_H + 52);
   lv_obj_set_style_bg_color(pwTa, C_CARD, 0);
   lv_obj_set_style_text_color(pwTa, C_TEXT, 0);
   lv_obj_set_style_border_color(pwTa, C_BORDER, 0);
@@ -422,7 +423,7 @@ static void pagePassword(const char *ssid) {
 
   lv_obj_t *eye = smallBtn(s, LV_SYMBOL_EYE_OPEN, C_MUTED, pwToggle, nullptr, 52);
   lv_obj_set_size(eye, 52, 44);
-  lv_obj_set_pos(eye, 416, 58);
+  lv_obj_set_pos(eye, 416, SB_H + 52);
 
   lv_obj_t *kb = lv_keyboard_create(s);
   lv_obj_set_size(kb, 480, 190);
@@ -511,7 +512,7 @@ static void pageSettings() {
   lv_obj_add_event_cb(sl, brightnessEvent, LV_EVENT_RELEASED, nullptr);
 
   lv_obj_t *card2 = makeCard(c, 456, 86);
-  lv_obj_t *st = makeLabel(card2, "Turn screen off after", F_BODY, C_MUTED);
+  lv_obj_t *st = makeLabel(card2, "When idle for", F_BODY, C_MUTED);
   lv_obj_align(st, LV_ALIGN_TOP_LEFT, 16, 10);
   sleepMap[0] = tr("Never");
   sleepMap[1] = tr("1 min");
@@ -539,6 +540,43 @@ static void pageSettings() {
   lv_obj_set_style_bg_color(bm, C_ACCENT, LV_PART_ITEMS | LV_STATE_CHECKED);
   lv_obj_set_style_text_color(bm, lv_color_hex(0x04101A), LV_PART_ITEMS | LV_STATE_CHECKED);
   lv_obj_add_event_cb(bm, sleepEvent, LV_EVENT_VALUE_CHANGED, nullptr);
+
+  // what happens after the idle time
+  static const char *idleMap[3];
+  idleMap[0] = tr("Turn screen off");
+  idleMap[1] = tr("Ambient clock");
+  idleMap[2] = "";
+  lv_obj_t *card3 = makeCard(c, 456, 86);
+  lv_obj_t *it = makeLabel(card3, "Then", F_BODY, C_MUTED);
+  lv_obj_align(it, LV_ALIGN_TOP_LEFT, 16, 10);
+  lv_obj_t *im = lv_btnmatrix_create(card3);
+  lv_btnmatrix_set_map(im, idleMap);
+  lv_btnmatrix_set_btn_ctrl_all(im, LV_BTNMATRIX_CTRL_CHECKABLE);
+  lv_btnmatrix_set_one_checked(im, true);
+  lv_btnmatrix_set_btn_ctrl(im, cfg.idleMode ? 1 : 0, LV_BTNMATRIX_CTRL_CHECKED);
+  lv_obj_set_size(im, 424, 38);
+  lv_obj_align(im, LV_ALIGN_BOTTOM_MID, 0, -10);
+  lv_obj_set_style_bg_opa(im, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_border_width(im, 0, 0);
+  lv_obj_set_style_pad_all(im, 0, 0);
+  lv_obj_set_style_pad_column(im, 8, 0);
+  lv_obj_set_style_text_font(im, F_BODY, LV_PART_ITEMS);
+  lv_obj_set_style_bg_color(im, C_BORDER, LV_PART_ITEMS);
+  lv_obj_set_style_text_color(im, C_TEXT, LV_PART_ITEMS);
+  lv_obj_set_style_border_width(im, 0, LV_PART_ITEMS);
+  lv_obj_set_style_shadow_width(im, 0, LV_PART_ITEMS);
+  lv_obj_set_style_radius(im, 10, LV_PART_ITEMS);
+  lv_obj_set_style_bg_color(im, C_ACCENT, LV_PART_ITEMS | LV_STATE_CHECKED);
+  lv_obj_set_style_text_color(im, lv_color_hex(0x04101A), LV_PART_ITEMS | LV_STATE_CHECKED);
+  lv_obj_add_event_cb(
+      im,
+      [](lv_event_t *e) {
+        uint32_t id = lv_btnmatrix_get_selected_btn(lv_event_get_target(e));
+        if (id > 1) return;
+        cfg.idleMode = id;
+        cfgSave();
+      },
+      LV_EVENT_VALUE_CHANGED, nullptr);
 
   sectionLabel(c, "GENERAL");
   lv_obj_t *tz = makeCard(c, 456, 52);

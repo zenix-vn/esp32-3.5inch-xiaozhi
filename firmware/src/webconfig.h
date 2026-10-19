@@ -56,6 +56,22 @@ button.sec{background:#1f2849;color:var(--txt);border:1px solid var(--line)}
 <p class=hint data-t=restartNote></p>
 <button id=saveStart data-t=save></button></section>
 
+<section><h2 data-t=lookTitle></h2>
+<label data-t=themeLbl></label><select id=theme><option value=0 data-t=thSky><option value=1 data-t=thForest><option value=2 data-t=thSunset><option value=3 data-t=thMono></select>
+<label class=chk><input type=checkbox id=fx><span data-t=fxOn></span></label>
+<label class=chk><input type=checkbox id=lunar><span data-t=lunarOn></span></label>
+<label class=chk><input type=checkbox id=quote><span data-t=quoteOn></span></label>
+<label data-t=phLbl></label><select id=phS><option value=5>5 s<option value=10>10 s<option value=20>20 s<option value=30>30 s<option value=60>60 s</select>
+<button id=saveLook data-t=save></button></section>
+
+<section><h2 data-t=ambTitle></h2>
+<label data-t=idleMLbl></label><select id=idleM><option value=1 data-t=idleAmb><option value=0 data-t=idleOff></select>
+<p class=hint data-t=idleHint></p>
+<label data-t=ambSched></label>
+<div class=two><select id=ambS></select><select id=ambE></select></div>
+<label data-t=volLbl></label><input type=range id=vol min=0 max=100>
+<button id=saveAmb data-t=save></button></section>
+
 <section><h2 data-t=clockTitle></h2>
 <div class=two><div><label data-t=timeFmt></label><select id=c24><option value=1 data-t=h24><option value=0 data-t=h12></select></div>
 <div><label data-t=dateFmt></label><select id=datef><option value=0 data-t=dLong><option value=1 data-t=dNum><option value=2 data-t=dHide></select></div></div>
@@ -106,7 +122,7 @@ qrTitle:'QR thanh toán',qrHint:'Dán chuỗi VietQR/EMV (bắt đầu bằng 00
 appsTitle:'Ứng dụng',appsHint:'Chọn ứng dụng hiển thị và dùng mũi tên để đổi thứ tự. Cài đặt luôn hiển thị.',
 accessTitle:'Truy cập',hostLbl:'Tên thiết bị (mở bằng tên.local)',pwLbl:'Mật khẩu trang web (để trống = không cần)',
 wifi:'Wi-Fi',ip:'Địa chỉ IP',fw:'Phần mềm',sd:'Thẻ nhớ',heap:'RAM trống',up:'Thời gian chạy',sdOk:'Có thẻ',sdNo:'Không có thẻ',
-dragonTitle:'Nuôi rồng ảo',dgName:'Tên rồng',dgReset:'Nuôi lại từ đầu (xóa dữ liệu rồng)',dgConfirm:'Xóa toàn bộ dữ liệu rồng và bắt đầu lại từ quả trứng?',dgNoSd:'Chưa có thẻ nhớ',dgStage:'Cấp độ',dgGrow:'Tiến độ',dgCoins:'Số xu',dgGen:'Thế hệ',dgBest:'Kỷ lục mini game',dgSick:'Đang ốm',saved:'Đã lưu',restarting:'Đã lưu. Thiết bị đang khởi động lại...',failed:'Lỗi: ',pwSet:'Đã đặt mật khẩu',pwOff:'Đã xóa mật khẩu',wxSaved:'Đã đặt vị trí thời tiết',needName:'Nhập tên thiết bị'},
+lookTitle:'Giao diện',phLbl:'Khung ảnh: thời gian mỗi ảnh',themeLbl:'Chủ đề màu',thSky:'Bầu trời',thForest:'Rừng xanh',thSunset:'Hoàng hôn',thMono:'Đơn sắc',fxOn:'Hiệu ứng thời tiết trên trang chủ (mưa, sao, nắng...)',lunarOn:'Hiện lịch âm',quoteOn:'Hiện câu nói mỗi ngày',ambTitle:'Màn hình chờ & âm thanh',idleMLbl:'Khi không dùng một lúc thì',idleAmb:'Hiện màn hình chờ (đồng hồ lớn, tối dần)',idleOff:'Tắt màn hình',idleHint:'Thời gian chờ chỉnh trong Cài đặt trên thiết bị.',ambSched:'Tự vào màn hình chờ ban đêm (từ - đến)',schedOff:'Tắt',volLbl:'Âm lượng loa',dragonTitle:'Nuôi rồng ảo',dgName:'Tên rồng',dgReset:'Nuôi lại từ đầu (xóa dữ liệu rồng)',dgConfirm:'Xóa toàn bộ dữ liệu rồng và bắt đầu lại từ quả trứng?',dgNoSd:'Chưa có thẻ nhớ',dgStage:'Cấp độ',dgGrow:'Tiến độ',dgCoins:'Số xu',dgGen:'Thế hệ',dgBest:'Kỷ lục mini game',dgSick:'Đang ốm',dgAch:'Huy hiệu',dgStreak:'Chuỗi ngày',dgBest2:'Kỷ lục Rồng bay',dgJournal:'Nhật ký rồng',dgDays:' ngày',saved:'Đã lưu',restarting:'Đã lưu. Thiết bị đang khởi động lại...',failed:'Lỗi: ',pwSet:'Đã đặt mật khẩu',pwOff:'Đã xóa mật khẩu',wxSaved:'Đã đặt vị trí thời tiết',needName:'Nhập tên thiết bị'},
 en:{status:'Status',lang:'Language',restartNote:'The device restarts to apply this.',save:'Save',startTitle:'Main screen',startLbl:'Screen shown at power-on',tHome:'Home',tQr:'Payment QR',tApps:'Apps',idleLbl:'Return to the main screen after',never:'Never',qrOn:'Show the payment QR page',
 clockTitle:'Clock & greeting',timeFmt:'Time format',h24:'24-hour',h12:'12-hour (AM/PM)',dateFmt:'Date display',dLong:'Long (Monday, 19 October)',dNum:'Numeric (19/10/2026)',dHide:'Hidden',greetOn:'Show greeting',nameLbl:'Name in the greeting (optional)',
 wxTitle:'Weather',wxNow:'Current location',wxSearch:'Search city',wxPh:'e.g. Da Nang',search:'Search',wxAuto:'Detect location automatically (by IP)',unit:'Temperature unit',auto:'automatic',noRes:'No results',
@@ -114,7 +130,7 @@ qrTitle:'Payment QR',qrHint:'Paste the VietQR/EMV string (starts with 000201...)
 appsTitle:'Apps',appsHint:'Tick the apps to show and use the arrows to reorder. Settings is always shown.',
 accessTitle:'Access',hostLbl:'Device name (opens as name.local)',pwLbl:'Web page password (empty = none)',
 wifi:'Wi-Fi',ip:'IP address',fw:'Firmware',sd:'microSD',heap:'Free RAM',up:'Uptime',sdOk:'Detected',sdNo:'No card',
-dragonTitle:'Virtual dragon',dgName:'Dragon name',dgReset:'Start over (erase dragon data)',dgConfirm:'Erase all dragon data and start again from an egg?',dgNoSd:'No microSD card',dgStage:'Stage',dgGrow:'Progress',dgCoins:'Coins',dgGen:'Generation',dgBest:'Mini-game best',dgSick:'Sick',saved:'Saved',restarting:'Saved. The device is restarting...',failed:'Failed: ',pwSet:'Password set',pwOff:'Password removed',wxSaved:'Weather location set',needName:'Enter a device name'}};
+lookTitle:'Look',phLbl:'Photo frame: time per picture',themeLbl:'Colour theme',thSky:'Sky',thForest:'Forest',thSunset:'Sunset',thMono:'Mono',fxOn:'Weather effects on the home screen (rain, stars, sun...)',lunarOn:'Show the lunar date',quoteOn:'Show the quote of the day',ambTitle:'Ambient screen & sound',idleMLbl:'After a while without use',idleAmb:'Show the ambient clock (dims)',idleOff:'Turn the screen off',idleHint:'The idle time is set in Settings on the device.',ambSched:'Ambient clock at night (from - to)',schedOff:'Off',volLbl:'Speaker volume',dragonTitle:'Virtual dragon',dgName:'Dragon name',dgReset:'Start over (erase dragon data)',dgConfirm:'Erase all dragon data and start again from an egg?',dgNoSd:'No microSD card',dgStage:'Stage',dgGrow:'Progress',dgCoins:'Coins',dgGen:'Generation',dgBest:'Mini-game best',dgSick:'Sick',dgAch:'Badges',dgStreak:'Day streak',dgBest2:'Dragon flight best',dgJournal:'Dragon journal',dgDays:' days',saved:'Saved',restarting:'Saved. The device is restarting...',failed:'Failed: ',pwSet:'Password set',pwOff:'Password removed',wxSaved:'Weather location set',needName:'Enter a device name'}};
 let T=D.vi,S=null,order=[];
 function toast(t,err){const m=$('msg');m.textContent=t;m.className=err?'err':'';m.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>m.style.display='none',3500)}
 function applyLang(l){T=D[l==1?'en':'vi'];document.documentElement.lang=l==1?'en':'vi';
@@ -139,9 +155,14 @@ async function load(){S=await (await fetch('/api/state')).json();applyLang(S.lan
  $('wxNow').textContent=(S.wx.city||'—')+' ('+(S.wx.manual?'':T.auto+', ')+S.wx.lat.toFixed(2)+', '+S.wx.lon.toFixed(2)+')';$('tempF').value=S.tempF?1:0;
  $('qrT').value=S.qrT;$('qrB').value=S.qrB;$('qrN').value=S.qrN;$('qrA').value=S.qrA;$('qrP').value=S.qrP;
  $('host').value=S.host;
- const g=S.dragon;$('dgInfo').innerHTML=g.ok?row(T.dgStage,g.stageName+(g.sick?' ('+T.dgSick+')':''))+row(T.dgGrow,g.pct+'%')+row(T.dgCoins,g.coins)+row(T.dgGen,g.gen)+row(T.dgBest,g.best):row(T.dgStage,T.dgNoSd);
+ $('theme').value=S.theme;$('phS').value=S.phS;$('fx').checked=S.fx;$('lunar').checked=S.lunar;$('quote').checked=S.quote;$('idleM').value=S.idleM;$('vol').value=S.vol;
+ fillHours('ambS',S.ambS);fillHours('ambE',S.ambE);
+ const g=S.dragon;$('dgInfo').innerHTML=g.ok?row(T.dgStage,g.stageName+(g.sick?' ('+T.dgSick+')':''))+row(T.dgGrow,g.pct+'%')+row(T.dgCoins,g.coins)+row(T.dgGen,g.gen)+row(T.dgBest,g.best)+row(T.dgBest2,g.best2)+row(T.dgAch,g.ach+'/12')+row(T.dgStreak,g.streak+T.dgDays)+(g.journal&&g.journal.length?'<h2 style="margin-top:12px">'+T.dgJournal+'</h2>'+g.journal.map(e=>row(e.ts?new Date(e.ts*1000).toLocaleString():'-',e.text)).join(''):''):row(T.dgStage,T.dgNoSd);
  if(document.activeElement!==$('dgNameIn'))$('dgNameIn').value=g.ok?g.name:'';
  order=S.apps.map(a=>({id:a.id,name:a.name,on:a.on,lock:a.lock}));drawApps()}
+function fillHours(id,v){const s=$(id);s.innerHTML=(id=='ambS'?'<option value=-1>'+T.schedOff:'')+Array.from({length:24},(_,h)=>'<option value='+h+'>'+h+':00').join('');s.value=v}
+$('saveLook').onclick=()=>saveCfg({phS:$('phS').value,theme:$('theme').value,fx:$('fx').checked?1:0,lunar:$('lunar').checked?1:0,quote:$('quote').checked?1:0});
+$('saveAmb').onclick=()=>saveCfg({idleM:$('idleM').value,ambS:$('ambS').value,ambE:$('ambE').value,vol:$('vol').value});
 $('saveLang').onclick=()=>saveCfg({lang:$('lang').value});
 $('saveStart').onclick=()=>saveCfg({start:$('start').value,idle:$('idle').value,qrOn:$('qrOn').checked?1:0});
 $('saveClock').onclick=()=>saveCfg({c24:$('c24').value,datef:$('datef').value,greet:$('greet').checked?1:0,name:$('name').value});
@@ -190,9 +211,14 @@ static String webSanitizeHost(String h) {
 
 static const char *webHost() { return webHostName.c_str(); }
 
+static bool mdnsOk = false;
+static uint32_t mdnsTriedAt = 0;
 static void webStartMdns() {
   MDNS.end();
-  if (MDNS.begin(webHostName.c_str())) MDNS.addService("http", "tcp", 80);
+  mdnsOk = MDNS.begin(webHostName.c_str());
+  if (mdnsOk) MDNS.addService("http", "tcp", 80);
+  mdnsTriedAt = millis();
+  Serial.printf("MDNS %s.local %s\n", webHostName.c_str(), mdnsOk ? "ok" : "failed");
 }
 
 static void webSendState() {
@@ -215,6 +241,15 @@ static void webSendState() {
   d["greet"] = cfg.greetOn;
   d["name"] = cfg.userName;
   d["tempF"] = cfg.tempF;
+  d["theme"] = cfg.theme;
+  d["phS"] = cfg.photoSec;
+  d["fx"] = cfg.fxOn;
+  d["lunar"] = cfg.lunarOn;
+  d["quote"] = cfg.quoteOn;
+  d["idleM"] = cfg.idleMode;
+  d["ambS"] = cfg.ambStart;
+  d["ambE"] = cfg.ambEnd;
+  d["vol"] = cfg.volume;
   d["qrT"] = cfg.qrTitle;
   d["qrB"] = cfg.qrBank;
   d["qrN"] = cfg.qrName;
@@ -230,6 +265,23 @@ static void webSendState() {
     dr["gen"] = dg.gen;
     dr["best"] = dg.best;
     dr["sick"] = dg.sick;
+    dr["best2"] = dg.best2;
+    dr["streak"] = dg.streak;
+    int got = 0;
+    for (int i = 0; i < 12; i++) got += (dg.ach >> i) & 1;
+    dr["ach"] = got;
+    JsonArray jn = dr["journal"].to<JsonArray>();
+    for (int i = dg.jnCount - 1; i >= 0; i--) {  // newest first
+      const DragonSave::Entry &e = dg.jn[i];
+      JsonObject o = jn.add<JsonObject>();
+      o["ts"] = e.ts;
+      String text;
+      if (e.type == 1) text = String(DL("Tiến hóa thành ", "Evolved into ")) + dgStageName(e.arg < ST_COUNT ? e.arg : 0);
+      else if (e.type == 2) text = String(DL("Đạt huy hiệu ", "Earned the badge ")) + (isVi() ? ACH[e.arg % 12].vi : ACH[e.arg % 12].en);
+      else if (e.type == 3) text = String(DL("Luân hồi - thế hệ ", "Reborn - generation ")) + e.arg;
+      else if (e.type == 4) text = String(DL("Mua ", "Bought ")) + (isVi() ? DECOR[e.arg % 6].vi : DECOR[e.arg % 6].en);
+      o["text"] = text;
+    }
   }
   float la, lo;
   char city[40];
@@ -300,6 +352,18 @@ static bool webApplyCfg() {
     if (cfg.userName.length() > 20) cfg.userName = cfg.userName.substring(0, 20);
   }
   if (has("tempF")) cfg.tempF = web.arg("tempF").toInt() != 0;
+  if (has("theme")) {
+    cfg.theme = web.arg("theme").toInt() & 3;
+    themeTick(true);
+  }
+  if (has("phS")) cfg.photoSec = constrain(web.arg("phS").toInt(), 3, 120);
+  if (has("fx")) cfg.fxOn = web.arg("fx").toInt() != 0;
+  if (has("lunar")) cfg.lunarOn = web.arg("lunar").toInt() != 0;
+  if (has("quote")) cfg.quoteOn = web.arg("quote").toInt() != 0;
+  if (has("idleM")) cfg.idleMode = web.arg("idleM").toInt() ? 1 : 0;
+  if (has("ambS")) cfg.ambStart = constrain(web.arg("ambS").toInt(), -1, 23);
+  if (has("ambE")) cfg.ambEnd = constrain(web.arg("ambE").toInt(), 0, 23);
+  if (has("vol")) cfg.volume = constrain(web.arg("vol").toInt(), 0, 100);
   auto text = [&](const char *key, String &dst, size_t maxLen) {
     if (!has(key)) return;
     String v = web.arg(key);
@@ -356,6 +420,47 @@ static void webBegin() {
     }
     web.send(200, "application/json", "{}");
   });
+  // Developer tools: read the screen back as a BMP, and inject a tap or swipe.
+  web.on("/api/screenshot", HTTP_GET, []() {
+    if (!webAuthOk()) return;
+    const int W = 480, H = 320;
+    const uint32_t row = W * 3, size = 54 + row * H;
+    uint8_t h[54] = {'B', 'M'};
+    auto le32 = [&](int o, uint32_t v) {
+      for (int i = 0; i < 4; i++) h[o + i] = (v >> (8 * i)) & 255;
+    };
+    le32(2, size);
+    le32(10, 54);
+    le32(14, 40);
+    le32(18, W);
+    le32(22, H);
+    h[26] = 1;
+    h[28] = 24;
+    le32(34, row * H);
+    web.setContentLength(size);
+    web.send(200, "image/bmp", "");
+    web.sendContent((const char *)h, 54);
+    static uint16_t line[480];
+    static uint8_t out[480 * 3];
+    for (int y = H - 1; y >= 0; y--) {
+      tft.readRect(0, y, W, 1, line);
+      for (int x = 0; x < W; x++) {
+        uint16_t c = line[x];
+        c = (c >> 8) | (c << 8);
+        out[x * 3 + 0] = (c & 31) << 3;
+        out[x * 3 + 1] = ((c >> 5) & 63) << 2;
+        out[x * 3 + 2] = (c >> 11) << 3;
+      }
+      web.sendContent((const char *)out, row);
+    }
+  });
+  web.on("/api/touch", HTTP_ANY, []() {
+    if (!webAuthOk()) return;
+    int x = web.arg("x").toInt(), y = web.arg("y").toInt();
+    int x2 = web.hasArg("x2") ? web.arg("x2").toInt() : x, y2 = web.hasArg("y2") ? web.arg("y2").toInt() : y;
+    touchInject(x, y, x2, y2, web.hasArg("ms") ? web.arg("ms").toInt() : 120);
+    web.send(200, "application/json", "{}");
+  });
   web.on("/api/dragon", HTTP_POST, []() {
     if (!webAuthOk()) return;
     if (!dgOk) return web.send(409, "text/plain", "no microSD card");
@@ -398,7 +503,8 @@ static void webTick() {
     webStarted = true;
   }
   if (!webStarted) return;
-  if (up && !webWasConnected) webStartMdns();  // (re)announce after every reconnect
+  // (re)announce after every reconnect; retry if it failed (e.g. memory was short during boot)
+  if (up && (!webWasConnected || (!mdnsOk && millis() - mdnsTriedAt > 30000))) webStartMdns();
   webWasConnected = up;
   if (up) web.handleClient();
 }

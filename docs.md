@@ -123,3 +123,198 @@ API: `POST /api/dragon` với `name=...`, `reset=1`, hoặc `speed=N` (nhân t�
 - Thêm mini game (nhớ hình, bắn lửa), thức ăn theo mùa.
 - Huy hiệu thành tựu (nuôi 7 ngày liên tục, đạt Rồng vương...).
 - Trang bị phụ kiện (mũ, khăn) mua bằng xu.
+
+---
+---
+
+# Zin100 Version 2 - thiết kế giao diện (đã triển khai, firmware 2.0.0)
+
+Mục tiêu: biến Zin100 từ "màn hình hiển thị" thành **một người bạn sống động trên bàn**. Ba ý chính:
+
+1. **Con rồng là linh hồn của thiết bị**: rồng của bạn xuất hiện ở trang chủ, làm avatar cho trợ lý AI, ngủ cùng màn hình chờ.
+2. **Giao diện thay đổi theo thời gian và thời tiết**: sáng, trưa, chiều tối và đêm có màu nền khác nhau; trời mưa thì có mưa rơi, đêm quang thì có sao.
+3. **Mọi màn hình chung một ngôn ngữ thiết kế**: một thanh trạng thái, một kiểu thẻ, một kiểu thông báo, một bộ biểu tượng.
+
+V1 (commit `8b6aab9`) là mốc ổn định. V2 làm theo từng giai đoạn (mục 10), mỗi giai đoạn đều nạp và dùng được ngay.
+
+## 1. Giới hạn phần cứng (thiết kế phải tôn trọng)
+
+| Tài nguyên | Hiện trạng | Hệ quả cho thiết kế |
+|---|---|---|
+| RAM trống | ~130 KB (không có PSRAM) | Không giữ ảnh toàn màn hình trong RAM; mỗi trang tạo khi mở, xóa khi đóng |
+| Flash còn trống | ~800 KB (đang dùng 74%) | Ảnh mới tối đa ~350 KB; nền dùng gradient và hình học thay vì ảnh |
+| Màn hình | 480x320, SPI 40 MHz | Vẽ lại cả màn hình mất ~60 ms (~15 fps); hiệu ứng chỉ được làm ở vùng nhỏ |
+| Cảm ứng | Điện trở, có nhiễu | Nút >= 44 px, không dùng thao tác đa điểm; vuốt đơn giản (trái/phải/xuống) |
+| Thẻ nhớ | Có | Có thể chứa hình nền, âm thanh, dữ liệu game |
+| Cần kiểm tra | Loa (cổng SPEAK), đèn LED RGB, cảm biến ánh sáng (LDR) | Nếu có: âm báo, đèn trạng thái, tự chỉnh độ sáng |
+
+**Quy tắc hiệu năng**: mỗi màn hình tối đa ~120 đối tượng LVGL. Hiệu ứng động chỉ chạy trên vùng nhỏ hơn 1/4 màn hình. Không có hiệu ứng nào chạy liên tục khi màn hình đã tắt.
+
+## 2. Ngôn ngữ thiết kế "Bầu trời Zin"
+
+- **Nền theo giờ** (gradient dọc, chuyển mượt khi đổi khung giờ):
+
+  | Khung giờ | Trên | Dưới | Điểm nhấn |
+  |---|---|---|---|
+  | Bình minh 5h-8h | `#2B2F6B` | `#F08A6C` | cam đào |
+  | Ban ngày 8h-17h | `#1E4FA8` | `#5FA8E8` | xanh trời |
+  | Hoàng hôn 17h-19h | `#3B1E5E` | `#F07A4A` | cam |
+  | Đêm 19h-5h | `#070B1A` | `#1D1146` | tím xanh (như V1) |
+
+- **Thời tiết trên nền** (chỉ ở trang chủ, tối đa 16 hạt): mưa là các vạch xanh rơi, đêm quang là sao nhấp nháy, nắng là vệt sáng xoay chậm ở góc, sương mù là dải mờ trôi ngang.
+- **Thẻ (card)**: nền kính mờ (màu thẻ, độ mờ 70%), bo góc 16, viền 1 px sáng nhẹ.
+- **Chữ**: vẫn là Montserrat tiếng Việt; thêm cỡ 36 cho số liệu lớn. Cỡ 48 chỉ dùng cho chữ số.
+- **Biểu tượng**: bộ icon riêng 48x48 vẽ bằng script (như rồng), thay ký hiệu LV_SYMBOL ở launcher.
+- **Chuyển động**: vào trang thì trượt và mờ dần trong 220 ms; nút nhấn co lại còn 95%; thông báo trượt từ trên xuống.
+
+## 3. Khung chung
+
+### 3.1 Thanh trạng thái (mọi màn hình)
+Một dải cao 22 px ở trên cùng (lớp `lv_layer_top`):
+```
+ 09:41                          [rồng đói]  AI  Wi-Fi ▂▄▆
+```
+- Bên trái là giờ (ẩn ở trang chủ vì đã có đồng hồ lớn).
+- Bên phải là các chấm trạng thái: biểu tượng rồng khi rồng cần chăm (đói, bẩn, ốm), "AI" xanh khi trợ lý sẵn sàng, cột sóng Wi-Fi.
+
+### 3.2 Trung tâm điều khiển (vuốt xuống từ mép trên)
+```
++------------------------------------------------+
+|  Độ sáng   [==========o-----]                  |
+|  [ Wi-Fi: Zin ]  [ Không làm phiền ]  [ Ngủ ]  |
+|  [ Màn hình chờ ] [ Cài đặt ]                  |
++------------------------------------------------+
+```
+Truy cập nhanh mà không phải vào Cài đặt. "Ngủ" là tắt màn hình ngay; "Không làm phiền" là tắt nhắc rồng và âm báo.
+
+### 3.3 Thông báo (toast)
+Một kiểu thống nhất: thẻ nhỏ trượt xuống dưới thanh trạng thái, tự ẩn sau 3 giây. Ví dụ: "Rồng đã tiến hóa!", "Đã lưu cài đặt", "Mất kết nối Wi-Fi".
+
+## 4. Trang chủ V2
+
+```
++--------------------------------------------------+
+| (thanh trạng thái)                   AI  Wi-Fi   |
+|                         Chào buổi sáng, Zin      |
+|      (con rồng của      09:41                    |
+|       bạn, đứng         Thứ Hai, 19 tháng 10     |
+|       trên mây,         +-----------------------+|
+|       thở, chớp mắt)    | (nắng) 28°  Hà Nội    ||
+|   "Chạm để trò chuyện"  | 13h 30° | 16h 29° ... ||
+|                         +-----------------------+|
+|            o  o  o   (chấm trang)                |
++--------------------------------------------------+
+```
+- **Rồng thay khuôn mặt mascot**: dùng đúng sprite của cấp rồng hiện tại. Chạm vào rồng là nói chuyện với trợ lý AI; khi nghe, rồng có vòng sóng âm quanh đầu. Chạm giữ là mở game. Chưa có thẻ nhớ thì giữ khuôn mặt mascot như V1.
+- **Rồng có lời thoại ngắn** (bong bóng) theo bối cảnh: buổi sáng chào, trời mưa nhắc mang ô, rồng đói thì kêu đói.
+- **Thời tiết mở rộng**: nhiệt độ hiện tại cùng 3 mốc giờ tới (lấy thêm `hourly` từ Open-Meteo). Chạm vào thẻ mở trang Thời tiết chi tiết (dự báo 5 ngày).
+- **Nền và hiệu ứng** theo giờ và thời tiết (mục 2).
+
+## 5. Màn hình chờ (Ambient)
+
+Sau thời gian rảnh do người dùng chọn (thay cho "tắt màn hình", có thể chọn một trong hai):
+```
++--------------------------------------------------+
+|                                                  |
+|                 09:41                            |
+|             Thứ Hai, 19/10   28°                 |
+|                                                  |
+|        (rồng ngủ cuộn tròn, Z z, tối dần)        |
++--------------------------------------------------+
+```
+- Đèn nền giảm còn 15%. Chữ đồng hồ đổi vị trí vài pixel mỗi phút.
+- Chỉ vẽ lại mỗi phút một lần.
+- Chạm bất kỳ chỗ nào để thức dậy. Ban đêm có thể tự vào màn hình chờ theo lịch.
+
+## 6. Launcher V2
+
+```
++--------------------------------------------------+
+| Ứng dụng                                 09:41   |
+|  [icon]    [icon]    [icon]    [icon]            |
+|  Trợ lý    Rồng ảo•  Thời tiết  QR               |
+|  [icon]    [icon]    [icon]    [icon]            |
+|  Wi-Fi     Bộ nhớ    Cài đặt   Giới thiệu        |
++--------------------------------------------------+
+```
+- Icon riêng có màu và chiều sâu, chữ dưới icon (không còn nằm trong ô vuông).
+- **Huy hiệu** (badge): chấm đỏ trên "Rồng ảo" khi rồng cần chăm.
+- Thêm app **Thời tiết** (dự báo 5 ngày) và **Đồng hồ** (báo thức, hẹn giờ, bấm giờ; báo thức cần có loa).
+- Bỏ "Âm nhạc" và "Ảnh" khỏi mặc định cho tới khi có nội dung thật. Riêng "Ảnh" có thể làm khung ảnh từ thẻ nhớ (ảnh JPG đặt sẵn đúng cỡ 480x320).
+
+## 7. QR thanh toán V2
+
+```
++--------------------------------------------------+
+| Thanh toán                       MB Bank         |
+|  +-----------+   Số tiền                         |
+|  |  QR code  |   150.000 đ                       |
+|  |           |   [1][2][3]                       |
+|  |           |   [4][5][6]   [000]               |
+|  +-----------+   [7][8][9]   [Xóa]               |
+|   HO KINH DOANH  [  0  ]     [Tạo mã]            |
++--------------------------------------------------+
+```
+- **Nhập số tiền ngay trên máy**: thiết bị tự tạo mã VietQR động. Firmware thêm trường số tiền (tag 54) vào chuỗi EMV và tính lại CRC16, nên khách quét là đã có sẵn số tiền.
+- Nút "Không nhập tiền" để quay về mã tĩnh.
+- Mã có số tiền tự hết hạn sau 5 phút rồi về mã tĩnh.
+
+## 8. Rồng ảo V2
+
+- **Phòng của rồng**: nền thay theo giờ. Có đồ trang trí (đèn, gối, cây) mua bằng xu và đặt vào các vị trí cố định.
+- **Rồng di chuyển**: đi qua lại trong phòng, quay đầu, vỗ cánh (đổi giữa 2 khung hình cánh).
+- **Vuốt ve**: xoa tay lên rồng thì hiện tim bay lên và tăng điểm vui vẻ (giới hạn số lần mỗi giờ).
+- **Hiệu ứng khi chăm**: khi ăn có thức ăn bay vào miệng, khi tắm có bọt xà phòng, khi tiến hóa có màn sáng lóe kèm pháo hoa.
+- **Mini game thứ 2: "Rồng bay"**: chạm để vỗ cánh, bay tránh cột mây (kiểu Flappy), chỉ vẽ lại vùng nhỏ.
+- **Thành tựu**: 12 huy hiệu (7 ngày liên tục, cho ăn 100 lần, kỷ lục 20 ngọc, đạt Rồng thần...).
+- **Nhật ký rồng** (đọc trên web): dòng thời gian các lần tiến hóa và thành tựu.
+
+## 9. Cài đặt và trang web V2
+
+- Trang Cài đặt trên máy chia nhóm có icon. Thêm "Màn hình chờ", "Không làm phiền", "Tự chỉnh độ sáng" (nếu có LDR).
+- Trang web thêm: chọn **chủ đề màu** (Bầu trời / Rừng / Hoàng hôn / Đơn sắc), bật/tắt hiệu ứng thời tiết, lịch màn hình chờ, chọn widget trang chủ (thời tiết / lịch âm / câu nói mỗi ngày).
+- **Lịch âm** trên trang chủ (tính ngay trên máy, không cần mạng). Rất hợp với người dùng Việt.
+
+## 10. Lộ trình
+
+| Giai đoạn | Nội dung | Rủi ro |
+|---|---|---|
+| **V2.1 Nền tảng** | Nền theo giờ, thanh trạng thái, toast, trung tâm điều khiển | Thấp |
+| **V2.2 Trang chủ** | Rồng trên trang chủ, bong bóng thoại, thời tiết theo giờ, hiệu ứng thời tiết, lịch âm | Trung bình (hiệu năng hiệu ứng) |
+| **V2.3 Màn hình chờ** | Ambient, lịch tự vào màn hình chờ | Thấp |
+| **V2.4 Launcher và app** | Bộ icon mới, huy hiệu, app Thời tiết và Đồng hồ | Trung bình (dung lượng flash cho icon) |
+| **V2.5 QR động** | Nhập số tiền, tạo VietQR có tiền, kiểm tra CRC | Thấp, cần thử bằng app ngân hàng thật |
+| **V2.6 Rồng ảo V2** | Phòng, di chuyển, vuốt ve, hiệu ứng, mini game Rồng bay, thành tựu | Cao nhất (nhiều đồ họa) |
+
+Ngân sách flash thực tế: icon 91 KB, đồ trang trí và hiệu ứng 57 KB. Firmware dùng 80% flash (còn khoảng 620 KB).
+
+## 11. Quyết định đã chốt
+
+1. Rồng **thay hẳn** khuôn mặt mascot ở trang chủ (không có thẻ nhớ thì vẫn hiện mascot cũ).
+2. Bo mạch **có loa**: âm báo, báo thức, tiếng rồng kêu (cổng SPEAK, GPIO26).
+3. **Có** lịch âm và câu nói mỗi ngày trên trang chủ (tắt được trên web).
+4. **Bỏ "Âm nhạc"**. **"Ảnh"** thành khung ảnh từ thẻ nhớ.
+5. Làm **theo lộ trình** V2.1 đến V2.6.
+
+## 12. Trạng thái triển khai
+
+| Giai đoạn | Đã làm | Mã nguồn |
+|---|---|---|
+| V2.1 | Nền theo giờ, 4 chủ đề màu; thanh trạng thái (giờ, nhắc rồng, AI, sóng Wi-Fi); toast; trung tâm điều khiển (chạm hoặc vuốt thanh trạng thái): độ sáng, âm lượng, Wi-Fi, Im lặng, Tắt màn, Chờ, Cài đặt. Chạm đánh thức màn hình không bấm nhầm nút bên dưới | `theme.h`, `statusbar.h`, `sound.h`, `touch.h` |
+| V2.2 | Trang chủ: rồng làm bạn đồng hành (chạm = trò chuyện, giữ = mở game), bong bóng thoại theo ngữ cảnh, lịch âm (Can Chi), thời tiết +2/+4/+6 giờ, câu nói mỗi ngày, hiệu ứng mưa/tuyết/sao/nắng/sương | `home.h`, `lunar.h`, `quotes.h`, `weather.cpp` |
+| V2.3 | Màn hình chờ: đồng hồ lớn, rồng ngủ, đèn 15%, chữ dịch chuyển mỗi phút; vào sau thời gian rảnh hoặc theo lịch đêm | `ambient.h` |
+| V2.4 | Launcher icon mới, chấm đỏ khi rồng cần chăm; app **Thời tiết** (12 giờ, 5 ngày), **Đồng hồ** (báo thức, hẹn giờ, bấm giờ), **Ảnh** (khung ảnh), **Thanh toán** | `tools/gen_icons.py`, `weather_page.h`, `clock_app.h`, `photos.h` |
+| V2.5 | VietQR động: nhập số tiền, thêm tag 54, đặt tag 01 = 12, tính lại CRC16; hết hạn sau 5 phút | `qr_page.h` |
+| V2.6 | Phòng rồng (cửa sổ ngày/đêm, sàn), 6 đồ trang trí mua bằng xu, rồng đi lại, xoa để vuốt ve (tối đa 20 lần/giờ tăng vui vẻ), hiệu ứng ăn/tắm/tiến hóa/nhặt xu, mini game **Rồng bay**, 12 huy hiệu, chuỗi ngày, nhật ký rồng (xem trên web) | `dragon.h`, `tools/gen_decor.py` |
+
+Khác với bản thiết kế:
+- **Rồng không quay đầu và không vỗ cánh** (cần thêm khoảng 500 KB sprite lật và khung cánh, vượt ngân sách flash). Thay vào đó rồng thở và đi lại trong phòng.
+- Mỗi lần mua đồ trang trí đặt vào một vị trí cố định, không kéo thả.
+
+Cách dùng nhanh:
+- **Khung ảnh**: chép ảnh JPG (nên 480x320, kiểu baseline) vào thư mục `/photos` trên thẻ nhớ. Chạm phải/trái để chuyển ảnh, giữ để thoát. Thời gian mỗi ảnh chỉnh trên web.
+- **Báo thức** đặt trong app Đồng hồ. Báo thức kêu cả khi đang Im lặng và tự tắt sau 2 phút.
+- **Thanh toán**: nhập số tiền, bấm "Tạo mã QR". Nên quét thử bằng app ngân hàng thật trước khi dùng cho khách.
+- **Công cụ phát triển** trên web (có mật khẩu nếu đã đặt): `GET /api/screenshot` trả ảnh BMP của màn hình; `/api/touch?x=&y=[&x2=&y2=&ms=]` giả lập chạm hoặc vuốt.
+
+Huy hiệu (mỗi huy hiệu +20 xu): Phá vỏ, Lớn khôn (Rồng cấp 3), Trưởng thành, Thần long, Sành ăn (100 lần ăn), Sạch bong (50 lần tắm), Thợ săn ngọc (Bắt ngọc 20 điểm), Phi công (Rồng bay 10 điểm), Đại gia (1000 xu), Bạn thân (7 ngày liền), Nhà trang trí (đủ 6 món), Luân hồi (thế hệ 2).

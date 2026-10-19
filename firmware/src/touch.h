@@ -32,9 +32,20 @@ static bool xptSample(int &rx, int &ry) {
 // Resistive panels report noisy coordinates when the finger lands; LVGL would read that jump as a swipe
 // and drop the tap. So: wait 40 ms for the contact to settle, smooth the position, and tolerate
 // 30 ms of dropouts mid-press.
-static uint32_t fakeUntil = 0;  // TEMP: synthetic touch for self-test
-static int fakeX = 0, fakeY = 0;
+// Synthetic touch from the web dev tools: press at (x1,y1), slide to (x2,y2) over `dur` ms, then release.
+static uint32_t fakeStart = 0, fakeDur = 0;
+static int fakeX1, fakeY1, fakeX2, fakeY2;
+static void touchInject(int x1, int y1, int x2, int y2, uint32_t dur) {
+  fakeX1 = x1;
+  fakeY1 = y1;
+  fakeX2 = x2;
+  fakeY2 = y2;
+  fakeDur = dur < 60 ? 60 : dur;
+  fakeStart = millis();
+}
 
+// While the screen is off the first touch only wakes it: it is swallowed until the finger lifts.
+static volatile bool gTouchSwallow = false, gTouchWake = false;
 
 static void touchRead(lv_indev_drv_t *, lv_indev_data_t *data) {
   static int16_t lx = 0, ly = 0;          // smoothed position
@@ -42,10 +53,25 @@ static void touchRead(lv_indev_drv_t *, lv_indev_data_t *data) {
   static uint32_t downAt = 0, lastSeen = 0;
   static bool down = false, reporting = false;
   int rx, ry;
-  if (millis() < fakeUntil) {
-    data->state = LV_INDEV_STATE_PR;
-    data->point.x = fakeX;
-    data->point.y = fakeY;
+  if (gTouchSwallow) {
+    static uint32_t lastPress = 0;
+    if (xptSample(rx, ry)) {
+      gTouchWake = true;
+      lastPress = millis();
+    } else if (lastPress && millis() - lastPress > 150) {
+      gTouchSwallow = false;
+      lastPress = 0;
+    }
+    data->state = LV_INDEV_STATE_REL;
+    return;
+  }
+  if (fakeDur) {
+    uint32_t el = millis() - fakeStart;
+    float t = el >= fakeDur ? 1.0f : (float)el / fakeDur;
+    data->point.x = fakeX1 + (int)((fakeX2 - fakeX1) * t);
+    data->point.y = fakeY1 + (int)((fakeY2 - fakeY1) * t);
+    data->state = el >= fakeDur ? LV_INDEV_STATE_REL : LV_INDEV_STATE_PR;
+    if (el >= fakeDur) fakeDur = 0;
     return;
   }
   if (xptSample(rx, ry)) {

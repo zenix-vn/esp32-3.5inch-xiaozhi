@@ -19,7 +19,7 @@ OUT_H = os.path.join(ROOT, 'firmware', 'src', 'dragon_img.h')
 
 W0, H0 = 230, 172  # logical canvas (dragon faces right, feet on y ~ 164)
 OY = 22  # headroom above the drawing for wings, horns and halo
-FIT = 0.84  # the game's picture box is 148 px tall
+FIT = 0.80  # the game picture box is 140 px tall
 
 
 def hexc(h, a=255):
