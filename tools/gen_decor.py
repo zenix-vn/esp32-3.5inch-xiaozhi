@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFilter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gen_dragons  # noqa: E402
 
-SS = 6
+SS = 0.5  # drawn at half size without smoothing, then doubled with nearest-neighbour: pixel-art look
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_C = os.path.join(ROOT, 'firmware', 'src', 'decor_img.c')
 OUT_H = os.path.join(ROOT, 'firmware', 'src', 'decor_img.h')
@@ -26,7 +26,7 @@ def hexc(h, a=255):
 class C:
     def __init__(self, w, h):
         self.w, self.h = w, h
-        self.img = Image.new('RGBA', (w * SS, h * SS), (0, 0, 0, 0))
+        self.img = Image.new('RGBA', (int(w * SS), int(h * SS)), (0, 0, 0, 0))
         self.d = ImageDraw.Draw(self.img)
 
     def ell(self, cx, cy, rx, ry, col):
@@ -39,17 +39,17 @@ class C:
         self.d.polygon([(x * SS, y * SS) for x, y in pts], fill=hexc(col) if isinstance(col, int) else col)
 
     def line(self, pts, w, col):
-        self.d.line([(x * SS, y * SS) for x, y in pts], fill=hexc(col), width=int(w * SS), joint='curve')
+        self.d.line([(x * SS, y * SS) for x, y in pts], fill=hexc(col), width=max(1, int(w * SS)), joint='curve')
 
     def done(self, outline=True):
         img = self.img
         if outline:
-            a = img.split()[3].filter(ImageFilter.MaxFilter(2 * int(1.0 * SS) + 1))
+            a = img.split()[3].filter(ImageFilter.MaxFilter(3))
             out = Image.new('RGBA', img.size, (0, 0, 0, 0))
             out.paste(Image.new('RGBA', img.size, (30, 20, 50, 255)), (0, 0), a)
             out.alpha_composite(img)
             img = out
-        return img.resize((self.w, self.h), Image.LANCZOS)
+        return img.resize((self.w, self.h), Image.NEAREST)
 
 
 def plant():
@@ -151,17 +151,16 @@ def coin():
     return c.done(outline=False)
 
 
-def flyer():
-    img, _ = gen_dragons.draw_dragon(0.3, *gen_dragons.STAGES[1][2:6], gen_dragons.STAGES[1][6])
+def flyer():  # the lv1 pixel dragon, doubled
+    import gen_pixelart
+    img = gen_pixelart.dragon(gen_pixelart.STAGES[1], 'happy')
     img = img.crop(img.getbbox())
-    w = 54
-    return img.resize((w, int(img.size[1] * w / img.size[0])), Image.LANCZOS)
+    return img.resize((img.size[0] * 2, img.size[1] * 2), Image.NEAREST)
 
 
 SPRITES = [
     ('dc_plant', plant), ('dc_lamp', lamp), ('dc_rug', rug), ('dc_painting', painting), ('dc_lantern', lantern), ('dc_chest', chest),
-    ('fx_heart', heart), ('fx_bubble', bubble), ('fx_food0', lambda: food(0)), ('fx_food1', lambda: food(1)), ('fx_food2', lambda: food(2)),
-    ('fx_coin', coin), ('fx_flyer', flyer),
+    ('fx_bubble', bubble), ('fx_flyer', flyer),  # hearts, food and coins come from gen_pixelart.py
 ]
 
 

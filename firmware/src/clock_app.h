@@ -2,6 +2,8 @@
 // Clock app (V2.4): daily alarm, countdown timer and stopwatch. The alarm and the timer keep running when the
 // page is closed; when they go off a full-screen ring card appears above everything (and wakes the screen).
 
+static void ambientExit();  // ambient.h
+
 // ---------- shared state ----------
 static uint32_t tmrEnd = 0, tmrLeft = 0, tmrTotal = 5 * 60000;  // timer: end time (running) or time left (paused)
 static uint32_t swStart = 0, swAcc = 0;                          // stopwatch: start (running) and accumulated ms

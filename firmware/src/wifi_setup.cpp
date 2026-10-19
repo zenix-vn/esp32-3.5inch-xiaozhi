@@ -49,25 +49,63 @@ static void startPortal() {
   WiFi.softAP(AP_NAME);
   dns.start(53, "*", WiFi.softAPIP());
 
-  int n = WiFi.scanNetworks();
-  scanOptions = "";
-  for (int i = 0; i < n; i++) scanOptions += "<option value=\"" + WiFi.SSID(i) + "\">";
+  // Scan once now; the page lists the networks as tappable rows (strongest first), "/scan" refreshes.
+  auto scan = []() {
+    int n = WiFi.scanNetworks();
+    int idx[30], cnt = 0;
+    for (int i = 0; i < n && cnt < 30; i++) {
+      String s = WiFi.SSID(i);
+      bool dup = s.length() == 0;
+      for (int k = 0; k < cnt && !dup; k++) dup = WiFi.SSID(idx[k]) == s;
+      if (!dup) idx[cnt++] = i;
+    }
+    for (int i = 1; i < cnt; i++)
+      for (int j = i; j > 0 && WiFi.RSSI(idx[j]) > WiFi.RSSI(idx[j - 1]); j--) std::swap(idx[j], idx[j - 1]);
+    scanOptions = "";
+    for (int k = 0; k < cnt; k++) {
+      int i = idx[k], r = WiFi.RSSI(i);
+      String esc = WiFi.SSID(i);
+      esc.replace("&", "&amp;");
+      esc.replace("<", "&lt;");
+      esc.replace("\"", "&quot;");
+      int bars = r > -55 ? 4 : r > -65 ? 3 : r > -75 ? 2 : 1;
+      scanOptions += "<div class=net data-s=\"" + esc + "\"><span>" + esc + "</span><b>" + String("▂▄▆█").substring(0, bars * 3) +
+                     (WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? "" : " 🔒") + "</b></div>";
+    }
+    WiFi.scanDelete();
+  };
+  scan();
 
   auto page = []() {
-    String h = "<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>"
-               "<style>body{font-family:sans-serif;background:#0b1020;color:#eef;padding:24px;max-width:420px;margin:auto}"
-               "input,button{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:0;font-size:16px;box-sizing:border-box}"
-               "button{background:#38e1ff;font-weight:bold}</style><h2>Zin100 Wi-Fi</h2>"
-               "<form method=POST action=/save><input name=s list=n placeholder='Wi-Fi name' required>"
-               "<datalist id=n>" + scanOptions + "</datalist>"
-               "<input name=p type=password placeholder='Password'><button>Save &amp; connect</button></form>";
+    bool vi = isVi();
+    String h = String("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
+               "<title>Zin100 Wi-Fi</title><style>body{font-family:system-ui,sans-serif;background:#0b1020;color:#eef;padding:20px;max-width:440px;margin:auto}"
+               "input,button,a.b{display:block;width:100%;padding:12px;margin:8px 0;border-radius:10px;border:0;font-size:16px;box-sizing:border-box;text-align:center}"
+               "button{background:#38e1ff;font-weight:bold;color:#04101a}a.b{background:#1f2849;color:#eef;text-decoration:none}"
+               ".net{display:flex;justify-content:space-between;padding:13px 12px;margin:6px 0;border-radius:10px;background:#151b33;border:1px solid #2a3359;cursor:pointer}"
+               ".net.on{border-color:#38e1ff;background:#123047}.net b{color:#8a93b8;font-weight:normal;white-space:nowrap;margin-left:10px}"
+               "p{color:#8a93b8;font-size:14px}</style><h2>Zin100 Wi-Fi</h2><p>") +
+               (vi ? "Chạm vào mạng Wi-Fi để chọn, nhập mật khẩu rồi Lưu. Thiết bị chỉ dùng được Wi-Fi 2,4 GHz."
+                   : "Tap a network, type its password and Save. The device only works with 2.4 GHz Wi-Fi.") +
+               "</p><div id=l>" + scanOptions + "</div><a class=b href=/scan>" + (vi ? "Quét lại" : "Scan again") +
+               "</a><form method=POST action=/save><input name=s id=s placeholder='" + (vi ? "Tên Wi-Fi" : "Wi-Fi name") +
+               "' required><input name=p type=password placeholder='" + (vi ? "Mật khẩu" : "Password") + "'><button>" +
+               (vi ? "Lưu và kết nối" : "Save and connect") + "</button></form>"
+               "<script>document.querySelectorAll('.net').forEach(n=>n.onclick=()=>{document.querySelectorAll('.net').forEach(x=>x.classList.remove('on'));"
+               "n.classList.add('on');document.getElementById('s').value=n.dataset.s;document.querySelector('[name=p]').focus()})</script>";
     server.send(200, "text/html", h);
   };
   server.on("/", page);
+  server.on("/scan", [scan]() {
+    scan();
+    server.sendHeader("Location", "/");
+    server.send(302, "text/plain", "");
+  });
   server.on("/save", HTTP_POST, []() {
     prefs.putString("ssid", server.arg("s"));
     prefs.putString("pass", server.arg("p"));
-    server.send(200, "text/html", "<meta name=viewport content='width=device-width'><h3>Saved. Restarting...</h3>");
+    server.send(200, "text/html", String("<meta charset=utf-8><meta name=viewport content='width=device-width'><h3>") +
+                                      (isVi() ? "Đã lưu. Thiết bị đang khởi động lại..." : "Saved. Restarting...") + "</h3>");
     delay(800);
     ESP.restart();
   });
@@ -82,6 +120,8 @@ void wifiBegin() {
   ui.begin("ui", true);
   tzHours = ui.getInt("tz", 7);
   ui.end();
+  prefs.remove("ssid2");  // hotspot saved by the removed Vietmap app
+  prefs.remove("pass2");
   ssid = prefs.getString("ssid", "");
   pass = prefs.getString("pass", "");
   if (ssid.length() == 0) {

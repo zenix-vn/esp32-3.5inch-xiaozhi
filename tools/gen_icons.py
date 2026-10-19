@@ -143,14 +143,38 @@ def glyph_qr(g, c):
         g.rect(x, y, x + 8, y + 8, 1.5)
 
 
+def glyph_2048(g, c):
+    cols = (WHITE, (255, 255, 255, 150), (255, 226, 122, 255), (255, 255, 255, 90))
+    for i, (x, y) in enumerate(((18, 18), (52, 18), (18, 52), (52, 52))):
+        g.rect(x, y, x + 30, y + 30, 7, cols[i])
+    g.line([(26, 30), (40, 30)], 5, hexc(c))  # "2" on the first tile, bars on the gold one
+    g.line([(26, 36), (40, 36)], 5, hexc(c))
+    for k in range(3):
+        g.rect(58, 58 + k * 7, 76, 61 + k * 7, 1.5, hexc(c))
+
+
+def glyph_caro(g, c):
+    for k in (38, 62):
+        g.line([(k, 16), (k, 84)], 4, (255, 255, 255, 150))
+        g.line([(16, k), (84, k)], 4, (255, 255, 255, 150))
+    g.line([(19, 19), (33, 33)], 6)
+    g.line([(33, 19), (19, 33)], 6)
+    g.line([(43, 43), (57, 43 + 14)], 6)
+    g.line([(57, 43), (43, 57)], 6)
+    g.arc(74, 50, 8, 0, 360, 5, hexc(0xFFE27A))
+    g.arc(26, 74, 8, 0, 360, 5, hexc(0xFFE27A))
+    g.arc(74, 74, 8, 0, 360, 5, hexc(0xFFE27A))
+
+
 def dragon_icon(c1, c2):
     out = tile(c1, c2)
-    img, _ = gen_dragons.draw_dragon(0.42 * SZ * SS / 100 * 2.2, *gen_dragons.STAGES[0][2:6], gen_dragons.STAGES[0][6])
+    import gen_pixelart  # the baby pixel dragon, scaled up with whole pixels
+    img = gen_pixelart.dragon(gen_pixelart.STAGES[0], 'happy')
     img = img.crop(img.getbbox())
     n = SZ * SS
-    w = int(n * 0.86)
-    h = int(img.size[1] * w / img.size[0])
-    img = img.resize((w, h), Image.LANCZOS)
+    k = max(1, int(n * 0.9 / max(img.size)))
+    img = img.resize((img.size[0] * k, img.size[1] * k), Image.NEAREST)
+    w, h = img.size
     out.alpha_composite(img, ((n - w) // 2, (n - h) // 2 + int(n * 0.04)))
     return out
 
@@ -167,6 +191,8 @@ ICONS = [
     ('ic_about', 0x7BDCB5, 0x2A7F86, glyph_about),
     ('ic_clock', 0xFF8FA3, 0xD03A6A, glyph_clock),
     ('ic_qr', 0xFFD54A, 0xD98A12, glyph_qr),
+    ('ic_2048', 0xFFB86B, 0xE0603A, glyph_2048),
+    ('ic_caro', 0x6BE0C8, 0x2A78B8, glyph_caro),
 ]
 
 

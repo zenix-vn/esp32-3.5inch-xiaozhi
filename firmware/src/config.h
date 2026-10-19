@@ -93,7 +93,8 @@ static void cfgLoad() {
   cfg.qrBank = p.getString("qrB", "VietQR  |  MB Bank");
   cfg.qrTitle = p.getString("qrT", "");
   String apps = p.getString("apps", APPS_DEFAULT);
-  if (p.getUChar("appsV", 1) < 2) {  // V1 list: id 1 was Music (now Weather); add the new apps
+  uint8_t appsV = p.getUChar("appsV", 1);
+  if (appsV < 2) {  // V1 list: id 1 was Music (now Weather); add the new apps
     apps = apps == "0,1,2,3,4,5,6,7" ? String(APPS_DEFAULT) : apps + ",8,9";
   }
   cfg.apps = cfgCleanApps(apps);
@@ -146,6 +147,9 @@ static void cfgSave() {
   p.putUChar("alM", cfg.alarmM);
   p.putUChar("phS", cfg.photoSec);
   p.putBool("wall", cfg.wallOn);
-  p.putUChar("appsV", 2);
+  p.remove("vmk");  // settings of the removed Vietmap app
+  p.remove("veh");
+  p.remove("spw");
+  p.putUChar("appsV", 3);
   p.end();
 }

@@ -1,10 +1,10 @@
-# Nuôi rồng ảo (Dragon Pet) - thiết kế và kịch bản
+# Luyện rồng (Dragon Training) - thiết kế và kịch bản
 
-Game nuôi thú ảo thời gian thực chạy trên Zin100 (ESP32-2432S035). Mở từ trang **Ứng dụng > Rồng ảo** (tiếng Anh: *Dragon*).
+Game nuôi thú ảo thời gian thực chạy trên Zin100 (ESP32-2432S035). Mở từ trang **Ứng dụng > Luyện rồng** (tiếng Anh: *Dragon training*).
 Dữ liệu được ghi vào **thẻ nhớ microSD**: `/zin100/dragon.json`. Không có thẻ nhớ thì game không chơi được và hiện thông báo yêu cầu cắm thẻ.
 
 - Mã nguồn: `firmware/src/dragon.h`
-- Cấu hình qua web: mục **Nuôi rồng ảo** tại `http://zin100.local`
+- Cấu hình qua web: mục **Luyện rồng** tại `http://zin100.local`
 
 ---
 
@@ -113,7 +113,7 @@ Các trường: `v`, `name`, `stage` (0-8), `growth`, `satiety`, `mood`, `clean`
 
 ## 9. Cấu hình qua web
 
-Mục **Nuôi rồng ảo** tại `http://zin100.local`: xem cấp độ, tiến độ, xu, thế hệ, kỷ lục; **đặt tên rồng**; **nuôi lại từ đầu** (xóa dữ liệu rồng).
+Mục **Luyện rồng** tại `http://zin100.local`: xem cấp độ, tiến độ, xu, thế hệ, kỷ lục; **đặt tên rồng**; **nuôi lại từ đầu** (xóa dữ liệu rồng).
 
 API: `POST /api/dragon` với `name=...`, `reset=1`, hoặc `speed=N` (nhân tốc độ lớn lên, chỉ để thử nghiệm, tự về 1 sau khi khởi động lại; ví dụ `speed=300` tiến hóa nhanh gấp 300 lần).
 
@@ -318,3 +318,4 @@ Cách dùng nhanh:
 - **Công cụ phát triển** trên web (có mật khẩu nếu đã đặt): `GET /api/screenshot` trả ảnh BMP của màn hình; `/api/touch?x=&y=[&x2=&y2=&ms=]` giả lập chạm hoặc vuốt.
 
 Huy hiệu (mỗi huy hiệu +20 xu): Phá vỏ, Lớn khôn (Rồng cấp 3), Trưởng thành, Thần long, Sành ăn (100 lần ăn), Sạch bong (50 lần tắm), Thợ săn ngọc (Bắt ngọc 20 điểm), Phi công (Rồng bay 10 điểm), Đại gia (1000 xu), Bạn thân (7 ngày liền), Nhà trang trí (đủ 6 món), Luân hồi (thế hệ 2).
+

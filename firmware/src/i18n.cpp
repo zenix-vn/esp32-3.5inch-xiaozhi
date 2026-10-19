@@ -54,7 +54,7 @@ static const Pair TABLE[] = {
     {"Assistant", "Trợ lý"},
     {"Music", "Âm nhạc"},
     {"Games", "Trò chơi"},
-    {"Dragon", "Rồng ảo"},
+    {"Dragon", "Luyện rồng"},
     {"Weather", "Thời tiết"},
     {"Clock", "Đồng hồ"},
     {"Payment", "Thanh toán"},

@@ -81,11 +81,10 @@ static bool locate() {
 }
 
 static bool fetch() {
-  WiFiClientSecure client;
-  client.setInsecure();
+  WiFiClient client;  // plain HTTP: no TLS, which needs ~40 KB of contiguous RAM
   HTTPClient http;
   http.setTimeout(10000);
-  String url = String("https://api.open-meteo.com/v1/forecast?latitude=") + String(lat, 3) +
+  String url = String("http://api.open-meteo.com/v1/forecast?latitude=") + String(lat, 3) +
                "&longitude=" + String(lon, 3) +
                "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day"
                "&hourly=temperature_2m,weather_code,precipitation_probability&forecast_hours=12"
@@ -180,7 +179,7 @@ static void task(void *) {
   }
 }
 
-void weatherBegin() { xTaskCreatePinnedToCore(task, "weather", 12288, nullptr, 1, nullptr, 0); }
+void weatherBegin() { xTaskCreatePinnedToCore(task, "weather", 6144, nullptr, 1, nullptr, 0); }  // plain HTTP: small stack
 
 WeatherData weatherGet() {
   WeatherData w;

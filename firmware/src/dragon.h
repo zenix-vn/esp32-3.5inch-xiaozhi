@@ -1,12 +1,13 @@
 #pragma once
-// Virtual dragon pet ("Nuôi rồng ảo"): a real-time game. Needs keep draining while the device runs and the
+// "Luyện rồng" (dragon training) virtual pet: a real-time game. Needs keep draining while the device runs and the
 // time the device was off is caught up from the wall clock. Progress lives on the microSD card
 // (/zin100/dragon.json). Design and story: see docs.md.
 // Included by main.cpp after the weather/shape helpers (uses shape(), makeLabel(), pageBegin(), sdOk, ...).
 #include <SD.h>
 #include <ArduinoJson.h>
-#include "dragon_img.h"
+#include "pixel_img.h"
 #include "decor_img.h"
+#include "scene_img.h"
 
 #define DL(vi, en) (isVi() ? (vi) : (en))
 
@@ -124,9 +125,9 @@ struct DecorInfo {
   int16_t x, y;  // top-left inside the room box
 };
 static const DecorInfo DECOR[6] = {
-    {"Chậu cây", "Potted plant", 30, &dc_plant, 6, 82},     {"Đèn ngủ", "Bedside lamp", 40, &dc_lamp, 252, 72},
-    {"Thảm tròn", "Round rug", 50, &dc_rug, 71, 112},      {"Bức tranh", "Painting", 60, &dc_painting, 16, 10},
-    {"Đèn lồng", "Lantern", 80, &dc_lantern, 112, -4},     {"Rương báu", "Treasure chest", 150, &dc_chest, 196, 96},
+    {"Chậu cây", "Potted plant", 30, &dc_plant, 14, 112},    {"Đèn vườn", "Garden lamp", 40, &dc_lamp, 418, 104},
+    {"Thảm picnic", "Picnic mat", 50, &dc_rug, 160, 152},    {"Biển gỗ", "Wooden sign", 60, &dc_painting, 96, 70},
+    {"Đèn lồng", "Lantern", 80, &dc_lantern, 40, 34},        {"Rương báu", "Treasure chest", 150, &dc_chest, 340, 128},
 };
 struct AchInfo {
   const char *vi, *en, *dvi, *den;
@@ -526,80 +527,106 @@ static bool dgBuyDecor(int i) {
 }
 
 // =====================================================================================
-// Drawing: pre-rendered sprites (tools/gen_dragons.py) with live eyes on top
+// Drawing: hand-made pixel art (tools/gen_pixelart.py) - 40x40 dragons with four expressions each, eggs
+// 24x30 - always shown with a whole-number zoom so every pixel stays a crisp square.
 // =====================================================================================
-static const lv_img_dsc_t *const DRAGON_SPRITES[8] = {&dragon_baby,  &dragon_lv1,  &dragon_lv2,     &dragon_lv3,
-                                                       &dragon_adult, &dragon_king, &dragon_emperor, &dragon_divine};
-static const int DG_BOX_W = 292, DG_BOX_H = 140, DG_GROUND = 4;  // picture box and feet margin
+enum { EX_NORMAL, EX_HAPPY, EX_SAD, EX_SLEEP };
+static const lv_img_dsc_t *const DRAGON_SPRITES[8][4] = {
+    {&dg_baby_normal, &dg_baby_happy, &dg_baby_sad, &dg_baby_sleep},
+    {&dg_lv1_normal, &dg_lv1_happy, &dg_lv1_sad, &dg_lv1_sleep},
+    {&dg_lv2_normal, &dg_lv2_happy, &dg_lv2_sad, &dg_lv2_sleep},
+    {&dg_lv3_normal, &dg_lv3_happy, &dg_lv3_sad, &dg_lv3_sleep},
+    {&dg_adult_normal, &dg_adult_happy, &dg_adult_sad, &dg_adult_sleep},
+    {&dg_king_normal, &dg_king_happy, &dg_king_sad, &dg_king_sleep},
+    {&dg_emperor_normal, &dg_emperor_happy, &dg_emperor_sad, &dg_emperor_sleep},
+    {&dg_divine_normal, &dg_divine_happy, &dg_divine_sad, &dg_divine_sleep},
+};
+static const int DG_BOX_W = 472, DG_BOX_H = 188, DG_GROUND = 8;  // the game scene and the feet margin
+static const uint8_t DG_STAGE_ZOOM[9] = {4, 3, 3, 3, 4, 4, 4, 4, 4};  // in the game: egg, then stages 1..8
 
-// zoom > 1 scales the sprite from its top-left corner (used on the home screen, where there is more room)
-static lv_obj_t *dgSprite(lv_obj_t *p, const lv_img_dsc_t *src, int x, int y, float zoom = 1.0f) {
+static lv_obj_t *dgSprite(lv_obj_t *p, const lv_img_dsc_t *src, int x, int y, int zoom) {
   lv_obj_t *img = lv_img_create(p);
   lv_img_set_src(img, src);
   lv_obj_set_pos(img, x, y);
-  if (zoom != 1.0f) {
-    lv_img_set_pivot(img, 0, 0);
-    lv_img_set_zoom(img, (uint16_t)(256 * zoom));
-  }
+  lv_img_set_antialias(img, false);  // nearest-neighbour: whole pixels
+  lv_img_set_pivot(img, 0, 0);
+  lv_img_set_zoom(img, 256 * zoom);
   lv_obj_clear_flag(img, LV_OBJ_FLAG_CLICKABLE);
   return img;
 }
-static void dgShadow(lv_obj_t *p, int cx, int footY, int w) { shape(p, cx - w / 2, footY - 7, w, 12, 0x000000, LV_RADIUS_CIRCLE, LV_OPA_30); }
+static void dgShadow(lv_obj_t *p, int cx, int footY, int w) { shape(p, cx - w / 2, footY - 5, w, 10, 0x000000, LV_RADIUS_CIRCLE, LV_OPA_20); }
+static int dgExpr(bool sleeping, bool sick, int moodLv) {
+  return sleeping ? EX_SLEEP : (sick || moodLv == 0) ? EX_SAD : moodLv == 2 ? EX_HAPPY : EX_NORMAL;
+}
 
-static void dgDrawEgg(lv_obj_t *p, int boxW = DG_BOX_W, int boxH = DG_BOX_H, float zoom = 1.0f, bool shadow = true) {
+static lv_obj_t *dgDrawEgg(lv_obj_t *p, int boxW = DG_BOX_W, int boxH = DG_BOX_H, int zoom = 0, bool shadow = true) {
+  if (!zoom) zoom = DG_STAGE_ZOOM[0];
   int prog = dgNeed() > 0 ? (int)(dg.growth * 100 / dgNeed()) : 0;
   const lv_img_dsc_t *src = dg.energy < 30 ? &egg_cold : prog > 80 ? &egg_crack2 : prog > 40 ? &egg_crack1 : &egg_warm;
   int w = src->header.w * zoom, h = src->header.h * zoom;
   if (shadow) dgShadow(p, boxW / 2, boxH - DG_GROUND, w * 3 / 4);
-  dgSprite(p, src, (boxW - w) / 2, boxH - DG_GROUND - h, zoom);
+  return dgSprite(p, src, (boxW - w) / 2, boxH - DG_GROUND - h, zoom);
 }
 
-static void dgDrawDragon(lv_obj_t *p, int st, bool sleeping, bool sick, int moodLv, int boxW = DG_BOX_W, int boxH = DG_BOX_H,
-                         float zoom = 1.0f, bool shadow = true) {
-  const lv_img_dsc_t *src = DRAGON_SPRITES[st - 1];
+// Returns the sprite object (callers keep it to make the dragon blink).
+static lv_obj_t *dgDrawDragon(lv_obj_t *p, int st, bool sleeping, bool sick, int moodLv, int boxW = DG_BOX_W, int boxH = DG_BOX_H,
+                              int zoom = 0, bool shadow = true) {
+  if (!zoom) zoom = DG_STAGE_ZOOM[st];
+  const lv_img_dsc_t *src = DRAGON_SPRITES[st - 1][dgExpr(sleeping, sick, moodLv)];
   int w = src->header.w * zoom, h = src->header.h * zoom;
-  int x = (boxW - w) / 2 + 6, y = boxH - DG_GROUND - h;
-  if (shadow) dgShadow(p, x + w / 2, boxH - DG_GROUND, w * 2 / 3);
+  int x = (boxW - w) / 2, y = boxH - DG_GROUND - h + zoom * 2;  // the art has a little empty space under the feet
+  if (shadow) dgShadow(p, x + w / 2, boxH - DG_GROUND, w / 2);
   lv_obj_t *img = dgSprite(p, src, x, y, zoom);
   if (sick) {
     lv_obj_set_style_img_recolor(img, lv_color_hex(0x7FA060), 0);
-    lv_obj_set_style_img_recolor_opa(img, LV_OPA_40, 0);
+    lv_obj_set_style_img_recolor_opa(img, LV_OPA_30, 0);
   }
-  int ex = x + (int)(DRAGON_EYE[st - 1][0] * zoom), ey = y + (int)(DRAGON_EYE[st - 1][1] * zoom);
-  int r = (int)(DRAGON_EYE[st - 1][2] * zoom + 0.5f);
-  const uint32_t ink = 0x241A3A;
   if (sleeping) {
-    shape(p, ex - r, ey, 2 * r + 1, 2, ink, 1);
-    lv_obj_t *z = makeLabel(p, "Z z", F_LABEL, C_ACCENT);
-    lv_obj_set_pos(z, ex + 2 * r, ey - 6 * r);
-  } else if (moodLv == 2) {  // happy: closed "^" eye
-    lv_obj_t *a = lv_arc_create(p);
-    lv_obj_remove_style(a, nullptr, LV_PART_KNOB);
-    lv_obj_clear_flag(a, LV_OBJ_FLAG_CLICKABLE);
-    lv_arc_set_bg_angles(a, 200, 340);
-    lv_obj_set_style_arc_width(a, 2, LV_PART_MAIN);
-    lv_obj_set_style_arc_color(a, lv_color_hex(ink), LV_PART_MAIN);
-    lv_obj_set_style_arc_opa(a, LV_OPA_TRANSP, LV_PART_INDICATOR);
-    lv_obj_set_style_pad_all(a, 0, 0);
-    lv_obj_set_size(a, 2 * r + 2, 2 * r + 2);
-    lv_obj_set_pos(a, ex - r - 1, ey - r + r / 2);
-  } else {
-    shape(p, ex - r, ey - r - 1, 2 * r + 1, 2 * r + 2, 0xFFFFFF);
-    int py = moodLv == 0 ? ey - r / 2 + 2 : ey - r / 2 - 1;
-    shape(p, ex - r / 2 + 1, py, r + 1, r + 3, ink);
-    shape(p, ex, py + 1, 2, 2, 0xFFFFFF);
-    if (moodLv == 0) shape(p, ex - r / 2, ey + r + 2, r, r + 3, 0x6BB5FF);  // tear
+    lv_obj_t *z = makeLabel(p, "Z z", F_TITLE, lv_color_hex(0x5A6FD8));
+    lv_obj_set_pos(z, x + w * 3 / 4, y + zoom * 2);
   }
-  if (sick) shape(p, ex + 3 * r, ey - 5 * r, r + 2, r + 5, 0x6BB5FF);  // sweat drop
+  return img;
+}
+
+// Blinking: every few seconds the open-eyed frame is swapped for the closed one for a moment.
+struct Blinker {
+  lv_obj_t *img = nullptr;
+  const lv_img_dsc_t *open = nullptr, *closed = nullptr;
+  uint32_t next = 0, until = 0;
+};
+static void blinkSet(Blinker &b, lv_obj_t *img, int st, int expr) {
+  b.img = img;
+  b.until = 0;
+  bool canBlink = img && st >= 1 && (expr == EX_NORMAL || expr == EX_SAD);
+  b.open = canBlink ? DRAGON_SPRITES[st - 1][expr] : nullptr;
+  b.closed = canBlink ? DRAGON_SPRITES[st - 1][EX_SLEEP] : nullptr;
+  b.next = millis() + 1500 + random(0, 2500);
+}
+static void blinkTick(Blinker &b) {
+  if (!b.img || !b.open) return;
+  uint32_t now = millis();
+  if (b.until && now >= b.until) {
+    lv_img_set_src(b.img, b.open);
+    b.until = 0;
+    b.next = now + 2200 + random(0, 3000);
+  } else if (!b.until && now >= b.next) {
+    lv_img_set_src(b.img, b.closed);
+    b.until = now + 150;
+  }
 }
 
 // =====================================================================================
-// Game page (V2): the dragon lives in a room you decorate, walks around, can be petted, and reacts with
-// little effects. Play opens two mini games; the header has the shop (room) and the badges.
+// Game page "Luyện rồng": pixel-art garden (tools/gen_scene.py) with the dragon walking around, pastel
+// striped panels with brown text (header: name / evolution + mood / coins, shop, badges; footer: actions).
 // =====================================================================================
-static lv_obj_t *dScr = nullptr, *dBox, *dRoom, *dBob, *dFx, *dCoins, *dStageLbl, *dMsg, *dXpBar, *dXpTxt, *dReinc;
-static lv_obj_t *dBtns[5], *dBarLbl[4], *dBars[4], *dOv = nullptr;
-static int dSig = -1, dRoomSig = -1;
+#define PX_INK 0x5A3A22     // brown text
+#define PX_EDGE 0xE29B4B    // orange-brown panel border
+#define PX_PANEL 0xD2F3F8   // pastel panel (under the stripes)
+
+static lv_obj_t *dScr = nullptr, *dBox, *dRoom, *dBob, *dFx, *dCoins, *dName, *dStageLbl, *dXpBar, *dXpTxt, *dFace, *dReinc;
+static lv_obj_t *dBubble, *dBubbleLbl, *dBtns[5], *dBars[4], *dOv = nullptr;
+static Blinker dBlink;
+static int dSig = -1, dRoomSig = -1, dFaceLv = -1;
 static uint32_t dNextWalk = 0, dPetAt = 0, dPetHourStart = 0;
 static int dPetDist = 0, dPetCount = 0;
 
@@ -622,6 +649,49 @@ struct Flight {  // "Rồng bay": tap to flap between cloud pillars
 static Flight fb;
 static bool dgBusy() { return dOv || mg.ov || fb.ov; }
 
+// ---------- pixel UI kit ----------
+static lv_obj_t *pxPanel(lv_obj_t *parent, int w, int h) {
+  lv_obj_t *p = lv_obj_create(parent);
+  lv_obj_remove_style_all(p);
+  lv_obj_set_size(p, w, h);
+  lv_obj_set_style_radius(p, 6, 0);
+  lv_obj_set_style_bg_opa(p, LV_OPA_COVER, 0);
+  lv_obj_set_style_bg_color(p, lv_color_hex(PX_PANEL), 0);
+  lv_obj_set_style_bg_img_src(p, &ui_stripe, 0);
+  lv_obj_set_style_bg_img_tiled(p, true, 0);
+  lv_obj_set_style_border_width(p, 3, 0);
+  lv_obj_set_style_border_color(p, lv_color_hex(PX_EDGE), 0);
+  lv_obj_set_style_clip_corner(p, false, 0);
+  lv_obj_clear_flag(p, LV_OBJ_FLAG_SCROLLABLE);
+  return p;
+}
+static lv_obj_t *pxText(lv_obj_t *parent, const char *t, const lv_font_t *font) { return makeLabel(parent, t, font, lv_color_hex(PX_INK)); }
+
+// Pastel button: icon above a label (or a label alone).
+static lv_obj_t *pxButton(lv_obj_t *parent, int w, int h, const lv_img_dsc_t *icon, const char *text, lv_event_cb_t cb, void *ud) {
+  lv_obj_t *b = pxPanel(parent, w, h);
+  lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_set_style_bg_color(b, lv_color_hex(0xFFE9C4), LV_STATE_PRESSED);
+  lv_obj_set_style_bg_img_opa(b, LV_OPA_TRANSP, LV_STATE_PRESSED);
+  lv_obj_set_style_border_color(b, lv_color_hex(0xC9772E), LV_STATE_PRESSED);
+  lv_obj_set_flex_flow(b, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_flex_align(b, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_row(b, 0, 0);
+  if (icon) {  // 16x16 pixel icons are shown doubled
+    lv_obj_t *i = lv_img_create(b);
+    lv_img_set_src(i, icon);
+    lv_img_set_antialias(i, false);
+    if (icon->header.w <= 20) {
+      lv_img_set_zoom(i, 512);
+      lv_img_set_size_mode(i, LV_IMG_SIZE_MODE_REAL);
+    }
+    lv_obj_clear_flag(i, LV_OBJ_FLAG_CLICKABLE);
+  }
+  if (text) pxText(b, text, F_BODY);
+  if (cb) lv_obj_add_event_cb(b, cb, LV_EVENT_CLICKED, ud);
+  return b;
+}
+
 static void dgCloseOverlay() {
   if (dOv) lv_obj_del(dOv);
   dOv = nullptr;
@@ -633,8 +703,8 @@ static lv_obj_t *dgOpenOverlay() {
   dOv = lv_obj_create(dScr);
   lv_obj_remove_style_all(dOv);
   lv_obj_set_size(dOv, 480, 320);
-  lv_obj_set_style_bg_color(dOv, lv_color_hex(0x000000), 0);
-  lv_obj_set_style_bg_opa(dOv, LV_OPA_70, 0);
+  lv_obj_set_style_bg_color(dOv, lv_color_hex(0x1A1020), 0);
+  lv_obj_set_style_bg_opa(dOv, LV_OPA_60, 0);
   lv_obj_add_flag(dOv, LV_OBJ_FLAG_CLICKABLE);  // swallow touches
   return dOv;
 }
@@ -671,13 +741,12 @@ static lv_obj_t *dgFloat(const lv_img_dsc_t *src, int x, int y, int rise, uint32
   return o;
 }
 
-// Where the dragon's mouth is inside the room box (follows the walking offset).
+// Where the dragon's mouth is inside the scene (follows the walking offset).
 static lv_point_t dgMouth() {
   if (dg.stage == ST_EGG) return {DG_BOX_W / 2, DG_BOX_H / 2};
-  const lv_img_dsc_t *src = DRAGON_SPRITES[dg.stage - 1];
-  int x = (DG_BOX_W - src->header.w) / 2 + 6 + lv_obj_get_x(dBob), y = DG_BOX_H - DG_GROUND - src->header.h;
-  const float *e = DRAGON_EYE[dg.stage - 1];
-  return {(lv_coord_t)(x + e[0] + e[2] * 4), (lv_coord_t)(y + e[1] + e[2] * 2)};
+  int z = DG_STAGE_ZOOM[dg.stage];
+  int x = (DG_BOX_W - 40 * z) / 2 + lv_obj_get_x(dBob), y = DG_BOX_H - DG_GROUND - 40 * z + z * 2;
+  return {(lv_coord_t)(x + 20 * z), (lv_coord_t)(y + 19 * z)};  // the mouth sits at (20, 19) in the 40x40 art
 }
 
 static void dgHearts(int n, int x, int y) {
@@ -707,7 +776,7 @@ static void dgFxFeed(int kind) {
 }
 static void dgFxBath() {
   lv_point_t m = dgMouth();
-  for (int i = 0; i < 10; i++) dgFloat(&fx_bubble, m.x - 90 + random(0, 110), DG_BOX_H - 20 - random(0, 40), 50 + random(0, 40), 1200, i * 90);
+  for (int i = 0; i < 12; i++) dgFloat(&fx_bubble, m.x - 120 + random(0, 150), DG_BOX_H - 24 - random(0, 50), 60 + random(0, 40), 1200, i * 90);
 }
 static void dgFxFlash() {
   lv_obj_t *f = shape(dFx, 0, 0, DG_BOX_W, DG_BOX_H, 0xFFFFFF, 0, LV_OPA_COVER);
@@ -719,50 +788,35 @@ static void dgFxFlash() {
   lv_anim_set_time(&a, 800);
   lv_anim_set_ready_cb(&a, fxDel);
   lv_anim_start(&a);
-  for (int i = 0; i < 8; i++) dgFloat(&fx_coin, random(30, DG_BOX_W - 30), DG_BOX_H - random(10, 50), 70, 1300, 200 + i * 80);
+  for (int i = 0; i < 10; i++) dgFloat(&fx_coin, random(40, DG_BOX_W - 40), DG_BOX_H - random(10, 60), 80, 1300, 200 + i * 80);
 }
 
-// ---------- room ----------
+// ---------- garden scene ----------
 static void dgDrawRoom() {
   bool night = dg.sleeping || dgNight();
   int sig = night | (dg.decor << 1);
   if (sig == dRoomSig) return;
   dRoomSig = sig;
-  lv_obj_set_style_bg_color(dBox, lv_color_hex(night ? 0x141A3A : 0x3E63B0), 0);
-  lv_obj_set_style_bg_grad_color(dBox, lv_color_hex(night ? 0x241A4A : 0x7AA6E6), 0);
   lv_obj_clean(dRoom);
-  // window
-  lv_obj_t *win = shape(dRoom, 206, 10, 70, 50, 0x6B4F2A, 5);
-  lv_obj_t *glass = shape(win, 4, 4, 62, 42, night ? 0x0B1230 : 0x9AD4FF, 3);
-  if (night) {
-    lv_obj_set_style_bg_grad_color(glass, lv_color_hex(0x1D2A5E), 0);
-    shape(glass, 40, 6, 14, 14, 0xFFF3C4);
-    shape(glass, 45, 4, 12, 12, 0x0B1230);
-    shape(glass, 12, 10, 3, 3, 0xFFFFFF);
-    shape(glass, 26, 26, 2, 2, 0xFFFFFF);
-  } else {
-    lv_obj_set_style_bg_grad_color(glass, lv_color_hex(0xE0F4FF), 0);
-    shape(glass, 8, 18, 22, 10, 0xFFFFFF, 5);
-    shape(glass, 16, 13, 16, 12, 0xFFFFFF);
-  }
-  lv_obj_set_style_bg_grad_dir(glass, LV_GRAD_DIR_VER, 0);
-  shape(win, 33, 4, 4, 42, 0x6B4F2A, 0);
-  shape(win, 4, 23, 62, 4, 0x6B4F2A, 0);
-  // floor
-  lv_obj_t *floor = shape(dRoom, 0, DG_BOX_H - 34, DG_BOX_W, 34, night ? 0x2E2340 : 0x9A6B45, 0);
-  lv_obj_set_style_bg_grad_color(floor, lv_color_hex(night ? 0x1E1730 : 0x7A5236), 0);
-  lv_obj_set_style_bg_grad_dir(floor, LV_GRAD_DIR_VER, 0);
-  shape(dRoom, 0, DG_BOX_H - 34, DG_BOX_W, 2, night ? 0x4A3A60 : 0xC08A5C, 0);
-  // decorations (back to front)
-  static const int order[6] = {2, 3, 4, 0, 5, 1};
+  lv_obj_t *bg = lv_img_create(dRoom);
+  lv_img_set_src(bg, &sc_garden);
+  lv_obj_set_pos(bg, -4, -2);
+  lv_obj_clear_flag(bg, LV_OBJ_FLAG_CLICKABLE);
+  static const int order[6] = {3, 4, 2, 0, 5, 1};  // back to front
   for (int k = 0; k < 6; k++) {
     int i = order[k];
     if (!(dg.decor & (1 << i))) continue;
-    if (i == 1 && night) shape(dRoom, DECOR[i].x - 16, DECOR[i].y - 12, 68, 52, 0xFFE08A, LV_RADIUS_CIRCLE, LV_OPA_20);  // lamp glow
     lv_obj_t *im = lv_img_create(dRoom);
     lv_img_set_src(im, DECOR[i].img);
     lv_obj_set_pos(im, DECOR[i].x, DECOR[i].y);
     lv_obj_clear_flag(im, LV_OBJ_FLAG_CLICKABLE);
+  }
+  if (night) {  // dusk-blue veil, moon over the sun, a few stars; lamps glow through
+    shape(dRoom, 0, 0, DG_BOX_W, DG_BOX_H, 0x0A1440, 0, LV_OPA_50);
+    shape(dRoom, 386, 8, 28, 28, 0xFFF3C4, 4);
+    shape(dRoom, 396, 4, 24, 24, 0x2A3360, 4);
+    for (int i = 0; i < 9; i++) shape(dRoom, 30 + i * 41, 8 + (i * 17) % 40, 3, 3, 0xFFFFFF, 0);
+    if (dg.decor & 2) shape(dRoom, DECOR[1].x - 14, DECOR[1].y - 8, 64, 48, 0xFFE08A, LV_RADIUS_CIRCLE, LV_OPA_30);
   }
 }
 
@@ -819,32 +873,34 @@ static void dgShowStory(int idx, bool evolved) {
     soundPlay(SND(SND_EVOLVE), 0, false);
   }
   lv_obj_t *ov = dgOpenOverlay();
-  lv_obj_t *card = makeCard(ov, 400, 236);
+  lv_obj_t *card = pxPanel(ov, 400, 236);
   lv_obj_center(card);
-  lv_obj_t *t = makeLabel(card, evolved ? DL("Tiến hóa!", "Evolution!") : DL("Quả trứng bí ẩn", "A mysterious egg"), F_HEADING, C_ACCENT);
-  lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 14);
-  lv_obj_t *n = makeLabel(card, dgStageName(idx), F_TITLE, C_TEXT);
-  lv_obj_align(n, LV_ALIGN_TOP_MID, 0, 54);
-  lv_obj_t *s = makeLabel(card, isVi() ? STORY_VI[idx] : STORY_EN[idx], F_BODY, C_MUTED);
+  lv_obj_t *t = pxText(card, evolved ? DL("Tiến hóa!", "Evolution!") : DL("Quả trứng bí ẩn", "A mysterious egg"), F_HEADING);
+  lv_obj_set_style_text_color(t, lv_color_hex(0xD0582A), 0);
+  lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 12);
+  lv_obj_t *n = pxText(card, dgStageName(idx), F_TITLE);
+  lv_obj_align(n, LV_ALIGN_TOP_MID, 0, 52);
+  lv_obj_t *s = pxText(card, isVi() ? STORY_VI[idx] : STORY_EN[idx], F_BODY);
   lv_obj_set_width(s, 360);
   lv_label_set_long_mode(s, LV_LABEL_LONG_WRAP);
   lv_obj_set_style_text_align(s, LV_TEXT_ALIGN_CENTER, 0);
-  lv_obj_align(s, LV_ALIGN_TOP_MID, 0, 88);
-  lv_obj_t *b = smallBtn(card, DL("Tuyệt vời!", "Awesome!"), C_ACCENT, dgOverlayDone, nullptr, 150);
-  lv_obj_align(b, LV_ALIGN_BOTTOM_MID, 0, -12);
+  lv_obj_align(s, LV_ALIGN_TOP_MID, 0, 86);
+  lv_obj_t *b = pxButton(card, 150, 40, nullptr, DL("Tuyệt vời!", "Awesome!"), dgOverlayDone, nullptr);
+  lv_obj_align(b, LV_ALIGN_BOTTOM_MID, 0, -10);
 }
 
 static lv_obj_t *dgResultCard(lv_obj_t *ov, const char *line1, const char *line2, lv_event_cb_t done) {
-  lv_obj_t *card = makeCard(ov, 300, 170);
+  lv_obj_t *card = pxPanel(ov, 300, 170);
   lv_obj_center(card);
-  lv_obj_t *t = makeLabel(card, DL("Kết thúc!", "Game over!"), F_HEADING, C_ACCENT);
-  lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 14);
-  lv_obj_t *r = makeLabel(card, line1, F_BODY, C_TEXT);
-  lv_obj_align(r, LV_ALIGN_TOP_MID, 0, 62);
-  lv_obj_t *b2 = makeLabel(card, line2, F_CAPTION, C_MUTED);
-  lv_obj_align(b2, LV_ALIGN_TOP_MID, 0, 90);
-  lv_obj_t *btn = smallBtn(card, DL("Xong", "Done"), C_ACCENT, done, nullptr, 120);
-  lv_obj_align(btn, LV_ALIGN_BOTTOM_MID, 0, -12);
+  lv_obj_t *t = pxText(card, DL("Kết thúc!", "Game over!"), F_HEADING);
+  lv_obj_set_style_text_color(t, lv_color_hex(0xD0582A), 0);
+  lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 12);
+  lv_obj_t *r = pxText(card, line1, F_BODY);
+  lv_obj_align(r, LV_ALIGN_TOP_MID, 0, 58);
+  lv_obj_t *b2 = pxText(card, line2, F_CAPTION);
+  lv_obj_align(b2, LV_ALIGN_TOP_MID, 0, 84);
+  lv_obj_t *btn = pxButton(card, 120, 40, nullptr, DL("Xong", "Done"), done, nullptr);
+  lv_obj_align(btn, LV_ALIGN_BOTTOM_MID, 0, -10);
   return card;
 }
 
@@ -872,17 +928,15 @@ static void mgJewelTap(lv_event_t *e) {
   mg.jewel = nullptr;
 }
 static void mgSpawn() {
-  mg.jewel = lv_obj_create(mg.ov);
-  lv_obj_remove_style_all(mg.jewel);
-  lv_obj_set_size(mg.jewel, 58, 58);
-  lv_obj_set_pos(mg.jewel, 20 + random(0, 380), 70 + random(0, 190));
-  lv_obj_set_style_radius(mg.jewel, LV_RADIUS_CIRCLE, 0);
-  lv_obj_set_style_bg_opa(mg.jewel, LV_OPA_COVER, 0);
-  static const uint32_t cols[] = {0x38E1FF, 0xFF6B9A, 0xFFC93C, 0x3DEBA0, 0xA16BFF};
-  lv_obj_set_style_bg_color(mg.jewel, lv_color_hex(cols[random(0, 5)]), 0);
-  lv_obj_set_style_border_width(mg.jewel, 4, 0);
-  lv_obj_set_style_border_color(mg.jewel, lv_color_hex(0xFFFFFF), 0);
-  lv_obj_set_style_border_opa(mg.jewel, LV_OPA_60, 0);
+  mg.jewel = lv_img_create(mg.ov);
+  lv_img_set_src(mg.jewel, &fx_gem);
+  lv_img_set_antialias(mg.jewel, false);
+  lv_img_set_zoom(mg.jewel, 256 * 4);
+  lv_img_set_size_mode(mg.jewel, LV_IMG_SIZE_MODE_REAL);
+  lv_obj_set_pos(mg.jewel, 20 + random(0, 380), 70 + random(0, 180));
+  static const uint32_t tint[] = {0xFF4D7A, 0x38E1FF, 0x3DEBA0, 0xFFC93C, 0xA16BFF};
+  lv_obj_set_style_img_recolor(mg.jewel, lv_color_hex(tint[random(0, 5)]), 0);
+  lv_obj_set_style_img_recolor_opa(mg.jewel, LV_OPA_50, 0);
   lv_obj_add_flag(mg.jewel, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_add_event_cb(mg.jewel, mgJewelTap, LV_EVENT_PRESSED, nullptr);
 }
@@ -926,21 +980,31 @@ static void mgEnd() {
 }
 static void dgStartGems() {
   mg = MiniGame();
-  mg.ov = dgOpenOverlay();
-  dOv = nullptr;  // the mini game owns its overlay
-  lv_obj_t *hint = makeLabel(mg.ov, DL("Chạm vào ngọc thật nhanh!", "Tap the gems fast!"), F_LABEL, C_TEXT);
-  lv_obj_align(hint, LV_ALIGN_TOP_MID, 0, SB_H + 10);
-  mg.lblScore = makeLabel(mg.ov, "0", F_HEADING, C_OK);
-  lv_obj_align(mg.lblScore, LV_ALIGN_TOP_LEFT, 20, SB_H + 6);
-  mg.lblTime = makeLabel(mg.ov, "12", F_HEADING, C_WARN);
-  lv_obj_align(mg.lblTime, LV_ALIGN_TOP_RIGHT, -20, SB_H + 6);
+  mg.ov = lv_obj_create(dScr);
+  lv_obj_remove_style_all(mg.ov);
+  lv_obj_set_size(mg.ov, 480, 320);
+  lv_obj_add_flag(mg.ov, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_t *bg = lv_img_create(mg.ov);  // play on the garden
+  lv_img_set_src(bg, &sc_garden);
+  lv_obj_set_pos(bg, 0, 128);
+  lv_obj_set_style_bg_color(mg.ov, lv_color_hex(0x86D3F5), 0);
+  lv_obj_set_style_bg_opa(mg.ov, LV_OPA_COVER, 0);
+  lv_obj_t *top = pxPanel(mg.ov, 472, 40);
+  lv_obj_set_pos(top, 4, SB_H + 2);
+  lv_obj_t *hint = pxText(top, DL("Chạm vào ngọc thật nhanh!", "Tap the gems fast!"), F_LABEL);
+  lv_obj_center(hint);
+  mg.lblScore = pxText(top, "0", F_TITLE);
+  lv_obj_align(mg.lblScore, LV_ALIGN_LEFT_MID, 12, 0);
+  mg.lblTime = pxText(top, "12", F_TITLE);
+  lv_obj_set_style_text_color(mg.lblTime, lv_color_hex(0xD0582A), 0);
+  lv_obj_align(mg.lblTime, LV_ALIGN_RIGHT_MID, -12, 0);
   mg.startMs = millis();
   mg.nextSpawn = mg.startMs + 400;
   mg.t = lv_timer_create(mgTick, 60, nullptr);
 }
 
 // ---- mini game 2: dragon flight ----
-static const int FB_TOP = SB_H, FB_PX = 80, FB_W = 46, FB_GAP = 116, FB_SPACING = 180;
+static const int FB_TOP = SB_H, FB_PX = 70, FB_W = 46, FB_GAP = 138, FB_SPACING = 200;
 static void fbPlaceCol(int i) {
   int top = fb.gapY[i] - FB_GAP / 2, bot = fb.gapY[i] + FB_GAP / 2;
   lv_obj_set_pos(fb.col[i][0], fb.cx[i], FB_TOP - 12);
@@ -995,8 +1059,7 @@ static void fbTick(lv_timer_t *) {
       lv_label_set_text_fmt(fb.lbl, "%d", fb.score);
       soundPlay(SND(SND_TAP), 0, false);
     }
-    // hit box a little smaller than the sprite
-    int x0 = FB_PX + 10, x1 = FB_PX + pw - 8, y0 = (int)fb.y + 8, y1 = (int)fb.y + ph - 6;
+    int x0 = FB_PX + 14, x1 = FB_PX + pw - 14, y0 = (int)fb.y + 14, y1 = (int)fb.y + ph - 10;
     if (x1 > fb.cx[i] && x0 < fb.cx[i] + FB_W && (y0 < fb.gapY[i] - FB_GAP / 2 || y1 > fb.gapY[i] + FB_GAP / 2)) {
       fbEnd();
       return;
@@ -1008,8 +1071,8 @@ static void dgStartFlight() {
   fb.ov = lv_obj_create(dScr);
   lv_obj_remove_style_all(fb.ov);
   lv_obj_set_size(fb.ov, 480, 320);
-  lv_obj_set_style_bg_color(fb.ov, lv_color_hex(0x2B4C99), 0);
-  lv_obj_set_style_bg_grad_color(fb.ov, lv_color_hex(0x8EC0F0), 0);
+  lv_obj_set_style_bg_color(fb.ov, lv_color_hex(0x86D3F5), 0);
+  lv_obj_set_style_bg_grad_color(fb.ov, lv_color_hex(0xD4F0FA), 0);
   lv_obj_set_style_bg_grad_dir(fb.ov, LV_GRAD_DIR_VER, 0);
   lv_obj_set_style_bg_opa(fb.ov, LV_OPA_COVER, 0);
   lv_obj_add_flag(fb.ov, LV_OBJ_FLAG_CLICKABLE);
@@ -1029,25 +1092,28 @@ static void dgStartFlight() {
   for (int i = 0; i < 3; i++) {
     fb.cx[i] = 480 + i * FB_SPACING;
     fb.gapY[i] = random(FB_TOP + 70, 320 - 70);
-    for (int k = 0; k < 2; k++) {
-      lv_obj_t *c = shape(fb.ov, 0, 0, FB_W, 10, 0xF4F8FF, 14, LV_OPA_90);
+    for (int k = 0; k < 2; k++) {  // white pixel-cloud pillars with a brown outline
+      lv_obj_t *c = shape(fb.ov, 0, 0, FB_W, 10, 0xFFFFFF, 6, LV_OPA_COVER);
       lv_obj_set_style_border_width(c, 3, 0);
-      lv_obj_set_style_border_color(c, lv_color_hex(0xB8CCF0), 0);
+      lv_obj_set_style_border_color(c, lv_color_hex(PX_INK), 0);
       fb.col[i][k] = c;
     }
     fbPlaceCol(i);
   }
   fb.pl = lv_img_create(fb.ov);
   lv_img_set_src(fb.pl, &fx_flyer);
+  lv_img_set_antialias(fb.pl, false);
   lv_obj_set_pos(fb.pl, FB_PX, (int)fb.y);
   lv_obj_clear_flag(fb.pl, LV_OBJ_FLAG_CLICKABLE);
-  fb.lbl = makeLabel(fb.ov, "0", F_HEADING, C_TEXT);
+  fb.lbl = pxText(fb.ov, "0", F_HEADING);
   lv_obj_align(fb.lbl, LV_ALIGN_TOP_MID, 0, SB_H + 6);
-  fb.hint = makeLabel(fb.ov, DL("Chạm để vỗ cánh, bay qua khe giữa các cột mây!", "Tap to flap and fly through the gaps!"), F_LABEL, C_TEXT);
-  lv_obj_set_width(fb.hint, 300);
-  lv_label_set_long_mode(fb.hint, LV_LABEL_LONG_WRAP);
-  lv_obj_set_style_text_align(fb.hint, LV_TEXT_ALIGN_CENTER, 0);
+  fb.hint = pxPanel(fb.ov, 300, 70);
   lv_obj_align(fb.hint, LV_ALIGN_CENTER, 40, 0);
+  lv_obj_t *ht = pxText(fb.hint, DL("Chạm để vỗ cánh, bay qua khe giữa các cột mây!", "Tap to flap and fly through the gaps!"), F_LABEL);
+  lv_obj_set_width(ht, 270);
+  lv_label_set_long_mode(ht, LV_LABEL_LONG_WRAP);
+  lv_obj_set_style_text_align(ht, LV_TEXT_ALIGN_CENTER, 0);
+  lv_obj_center(ht);
   fb.t = lv_timer_create(fbTick, 30, nullptr);
 }
 
@@ -1055,26 +1121,24 @@ static void dgStartFlight() {
 static void dgOpenPlay() {
   if (!dgCanPlay()) return;
   lv_obj_t *ov = dgOpenOverlay();
-  lv_obj_t *card = makeCard(ov, 360, 200);
+  lv_obj_t *card = pxPanel(ov, 360, 196);
   lv_obj_center(card);
-  lv_obj_t *t = makeLabel(card, DL("Chơi trò gì?", "Which game?"), F_TITLE, C_TEXT);
-  lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 12);
-  char b1[64], b2[64];
+  lv_obj_t *t = pxText(card, DL("Chơi trò gì?", "Which game?"), F_TITLE);
+  lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 10);
+  static char b1[64], b2[64];
   snprintf(b1, sizeof(b1), isVi() ? "Bắt ngọc  (kỷ lục %d)" : "Gem catch  (best %d)", (int)dg.best);
   snprintf(b2, sizeof(b2), isVi() ? "Rồng bay  (kỷ lục %d)" : "Dragon flight  (best %d)", (int)dg.best2);
-  lv_obj_t *g1 = smallBtn(card, b1, C_ACCENT, [](lv_event_t *) {
+  lv_obj_t *g1 = pxButton(card, 320, 42, nullptr, b1, [](lv_event_t *) {
     dgCloseOverlay();
     dgStartGems();
-  }, nullptr, 320);
-  lv_obj_set_height(g1, 42);
-  lv_obj_align(g1, LV_ALIGN_TOP_MID, 0, 48);
-  lv_obj_t *g2 = smallBtn(card, b2, C_ACCENT2, [](lv_event_t *) {
+  }, nullptr);
+  lv_obj_align(g1, LV_ALIGN_TOP_MID, 0, 44);
+  lv_obj_t *g2 = pxButton(card, 320, 42, nullptr, b2, [](lv_event_t *) {
     dgCloseOverlay();
     dgStartFlight();
-  }, nullptr, 320);
-  lv_obj_set_height(g2, 42);
-  lv_obj_align(g2, LV_ALIGN_TOP_MID, 0, 96);
-  lv_obj_t *c = smallBtn(card, DL("Đóng", "Close"), C_MUTED, dgOverlayDone, nullptr, 120);
+  }, nullptr);
+  lv_obj_align(g2, LV_ALIGN_TOP_MID, 0, 92);
+  lv_obj_t *c = pxButton(card, 120, 34, nullptr, DL("Đóng", "Close"), dgOverlayDone, nullptr);
   lv_obj_align(c, LV_ALIGN_BOTTOM_MID, 0, -8);
 }
 
@@ -1092,23 +1156,23 @@ static void feedPick(lv_event_t *e) {
 static void dgOpenFeed() {
   if (dgBlockedAsleep()) return;
   lv_obj_t *ov = dgOpenOverlay();
-  lv_obj_t *card = makeCard(ov, 360, 230);
+  lv_obj_t *card = pxPanel(ov, 420, 200);
   lv_obj_center(card);
-  lv_obj_t *t = makeLabel(card, DL("Cho rồng ăn gì?", "What to feed?"), F_TITLE, C_TEXT);
-  lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 12);
-  const char *names[3] = {DL("Trái cây  (miễn phí)", "Fruit  (free)"), DL("Thịt nướng  (5 xu)", "Grilled meat  (5 coins)"),
-                          DL("Bánh ngọc  (15 xu)", "Jewel cake  (15 coins)")};
+  lv_obj_t *t = pxText(card, DL("Cho rồng ăn gì?", "What to feed?"), F_TITLE);
+  lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 10);
+  static const lv_img_dsc_t *foods[3] = {&fx_food0, &fx_food1, &fx_food2};
+  const char *names[3] = {DL("Trái cây\nmiễn phí", "Fruit\nfree"), DL("Thịt nướng\n5 xu", "Grilled meat\n5 coins"),
+                          DL("Bánh ngọc\n15 xu", "Jewel cake\n15 coins")};
   for (int i = 0; i < 3; i++) {
-    lv_obj_t *b = smallBtn(card, names[i], C_ACCENT, feedPick, (void *)(intptr_t)i, 320);
-    lv_obj_set_size(b, 320, 38);
-    lv_obj_align(b, LV_ALIGN_TOP_MID, 0, 48 + i * 44);
+    lv_obj_t *b = pxButton(card, 124, 104, foods[i], names[i], feedPick, (void *)(intptr_t)i);
+    lv_obj_set_style_text_align(lv_obj_get_child(b, 1), LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_pos(b, 12 + i * 132, 42);
   }
-  lv_obj_t *c = smallBtn(card, DL("Đóng", "Close"), C_MUTED, dgOverlayDone, nullptr, 120);
-  lv_obj_align(c, LV_ALIGN_BOTTOM_MID, 0, -8);
+  lv_obj_t *c = pxButton(card, 100, 30, nullptr, DL("Đóng", "Close"), dgOverlayDone, nullptr);
+  lv_obj_align(c, LV_ALIGN_BOTTOM_MID, 0, -6);
 }
 
-// ---- shop: room decorations ----
-static void dgOpenShop();
+// ---- shop: garden decorations ----
 static void shopBuy(lv_event_t *e) {
   int i = (int)(intptr_t)lv_event_get_user_data(e);
   if (dgBuyDecor(i)) {
@@ -1121,38 +1185,40 @@ static void shopBuy(lv_event_t *e) {
 }
 static void dgOpenShop() {
   lv_obj_t *ov = dgOpenOverlay();
-  lv_obj_t *card = makeCard(ov, 452, 276);
+  lv_obj_t *card = pxPanel(ov, 452, 276);
   lv_obj_align(card, LV_ALIGN_TOP_MID, 0, SB_H + 8);
-  lv_obj_t *t = makeLabel(card, DL("Trang trí phòng", "Decorate the room"), F_TITLE, C_TEXT);
-  lv_obj_set_pos(t, 16, 10);
-  lv_obj_t *cn = makeLabel(card, "", F_LABEL, C_WARN);
+  lv_obj_t *t = pxText(card, DL("Trang trí khu vườn", "Decorate the garden"), F_TITLE);
+  lv_obj_set_pos(t, 14, 8);
+  lv_obj_t *cn = pxText(card, "", F_LABEL);
   lv_label_set_text_fmt(cn, "%u %s", (unsigned)dg.coins, DL("xu", "coins"));
-  lv_obj_align(cn, LV_ALIGN_TOP_RIGHT, -16, 12);
+  lv_obj_align(cn, LV_ALIGN_TOP_RIGHT, -14, 10);
   for (int i = 0; i < 6; i++) {
     bool owned = dg.decor & (1 << i);
-    lv_obj_t *it = makeCard(card, 206, 62);
-    lv_obj_set_pos(it, 14 + (i % 2) * 218, 44 + (i / 2) * 68);
-    lv_obj_set_style_bg_color(it, C_BORDER, 0);
-    lv_obj_set_style_bg_color(it, C_ACCENT2, LV_STATE_PRESSED);
+    lv_obj_t *it = pxPanel(card, 206, 62);
+    lv_obj_set_pos(it, 12 + (i % 2) * 216, 40 + (i / 2) * 68);
+    lv_obj_set_style_bg_color(it, lv_color_hex(0xFFE9C4), LV_STATE_PRESSED);
     lv_obj_t *im = lv_img_create(it);
     lv_img_set_src(im, DECOR[i].img);
+    lv_img_set_antialias(im, false);
     const lv_img_dsc_t *d = DECOR[i].img;
     float z = 46.0f / d->header.h;
     if (56.0f / d->header.w < z) z = 56.0f / d->header.w;
     if (z > 1) z = 1;
     lv_img_set_zoom(im, (uint16_t)(256 * z));
-    lv_obj_align(im, LV_ALIGN_LEFT_MID, 32 - d->header.w / 2, 0);
-    lv_obj_t *n = makeLabel(it, isVi() ? DECOR[i].vi : DECOR[i].en, F_BODY, C_TEXT);
-    lv_obj_set_pos(n, 70, 10);
-    lv_obj_t *p = makeLabel(it, "", F_CAPTION, owned ? C_OK : C_WARN);
+    lv_obj_align(im, LV_ALIGN_LEFT_MID, 30 - d->header.w / 2, 0);
+    lv_obj_t *n = pxText(it, isVi() ? DECOR[i].vi : DECOR[i].en, F_BODY);
+    lv_obj_set_pos(n, 66, 8);
+    lv_obj_t *p = pxText(it, "", F_CAPTION);
     if (owned) lv_label_set_text(p, DL("Đã có", "Owned"));
     else lv_label_set_text_fmt(p, "%u %s", (unsigned)DECOR[i].price, DL("xu", "coins"));
-    lv_obj_set_pos(p, 70, 34);
-    if (!owned) lv_obj_add_event_cb(it, shopBuy, LV_EVENT_CLICKED, (void *)(intptr_t)i);
-    else lv_obj_clear_flag(it, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_style_text_color(p, lv_color_hex(owned ? 0x2E8B3E : 0xD0582A), 0);
+    lv_obj_set_pos(p, 66, 32);
+    if (!owned) {
+      lv_obj_add_flag(it, LV_OBJ_FLAG_CLICKABLE);
+      lv_obj_add_event_cb(it, shopBuy, LV_EVENT_CLICKED, (void *)(intptr_t)i);
+    }
   }
-  lv_obj_t *c = smallBtn(card, DL("Đóng", "Close"), C_MUTED, dgOverlayDone, nullptr, 120);
-  lv_obj_set_height(c, 30);
+  lv_obj_t *c = pxButton(card, 110, 30, nullptr, DL("Đóng", "Close"), dgOverlayDone, nullptr);
   lv_obj_align(c, LV_ALIGN_BOTTOM_MID, 0, -6);
 }
 
@@ -1160,31 +1226,33 @@ static void dgOpenShop() {
 static lv_obj_t *achDesc;
 static void dgOpenBadges() {
   lv_obj_t *ov = dgOpenOverlay();
-  lv_obj_t *card = makeCard(ov, 452, 276);
+  lv_obj_t *card = pxPanel(ov, 452, 276);
   lv_obj_align(card, LV_ALIGN_TOP_MID, 0, SB_H + 8);
   int got = 0;
   for (int i = 0; i < 12; i++) got += (dg.ach >> i) & 1;
-  lv_obj_t *t = makeLabel(card, "", F_TITLE, C_TEXT);
+  lv_obj_t *t = pxText(card, "", F_TITLE);
   lv_label_set_text_fmt(t, isVi() ? "Huy hiệu  %d/12" : "Badges  %d/12", got);
-  lv_obj_set_pos(t, 16, 10);
-  lv_obj_t *st = makeLabel(card, "", F_CAPTION, C_MUTED);
+  lv_obj_set_pos(t, 14, 8);
+  lv_obj_t *st = pxText(card, "", F_CAPTION);
   lv_label_set_text_fmt(st, isVi() ? "Chuỗi %u ngày  -  Thế hệ %u" : "Streak %u days  -  Generation %u", (unsigned)dg.streak, (unsigned)dg.gen);
-  lv_obj_align(st, LV_ALIGN_TOP_RIGHT, -16, 16);
+  lv_obj_align(st, LV_ALIGN_TOP_RIGHT, -14, 14);
   for (int i = 0; i < 12; i++) {
     bool on = dg.ach & (1 << i);
-    lv_obj_t *cell = lv_obj_create(card);
-    lv_obj_remove_style_all(cell);
-    lv_obj_set_size(cell, 104, 56);
-    lv_obj_set_pos(cell, 12 + (i % 4) * 108, 42 + (i / 4) * 60);
-    lv_obj_set_style_radius(cell, 12, 0);
-    lv_obj_set_style_bg_color(cell, C_BORDER, 0);
-    lv_obj_set_style_bg_opa(cell, LV_OPA_COVER, 0);
-    lv_obj_set_style_bg_color(cell, C_ACCENT2, LV_STATE_PRESSED);
-    lv_obj_t *medal = shape(cell, 38, 4, 28, 28, on ? 0xFFC93C : 0x3A4470);
-    lv_obj_set_style_border_width(medal, 3, 0);
-    lv_obj_set_style_border_color(medal, lv_color_hex(on ? 0xFFF0B0 : 0x4E5880), 0);
-    lv_obj_t *n = makeLabel(cell, isVi() ? ACH[i].vi : ACH[i].en, F_CAPTION, on ? C_TEXT : C_MUTED);
-    lv_obj_align(n, LV_ALIGN_BOTTOM_MID, 0, -3);
+    lv_obj_t *cell = pxPanel(card, 104, 56);
+    lv_obj_set_pos(cell, 10 + (i % 4) * 108, 40 + (i / 4) * 60);
+    lv_obj_set_style_border_width(cell, 2, 0);
+    lv_obj_add_flag(cell, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_style_bg_color(cell, lv_color_hex(0xFFE9C4), LV_STATE_PRESSED);
+    lv_obj_t *medal = lv_img_create(cell);
+    lv_img_set_src(medal, &ui_badge);
+    lv_img_set_antialias(medal, false);
+    lv_img_set_zoom(medal, 512);
+    lv_img_set_size_mode(medal, LV_IMG_SIZE_MODE_REAL);
+    lv_obj_align(medal, LV_ALIGN_TOP_MID, 0, 0);
+    if (!on) lv_obj_set_style_img_opa(medal, LV_OPA_30, 0);
+    lv_obj_t *n = pxText(cell, isVi() ? ACH[i].vi : ACH[i].en, F_CAPTION);
+    if (!on) lv_obj_set_style_text_opa(n, LV_OPA_50, 0);
+    lv_obj_align(n, LV_ALIGN_BOTTOM_MID, 0, -2);
     lv_obj_add_event_cb(
         cell,
         [](lv_event_t *e) {
@@ -1194,13 +1262,12 @@ static void dgOpenBadges() {
         },
         LV_EVENT_CLICKED, (void *)(intptr_t)i);
   }
-  achDesc = makeLabel(card, DL("Chạm vào huy hiệu để xem cách đạt được.", "Tap a badge to see how to earn it."), F_CAPTION, C_ACCENT);
+  achDesc = pxText(card, DL("Chạm vào huy hiệu để xem cách đạt được.", "Tap a badge to see how to earn it."), F_CAPTION);
   lv_obj_set_width(achDesc, 300);
   lv_label_set_long_mode(achDesc, LV_LABEL_LONG_DOT);
-  lv_obj_set_pos(achDesc, 16, 230);
-  lv_obj_t *c = smallBtn(card, DL("Đóng", "Close"), C_MUTED, dgOverlayDone, nullptr, 100);
-  lv_obj_set_height(c, 30);
-  lv_obj_align(c, LV_ALIGN_BOTTOM_RIGHT, -12, -6);
+  lv_obj_set_pos(achDesc, 14, 226);
+  lv_obj_t *c = pxButton(card, 96, 30, nullptr, DL("Đóng", "Close"), dgOverlayDone, nullptr);
+  lv_obj_align(c, LV_ALIGN_BOTTOM_RIGHT, -10, -6);
 }
 
 // ---- reincarnation (divine dragon only) ----
@@ -1237,21 +1304,16 @@ static void dgBtnCb(lv_event_t *e) {
   }
 }
 
-static lv_color_t dgBarColor(int i, float v) {
-  static const uint32_t cols[4] = {0xFFB84A, 0xFF6B9A, 0x38E1FF, 0x3DEBA0};
-  return v < 25 ? C_DANGER : lv_color_hex(cols[i]);
-}
-
 static void dgWalk() {
   if (dg.stage == ST_EGG || dg.sleeping || dgBusy() || millis() < dNextWalk) return;
   dNextWalk = millis() + 5000 + random(0, 5000);
-  int from = lv_obj_get_x(dBob), to = random(-55, 45);
+  int from = lv_obj_get_x(dBob), to = random(-140, 120);
   lv_anim_t a;
   lv_anim_init(&a);
   lv_anim_set_var(&a, dBob);
   lv_anim_set_exec_cb(&a, fxX);
   lv_anim_set_values(&a, from, to);
-  lv_anim_set_time(&a, 300 + abs(to - from) * 22);
+  lv_anim_set_time(&a, 300 + abs(to - from) * 18);
   lv_anim_set_path_cb(&a, lv_anim_path_ease_in_out);
   lv_anim_start(&a);
 }
@@ -1260,34 +1322,34 @@ static void dgRefreshUi() {
   if (!dScr || !dgOk) return;
   bool egg = dg.stage == ST_EGG;
   float vals[4] = {egg ? dg.energy : dg.satiety, dg.mood, dg.clean, dg.energy};
-  const char *names[4] = {egg ? DL("Độ ấm", "Warmth") : DL("No bụng", "Fed"), DL("Vui vẻ", "Mood"), DL("Sạch sẽ", "Clean"), DL("Năng lượng", "Energy")};
+  static const uint32_t cols[4] = {0xFFA94D, 0xFF6B9A, 0x4FB8FF, 0x7ED957};
   for (int i = 0; i < 4; i++) {
-    bool show = !egg || i == 0;
-    if (show) {
-      lv_obj_clear_flag(dBarLbl[i], LV_OBJ_FLAG_HIDDEN);
-      lv_obj_clear_flag(dBars[i], LV_OBJ_FLAG_HIDDEN);
-    } else {
-      lv_obj_add_flag(dBarLbl[i], LV_OBJ_FLAG_HIDDEN);
-      lv_obj_add_flag(dBars[i], LV_OBJ_FLAG_HIDDEN);
-    }
-    lv_label_set_text_fmt(dBarLbl[i], "%s  %d", names[i], (int)vals[i]);
+    lv_obj_t *row = lv_obj_get_parent(dBars[i]);
+    if (!egg || i == 0) lv_obj_clear_flag(row, LV_OBJ_FLAG_HIDDEN);
+    else lv_obj_add_flag(row, LV_OBJ_FLAG_HIDDEN);
     lv_bar_set_value(dBars[i], (int)vals[i], LV_ANIM_OFF);
-    lv_obj_set_style_bg_color(dBars[i], dgBarColor(i, vals[i]), LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(dBars[i], lv_color_hex(vals[i] < 25 ? 0xE5484D : cols[i]), LV_PART_INDICATOR);
   }
-  lv_label_set_text_fmt(dCoins, "%u %s", (unsigned)dg.coins, DL("xu", "coins"));
-  lv_label_set_text_fmt(dStageLbl, "%s  -  %s%s", dgName().c_str(), dgStageName(dg.stage), dg.gen > 1 ? (String("  (G") + dg.gen + ")").c_str() : "");
+  lv_label_set_text_fmt(dCoins, "%u", (unsigned)dg.coins);
+  lv_label_set_text(dName, dgName().c_str());
+  lv_label_set_text_fmt(dStageLbl, "%s%s", dgStageName(dg.stage), dg.gen > 1 ? (String(" - G") + dg.gen).c_str() : "");
+  int moodLv = dg.mood < 30 ? 0 : dg.mood < 65 ? 1 : 2;
+  if (moodLv != dFaceLv) {
+    dFaceLv = moodLv;
+    lv_img_set_src(dFace, moodLv == 2 ? &fc_happy : moodLv == 1 ? &fc_ok : &fc_sad);
+  }
   if (dg.stage == ST_DIVINE) {
     lv_bar_set_value(dXpBar, 100, LV_ANIM_OFF);
-    lv_label_set_text(dXpTxt, DL("Đã đạt cấp cao nhất", "Maximum level reached"));
+    lv_label_set_text(dXpTxt, DL("Cấp cao nhất", "Max level"));
     lv_obj_clear_flag(dReinc, LV_OBJ_FLAG_HIDDEN);
   } else {
     int pct = (int)(dg.growth * 100 / dgNeed());
     lv_bar_set_value(dXpBar, pct > 100 ? 100 : pct, LV_ANIM_OFF);
-    lv_label_set_text_fmt(dXpTxt, "%s: %d%%", egg ? DL("Ấp trứng", "Hatching") : DL("Tiến hóa", "Evolution"), pct);
+    lv_label_set_text_fmt(dXpTxt, "%s %d%%", egg ? DL("Ấp trứng", "Hatching") : DL("Tiến hóa", "Evolution"), pct);
     lv_obj_add_flag(dReinc, LV_OBJ_FLAG_HIDDEN);
   }
 
-  // message line
+  // speech bubble
   String msg;
   uint32_t ms = millis();
   if (ms < dgToastUntil) msg = dgToast;
@@ -1300,27 +1362,37 @@ static void dgRefreshUi() {
   else if (dg.mood < 25) msg = DL("Rồng buồn, chơi với rồng đi!", "Feeling sad - play with it!");
   else if (dgNight() && dg.energy < 60) msg = DL("Khuya rồi, cho rồng đi ngủ nhé.", "It's late, time for bed.");
   else msg = DL("Xoa vào rồng để vuốt ve nhé!", "Rub the dragon to pet it!");
-  lv_label_set_text(dMsg, msg.c_str());
+  if (strcmp(msg.c_str(), lv_label_get_text(dBubbleLbl)) != 0) {
+    lv_point_t sz;
+    lv_txt_get_size(&sz, msg.c_str(), F_BODY, 0, 0, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
+    lv_obj_set_width(dBubbleLbl, sz.x > 250 ? 250 : LV_SIZE_CONTENT);
+    lv_label_set_text(dBubbleLbl, msg.c_str());
+  }
 
-  // buttons
-  const char *bl[5] = {egg ? DL("Ấp", "Warm") : DL("Ăn", "Feed"), DL("Chơi", "Play"), DL("Tắm", "Bath"), dg.sleeping ? DL("Dậy", "Wake") : DL("Ngủ", "Sleep"), DL("Thuốc", "Medicine")};
+  // buttons (icons only): feed / play / bath / sleep (a bolt to wake up) / medicine; the egg only has "warm"
+  static const lv_img_dsc_t *icons[5] = {&ui_food, &ui_play, &ui_bath, &ui_sleep, &ui_med};
   for (int i = 0; i < 5; i++) {
-    lv_label_set_text(lv_obj_get_child(dBtns[i], 0), bl[i]);
+    const lv_img_dsc_t *ic = egg && i == 0 ? &st_heart : (i == 3 && dg.sleeping) ? &st_energy : icons[i];
+    lv_obj_t *im = lv_obj_get_child(dBtns[i], 0);
+    if (lv_img_get_src(im) != ic) lv_img_set_src(im, ic);
     if (egg && i > 0) lv_obj_add_flag(dBtns[i], LV_OBJ_FLAG_HIDDEN);
     else lv_obj_clear_flag(dBtns[i], LV_OBJ_FLAG_HIDDEN);
   }
-  lv_obj_set_width(dBtns[0], egg ? 464 : 88);
+  lv_obj_set_width(dBtns[0], egg ? 466 : 90);
 
-  // room and dragon, redrawn only when something visible changed
+  // garden and dragon, redrawn only when something visible changed
   dgDrawRoom();
-  int moodLv = dg.mood < 30 ? 0 : dg.mood < 65 ? 1 : 2;
   int eggStep = egg ? (int)(dg.growth * 100 / dgNeed()) / 20 : 0;
   int sig = dg.stage | (dg.sleeping << 4) | (dg.sick << 5) | (moodLv << 6) | (eggStep << 9) | ((egg && dg.energy < 30) << 12);
   if (sig != dSig) {
     dSig = sig;
     lv_obj_clean(dBob);
-    if (egg) dgDrawEgg(dBob);
-    else dgDrawDragon(dBob, dg.stage, dg.sleeping, dg.sick, moodLv);
+    if (egg) {
+      dgDrawEgg(dBob);
+      blinkSet(dBlink, nullptr, 0, 0);
+    } else {
+      blinkSet(dBlink, dgDrawDragon(dBob, dg.stage, dg.sleeping, dg.sick, moodLv), dg.stage, dgExpr(dg.sleeping, dg.sick, moodLv));
+    }
   }
   if (dgCoinFound) {
     dgCoinFound = false;
@@ -1340,53 +1412,106 @@ static void dgUiTick(lv_timer_t *) { dgRefreshUi(); }
 static void animBob(void *o, int32_t v) { lv_obj_set_y((lv_obj_t *)o, v); }
 
 static void pageDragon() {
-  lv_obj_t *c;
-  lv_obj_t *s = pageBegin("Dragon", &c);
-  lv_obj_del(c);
+  lv_obj_t *s = lv_obj_create(nullptr);
+  lv_obj_remove_style_all(s);
+  lv_obj_set_style_bg_color(s, lv_color_hex(0xF6E7C8), 0);  // warm parchment behind the panels
+  lv_obj_set_style_bg_opa(s, LV_OPA_COVER, 0);
+  lv_obj_clear_flag(s, LV_OBJ_FLAG_SCROLLABLE);
   if (!dgOk) {
-    lv_obj_t *card = makeCard(s, 456, 120);
+    lv_obj_t *back = pxButton(s, 52, 36, nullptr, LV_SYMBOL_LEFT, goBack, nullptr);
+    lv_obj_set_pos(back, 8, SB_H + 6);
+    lv_obj_t *card = pxPanel(s, 456, 130);
     lv_obj_set_pos(card, 12, SB_H + 74);
-    lv_obj_t *t = makeLabel(card, DL("Cần thẻ nhớ microSD", "A microSD card is required"), F_TITLE, C_WARN);
-    lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 18);
-    lv_obj_t *h = makeLabel(card, DL("Dữ liệu rồng được lưu trên thẻ nhớ. Hãy cắm thẻ rồi khởi động lại thiết bị.", "The dragon is saved on the card. Insert one and restart the device."), F_BODY, C_MUTED);
+    lv_obj_t *t = pxText(card, DL("Cần thẻ nhớ microSD", "A microSD card is required"), F_TITLE);
+    lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 16);
+    lv_obj_t *h = pxText(card, DL("Dữ liệu rồng được lưu trên thẻ nhớ. Hãy cắm thẻ rồi khởi động lại thiết bị.", "The dragon is saved on the card. Insert one and restart the device."), F_BODY);
     lv_obj_set_width(h, 410);
     lv_label_set_long_mode(h, LV_LABEL_LONG_WRAP);
     lv_obj_set_style_text_align(h, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_align(h, LV_ALIGN_TOP_MID, 0, 58);
+    lv_obj_align(h, LV_ALIGN_TOP_MID, 0, 56);
     pageShow(s);
     return;
   }
   dScr = s;
-  dSig = dRoomSig = -1;
+  dSig = dRoomSig = dFaceLv = -1;
   dOv = nullptr;
   mg = MiniGame();
   fb = Flight();
   dNextWalk = millis() + 3000;
+  const int TOP = SB_H + 3;
 
-  dCoins = makeLabel(s, "", F_LABEL, C_WARN);
-  lv_obj_align(dCoins, LV_ALIGN_TOP_RIGHT, -14, SB_H + 14);
-  lv_obj_t *bBadge = smallBtn(s, DL("Huy hiệu", "Badges"), C_ACCENT2, [](lv_event_t *) {
-    if (!dgBusy()) dgOpenBadges();
-  }, nullptr, 88);
-  lv_obj_align(bBadge, LV_ALIGN_TOP_RIGHT, -96, SB_H + 8);
-  lv_obj_t *bShop = smallBtn(s, DL("Phòng", "Room"), C_ACCENT, [](lv_event_t *) {
+  // header: [back | name, stage]  [mood face | evolution bar]  [coins | shop | badges]
+  lv_obj_t *pA = pxPanel(s, 156, 40);  // the whole panel goes back home, not just the arrow
+  lv_obj_add_flag(pA, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_set_style_bg_color(pA, lv_color_hex(0xFFE9C4), LV_STATE_PRESSED);
+  lv_obj_set_style_bg_img_opa(pA, LV_OPA_TRANSP, LV_STATE_PRESSED);
+  lv_obj_add_event_cb(pA, goBack, LV_EVENT_CLICKED, nullptr);
+  lv_obj_set_pos(pA, 4, TOP);
+  lv_obj_t *back = pxButton(pA, 44, 34, nullptr, LV_SYMBOL_LEFT, goBack, nullptr);  // big, easy to hit
+  lv_obj_set_style_border_width(back, 2, 0);
+  lv_obj_set_style_text_font(lv_obj_get_child(back, 0), F_TITLE, 0);
+  lv_obj_set_ext_click_area(back, 14);
+  lv_obj_align(back, LV_ALIGN_LEFT_MID, -2, 0);
+  dName = pxText(pA, "", F_LABEL);
+  lv_obj_set_width(dName, 100);
+  lv_label_set_long_mode(dName, LV_LABEL_LONG_DOT);
+  lv_obj_set_pos(dName, 46, 0);
+  dStageLbl = pxText(pA, "", F_CAPTION);
+  lv_obj_set_width(dStageLbl, 102);
+  lv_label_set_long_mode(dStageLbl, LV_LABEL_LONG_DOT);
+  lv_obj_set_pos(dStageLbl, 46, 18);
+
+  lv_obj_t *pB = pxPanel(s, 164, 40);
+  lv_obj_set_pos(pB, 164, TOP);
+  dFace = lv_img_create(pB);
+  lv_img_set_antialias(dFace, false);
+  lv_img_set_src(dFace, &fc_happy);
+  lv_img_set_zoom(dFace, 512);
+  lv_img_set_size_mode(dFace, LV_IMG_SIZE_MODE_REAL);
+  lv_obj_align(dFace, LV_ALIGN_LEFT_MID, 0, 0);
+  dXpTxt = pxText(pB, "", F_CAPTION);
+  lv_obj_set_pos(dXpTxt, 38, 0);
+  dXpBar = lv_bar_create(pB);
+  lv_obj_set_size(dXpBar, 114, 10);
+  lv_obj_set_pos(dXpBar, 38, 19);
+  lv_bar_set_range(dXpBar, 0, 100);
+  lv_obj_set_style_bg_color(dXpBar, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(dXpBar, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_border_width(dXpBar, 1, LV_PART_MAIN);
+  lv_obj_set_style_border_color(dXpBar, lv_color_hex(PX_INK), LV_PART_MAIN);
+  lv_obj_set_style_radius(dXpBar, 3, LV_PART_MAIN);
+  lv_obj_set_style_radius(dXpBar, 2, LV_PART_INDICATOR);
+  lv_obj_set_style_bg_color(dXpBar, lv_color_hex(0xFF8FB8), LV_PART_INDICATOR);
+
+  lv_obj_t *pC = pxPanel(s, 148, 40);
+  lv_obj_set_pos(pC, 332, TOP);
+  lv_obj_t *coin = lv_img_create(pC);
+  lv_img_set_src(coin, &ui_coin);
+  lv_img_set_antialias(coin, false);
+  lv_img_set_zoom(coin, 384);
+  lv_img_set_size_mode(coin, LV_IMG_SIZE_MODE_REAL);
+  lv_obj_align(coin, LV_ALIGN_LEFT_MID, 0, 0);
+  dCoins = pxText(pC, "", F_LABEL);
+  lv_obj_align(dCoins, LV_ALIGN_LEFT_MID, 28, 0);
+  lv_obj_t *bShop = pxButton(pC, 32, 30, &ui_shop, nullptr, [](lv_event_t *) {
     if (!dgBusy()) dgOpenShop();
-  }, nullptr, 76);
-  lv_obj_align(bShop, LV_ALIGN_TOP_RIGHT, -190, SB_H + 8);
+  }, nullptr);
+  lv_obj_set_style_border_width(bShop, 2, 0);
+  lv_obj_align(bShop, LV_ALIGN_RIGHT_MID, -38, 0);
+  lv_obj_t *bBadge = pxButton(pC, 32, 30, &ui_badge, nullptr, [](lv_event_t *) {
+    if (!dgBusy()) dgOpenBadges();
+  }, nullptr);
+  lv_obj_set_style_border_width(bBadge, 2, 0);
+  lv_obj_align(bBadge, LV_ALIGN_RIGHT_MID, -2, 0);
 
-  dStageLbl = makeLabel(s, "", F_LABEL, C_ACCENT);
-  lv_obj_align(dStageLbl, LV_ALIGN_TOP_LEFT, 14, SB_H + 48);
-  dReinc = smallBtn(s, DL("Luân hồi", "Rebirth"), C_ACCENT2, askReincarnate, nullptr, 96);
-  lv_obj_set_height(dReinc, 26);
-  lv_obj_align(dReinc, LV_ALIGN_TOP_RIGHT, -170, SB_H + 44);
-  lv_obj_add_flag(dReinc, LV_OBJ_FLAG_HIDDEN);
-
-  dBox = makeCard(s, DG_BOX_W, DG_BOX_H);
-  lv_obj_set_pos(dBox, 10, 92);
-  lv_obj_set_style_bg_grad_dir(dBox, LV_GRAD_DIR_VER, 0);
-  lv_obj_set_style_radius(dBox, 18, 0);
+  // scene
+  dBox = lv_obj_create(s);
+  lv_obj_remove_style_all(dBox);
+  lv_obj_set_size(dBox, DG_BOX_W, DG_BOX_H);
+  lv_obj_set_pos(dBox, 4, TOP + 43);
+  lv_obj_set_style_radius(dBox, 6, 0);
   lv_obj_set_style_clip_corner(dBox, true, 0);
-  lv_obj_set_style_border_width(dBox, 0, 0);
+  lv_obj_clear_flag(dBox, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_add_flag(dBox, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_add_event_cb(dBox, dgBoxEvent, LV_EVENT_ALL, nullptr);
   dRoom = lv_obj_create(dBox);
@@ -1396,65 +1521,91 @@ static void pageDragon() {
   dBob = lv_obj_create(dBox);
   lv_obj_remove_style_all(dBob);
   lv_obj_set_size(dBob, DG_BOX_W, DG_BOX_H);
-  lv_obj_set_pos(dBob, 0, 0);
   lv_obj_clear_flag(dBob, LV_OBJ_FLAG_CLICKABLE);
   dFx = lv_obj_create(dBox);
   lv_obj_remove_style_all(dFx);
   lv_obj_set_size(dFx, DG_BOX_W, DG_BOX_H);
   lv_obj_clear_flag(dFx, LV_OBJ_FLAG_CLICKABLE);
-  lv_anim_t a;  // gentle breathing
+  lv_anim_t a;  // breathing: a 2-pixel hop, in pixel steps
   lv_anim_init(&a);
   lv_anim_set_var(&a, dBob);
   lv_anim_set_exec_cb(&a, animBob);
   lv_anim_set_values(&a, 0, -4);
-  lv_anim_set_time(&a, 1400);
-  lv_anim_set_playback_time(&a, 1400);
+  lv_anim_set_time(&a, 1200);
+  lv_anim_set_playback_time(&a, 1200);
   lv_anim_set_repeat_count(&a, LV_ANIM_REPEAT_INFINITE);
-  lv_anim_set_path_cb(&a, lv_anim_path_ease_in_out);
+  lv_anim_set_path_cb(&a, lv_anim_path_step);
   lv_anim_start(&a);
+  lv_obj_t *frame = lv_obj_create(s);  // pixel frame drawn over the scene edges
+  lv_obj_remove_style_all(frame);
+  lv_obj_set_size(frame, DG_BOX_W, DG_BOX_H);
+  lv_obj_set_pos(frame, 4, TOP + 43);
+  lv_obj_set_style_radius(frame, 6, 0);
+  lv_obj_set_style_border_width(frame, 3, 0);
+  lv_obj_set_style_border_color(frame, lv_color_hex(PX_EDGE), 0);
+  lv_obj_clear_flag(frame, LV_OBJ_FLAG_CLICKABLE);
 
+  // needs, top-left inside the scene
+  lv_obj_t *stats = pxPanel(dBox, 116, 80);
+  lv_obj_set_pos(stats, 8, 8);
+  lv_obj_set_style_bg_opa(stats, LV_OPA_80, 0);
+  lv_obj_set_style_border_width(stats, 2, 0);
+  lv_obj_set_flex_flow(stats, LV_FLEX_FLOW_COLUMN);
+  lv_obj_set_style_pad_all(stats, 5, 0);
+  lv_obj_set_style_pad_row(stats, 1, 0);
+  static const lv_img_dsc_t *sicons[4] = {&st_food, &st_heart, &st_clean, &st_energy};
   for (int i = 0; i < 4; i++) {
-    int y = 92 + i * 34;
-    dBarLbl[i] = makeLabel(s, "", F_CAPTION, C_MUTED);
-    lv_obj_set_pos(dBarLbl[i], 314, y);
-    dBars[i] = lv_bar_create(s);
-    lv_obj_set_size(dBars[i], 154, 9);
-    lv_obj_set_pos(dBars[i], 314, y + 18);
+    lv_obj_t *row = lv_obj_create(stats);
+    lv_obj_remove_style_all(row);
+    lv_obj_set_size(row, 104, 16);
+    lv_obj_clear_flag(row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_t *ic = lv_img_create(row);
+    lv_img_set_src(ic, sicons[i]);
+    lv_img_set_antialias(ic, false);
+    lv_obj_align(ic, LV_ALIGN_LEFT_MID, 0, 0);
+    dBars[i] = lv_bar_create(row);
+    lv_obj_set_size(dBars[i], 80, 8);
+    lv_obj_align(dBars[i], LV_ALIGN_LEFT_MID, 20, 0);
     lv_bar_set_range(dBars[i], 0, 100);
-    lv_obj_set_style_bg_color(dBars[i], C_BORDER, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(dBars[i], lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(dBars[i], LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_border_width(dBars[i], 1, LV_PART_MAIN);
+    lv_obj_set_style_border_color(dBars[i], lv_color_hex(PX_INK), LV_PART_MAIN);
+    lv_obj_set_style_radius(dBars[i], 2, LV_PART_MAIN);
+    lv_obj_set_style_radius(dBars[i], 1, LV_PART_INDICATOR);
   }
 
-  dXpBar = lv_bar_create(s);
-  lv_obj_set_size(dXpBar, 292, 7);
-  lv_obj_set_pos(dXpBar, 10, 238);
-  lv_bar_set_range(dXpBar, 0, 100);
-  lv_obj_set_style_bg_color(dXpBar, C_BORDER, LV_PART_MAIN);
-  lv_obj_set_style_bg_color(dXpBar, C_ACCENT2, LV_PART_INDICATOR);
-  dXpTxt = makeLabel(s, "", F_CAPTION, C_MUTED);
-  lv_obj_set_pos(dXpTxt, 314, 232);
+  // speech bubble, top centre of the scene
+  dBubble = lv_obj_create(dBox);
+  lv_obj_remove_style_all(dBubble);
+  lv_obj_set_size(dBubble, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+  lv_obj_set_style_bg_color(dBubble, lv_color_hex(0xFFFFFF), 0);
+  lv_obj_set_style_bg_opa(dBubble, LV_OPA_COVER, 0);
+  lv_obj_set_style_radius(dBubble, 6, 0);
+  lv_obj_set_style_border_width(dBubble, 2, 0);
+  lv_obj_set_style_border_color(dBubble, lv_color_hex(PX_INK), 0);
+  lv_obj_set_style_pad_hor(dBubble, 8, 0);
+  lv_obj_set_style_pad_ver(dBubble, 4, 0);
+  lv_obj_clear_flag(dBubble, LV_OBJ_FLAG_CLICKABLE);
+  dBubbleLbl = pxText(dBubble, "", F_BODY);
+  lv_label_set_long_mode(dBubbleLbl, LV_LABEL_LONG_SCROLL_CIRCULAR);
+  lv_obj_align(dBubble, LV_ALIGN_TOP_MID, 40, 10);
 
-  dMsg = makeLabel(s, "", F_BODY, C_TEXT);
-  lv_obj_set_width(dMsg, 456);
-  lv_label_set_long_mode(dMsg, LV_LABEL_LONG_DOT);
-  lv_obj_set_pos(dMsg, 14, 250);
+  dReinc = pxButton(dBox, 104, 32, nullptr, DL("Luân hồi", "Rebirth"), askReincarnate, nullptr);
+  lv_obj_align(dReinc, LV_ALIGN_TOP_RIGHT, -8, 8);
+  lv_obj_add_flag(dReinc, LV_OBJ_FLAG_HIDDEN);
 
+  // actions
   for (int i = 0; i < 5; i++) {
-    lv_obj_t *b = lv_btn_create(s);
-    lv_obj_set_size(b, 88, 40);
-    lv_obj_set_pos(b, 8 + i * 94, 275);
-    lv_obj_set_style_radius(b, 14, 0);
-    lv_obj_set_style_bg_color(b, C_CARD, 0);
-    lv_obj_set_style_border_width(b, 1, 0);
-    lv_obj_set_style_border_color(b, i == 4 ? C_DANGER : C_ACCENT, 0);
-    lv_obj_set_style_shadow_width(b, 0, 0);
-    lv_obj_set_style_bg_color(b, C_BORDER, LV_STATE_PRESSED);
-    lv_obj_t *l = makeLabel(b, "", F_BODY, i == 4 ? C_DANGER : C_TEXT);
-    lv_obj_center(l);
-    lv_obj_add_event_cb(b, dgBtnCb, LV_EVENT_CLICKED, (void *)(intptr_t)i);
+    lv_obj_t *b = pxButton(s, 90, 52, &ui_food, nullptr, dgBtnCb, (void *)(intptr_t)i);
+    lv_img_set_zoom(lv_obj_get_child(b, 0), 256 * 3);  // icon only: 48 px
+    lv_obj_set_pos(b, 7 + i * 94, 320 - 54);
     dBtns[i] = b;
   }
 
   pageTimer(s, dgUiTick, 500);
+  dBlink = Blinker();
+  pageTimer(s, [](lv_timer_t *) { blinkTick(dBlink); }, 60);
   lv_obj_add_event_cb(
       s,
       [](lv_event_t *) {

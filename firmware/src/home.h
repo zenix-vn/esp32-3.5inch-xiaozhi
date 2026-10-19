@@ -4,6 +4,7 @@
 // drifting over the background. Included by main.cpp after dragon.h / statusbar.h / ambient.h.
 #include "lunar.h"
 #include "quotes.h"
+#include "hd_img.h"
 
 static const char DEG[] = {(char)0xC2, (char)0xB0, 0};  // UTF-8 degree sign
 static const char *const DAYS_VI[] = {"Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"};
@@ -116,6 +117,7 @@ static bool listening = false;
 static uint32_t bannerUntil = 0;
 static int hPetSig = -1, wIconKey = -1, fxKind = -1, quoteDay = -1;
 
+
 // ---------- weather effects ----------
 enum { FX_NONE, FX_RAIN, FX_SNOW, FX_STARS, FX_SUN, FX_FOG };
 static void fxStart(int kind) {
@@ -170,6 +172,71 @@ static int fxWanted() {
 }
 
 // ---------- companion ----------
+#define HD_INK 0x1E2140
+static const lv_img_dsc_t *const HD_SPRITES[8] = {&hd_baby, &hd_lv1, &hd_lv2, &hd_lv3, &hd_adult, &hd_king, &hd_emperor, &hd_divine};
+static const lv_point_t HD_CRACK1[5] = {{58, 70}, {67, 79}, {76, 69}, {86, 80}, {96, 71}};
+static const lv_point_t HD_CRACK2[5] = {{62, 104}, {71, 95}, {80, 106}, {90, 96}, {100, 105}};
+
+struct HdFace {  // open eyes / closed eyes, swapped for a moment every few seconds
+  lv_obj_t *open[2] = {nullptr, nullptr}, *closed[2] = {nullptr, nullptr};
+  uint32_t next = 0, until = 0;
+};
+static HdFace hFace;
+
+static void hdBlinkTick() {
+  if (!hFace.open[0]) return;
+  uint32_t now = millis();
+  bool close = !hFace.until && now >= hFace.next;
+  if (!close && !(hFace.until && now >= hFace.until)) return;
+  for (int i = 0; i < 2; i++) {
+    if (close) {
+      lv_obj_add_flag(hFace.open[i], LV_OBJ_FLAG_HIDDEN);
+      lv_obj_clear_flag(hFace.closed[i], LV_OBJ_FLAG_HIDDEN);
+    } else {
+      lv_obj_clear_flag(hFace.open[i], LV_OBJ_FLAG_HIDDEN);
+      lv_obj_add_flag(hFace.closed[i], LV_OBJ_FLAG_HIDDEN);
+    }
+  }
+  if (close) {
+    hFace.until = now + 150;
+  } else {
+    hFace.until = 0;
+    hFace.next = now + 2200 + random(0, 3000);
+  }
+}
+
+static lv_obj_t *hdImg(lv_obj_t *p, const lv_img_dsc_t *src, int x, int y) {
+  lv_obj_t *img = lv_img_create(p);
+  lv_img_set_src(img, src);
+  lv_obj_set_pos(img, x, y);
+  lv_obj_clear_flag(img, LV_OBJ_FLAG_CLICKABLE);
+  return img;
+}
+
+static lv_obj_t *hdArc(lv_obj_t *p, int cx, int cy, int r, int a0, int a1, int w, uint32_t col) {
+  lv_obj_t *a = lv_arc_create(p);
+  lv_obj_remove_style_all(a);
+  lv_obj_set_size(a, r * 2, r * 2);
+  lv_obj_set_pos(a, cx - r, cy - r);
+  lv_arc_set_bg_angles(a, a0, a1);
+  lv_arc_set_angles(a, a0, a0);
+  lv_obj_set_style_arc_width(a, w, LV_PART_MAIN);
+  lv_obj_set_style_arc_color(a, lv_color_hex(col), LV_PART_MAIN);
+  lv_obj_set_style_arc_opa(a, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_arc_rounded(a, true, LV_PART_MAIN);
+  lv_obj_clear_flag(a, LV_OBJ_FLAG_CLICKABLE);
+  return a;
+}
+
+static lv_obj_t *hdLine(lv_obj_t *p, const lv_point_t *pts, int n) {
+  lv_obj_t *l = lv_line_create(p);
+  lv_line_set_points(l, pts, n);
+  lv_obj_set_style_line_width(l, 3, 0);
+  lv_obj_set_style_line_color(l, lv_color_hex(HD_INK), 0);
+  lv_obj_set_style_line_rounded(l, true, 0);
+  return l;
+}
+
 static void homeDrawPet() {
   int moodLv = dg.mood < 30 ? 0 : dg.mood < 65 ? 1 : 2;
   int sig = !dgOk ? 1 << 20 : dg.stage | (dg.sleeping << 4) | (dg.sick << 5) | (moodLv << 6) | ((dg.stage == ST_EGG && dg.energy < 30) << 8);
@@ -189,11 +256,53 @@ static void homeDrawPet() {
     }
     return;
   }
+  hFace = HdFace();
   if (dg.stage == ST_EGG) {
-    dgDrawEgg(hPetBob, 236, 196, 1.3f, false);
+    int prog = dgNeed() > 0 ? (int)(dg.growth * 100 / dgNeed()) : 0;
+    lv_obj_t *img = hdImg(hPetBob, dg.energy < 30 ? &hd_egg_cold : &hd_egg, 38, 47);
+    if (prog > 40) hdLine(img, HD_CRACK1, 5);
+    if (prog > 80) hdLine(img, HD_CRACK2, 5);
+    return;
+  }
+  // Smooth 160x160 body (tools/gen_hd.py) with the face drawn on top, so it can change expression and blink.
+  int ex = dgExpr(dg.sleeping, dg.sick, moodLv);
+  lv_obj_t *img = hdImg(hPetBob, HD_SPRITES[dg.stage - 1], 38, 36);
+  if (dg.sick) {
+    lv_obj_set_style_img_recolor(img, lv_color_hex(0x7FA060), 0);
+    lv_obj_set_style_img_recolor_opa(img, LV_OPA_30, 0);
+  }
+  for (int i = 0; i < 2; i++) {
+    int ex0 = i ? 102 : 58, bx = i ? 110 : 34;
+    shape(img, bx, 72, 16, 8, 0xFF7FA0, LV_RADIUS_CIRCLE, ex == EX_SAD ? LV_OPA_30 : LV_OPA_60);  // blush
+    if (ex == EX_HAPPY) {
+      hdArc(img, ex0, 64, 8, 200, 340, 4, HD_INK);  // ^ ^
+    } else if (ex == EX_SLEEP) {
+      hdArc(img, ex0, 54, 8, 20, 160, 4, HD_INK);   // closed
+    } else {
+      lv_obj_t *e = shape(img, ex0 - 7, 52, 14, 17, HD_INK, 7);
+      shape(e, 2, 2, 6, 6, 0xFFFFFF);
+      shape(e, 8, 11, 3, 3, 0xB9A8FF);
+      hFace.open[i] = e;
+      hFace.closed[i] = hdArc(img, ex0, 56, 8, 20, 160, 4, HD_INK);
+      lv_obj_add_flag(hFace.closed[i], LV_OBJ_FLAG_HIDDEN);
+    }
+  }
+  if (ex == EX_HAPPY) {  // open mouth with a tongue
+    lv_obj_t *m = shape(img, 72, 71, 16, 11, 0x6A2340, 6);
+    lv_obj_set_style_clip_corner(m, true, 0);
+    shape(m, 3, 6, 10, 6, 0xFF7F9A, 3);
+  } else if (ex == EX_SAD) {
+    hdArc(img, 80, 82, 7, 225, 315, 3, HD_INK);
+    shape(img, 50, 70, 6, 9, 0x5AB8FF, 3);  // tear
+  } else if (ex == EX_SLEEP) {
+    shape(img, 77, 73, 6, 6, 0x6A2340);
   } else {
-    float z = 150.0f / DRAGON_SPRITES[dg.stage - 1]->header.h;  // the home companion is always ~150 px tall
-    dgDrawDragon(hPetBob, dg.stage, dg.sleeping, dg.sick, moodLv, 236, 196, z > 1.7f ? 1.7f : z, false);
+    hdArc(img, 80, 71, 7, 30, 150, 3, HD_INK);
+  }
+  if (hFace.open[0]) hFace.next = millis() + 1500 + random(0, 2500);
+  if (dg.sleeping) {
+    lv_obj_t *z = makeLabel(hPetBob, "Z z", F_TITLE, lv_color_hex(0x5A6FD8));
+    lv_obj_set_pos(z, 158, 44);
   }
 }
 
@@ -374,6 +483,9 @@ static void buildHome(lv_obj_t *tile) {
   lv_obj_set_size(hPetBob, 236, 196);
   lv_obj_set_pos(hPetBob, 0, 26);
   lv_obj_clear_flag(hPetBob, LV_OBJ_FLAG_CLICKABLE);
+  lv_timer_create([](lv_timer_t *) {
+    if (homeIsActive()) hdBlinkTick();
+  }, 60, nullptr);
   lv_timer_create(  // breathing: two positions, so the zoomed sprite is redrawn only twice per breath
       [](lv_timer_t *) {
         static bool up = false;

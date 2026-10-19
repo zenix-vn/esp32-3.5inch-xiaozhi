@@ -11,12 +11,7 @@ extern const lv_img_dsc_t dc_rug;
 extern const lv_img_dsc_t dc_painting;
 extern const lv_img_dsc_t dc_lantern;
 extern const lv_img_dsc_t dc_chest;
-extern const lv_img_dsc_t fx_heart;
 extern const lv_img_dsc_t fx_bubble;
-extern const lv_img_dsc_t fx_food0;
-extern const lv_img_dsc_t fx_food1;
-extern const lv_img_dsc_t fx_food2;
-extern const lv_img_dsc_t fx_coin;
 extern const lv_img_dsc_t fx_flyer;
 #ifdef __cplusplus
 }

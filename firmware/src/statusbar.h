@@ -8,6 +8,7 @@ static lv_obj_t *toastObj = nullptr;
 static bool sbVisible = true;
 
 static void ambientShow();      // ambient.h
+static bool ambOn = false;      // ambient screen showing (ambient.h)
 static void screenSleepNow();   // main.cpp
 static bool homeIsActive();     // main.cpp: main screen showing the home tile
 static void soundPlay(const Note *seq, int len, int repeat, bool evenInDnd);

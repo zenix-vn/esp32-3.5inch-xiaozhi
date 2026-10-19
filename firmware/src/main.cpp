@@ -24,9 +24,17 @@
 static const int PIN_BL = 27;
 
 TFT_eSPI tft;
+
+// lv_conf.h: LVGL asserts (almost always an allocation that failed) land here instead of looping forever.
+extern "C" void lv_assert_fail(void) {
+  ets_printf("LVGL ASSERT at %p: free heap %u, largest block %u - restarting\n", __builtin_return_address(0), (unsigned)ESP.getFreeHeap(),
+             (unsigned)ESP.getMaxAllocHeap());
+  delay(200);
+  ESP.restart();
+}
 static SPIClass sdSPI(HSPI);  // TF slot: CS5 SCK18 MISO19 MOSI23
 static bool sdOk = false;
-static lv_color_t buf1[480 * 8], buf2[480 * 8];
+static lv_color_t *buf1, *buf2;  // draw buffers, allocated at boot (not .bss: keeps the big RAM region free for TLS)
 
 // ---------- design tokens ----------
 #define C_BG_TOP   lv_color_hex(0x070B1A)
@@ -119,12 +127,12 @@ static bool screenOff = false;  // backlight off until the next touch (see scree
 
 #include "dragon.h"
 #include "statusbar.h"
-#include "ambient.h"
 #include "home.h"
 #include "weather_page.h"
 #include "clock_app.h"
 #include "photos.h"
 #include "qr_page.h"
+#include "ambient.h"
 
 // ---------- payment QR (VietQR; details come from the web setup page) ----------
 
@@ -335,6 +343,9 @@ void setup() {
 
   lv_init();
   static lv_disp_draw_buf_t db;
+  // smallest-first so the draw buffers land in the small RAM regions and the large one stays free for TLS
+  buf1 = (lv_color_t *)heap_caps_malloc(480 * 8 * sizeof(lv_color_t), MALLOC_CAP_DMA | MALLOC_CAP_8BIT);
+  buf2 = (lv_color_t *)heap_caps_malloc(480 * 8 * sizeof(lv_color_t), MALLOC_CAP_DMA | MALLOC_CAP_8BIT);
   lv_disp_draw_buf_init(&db, buf1, buf2, 480 * 8);
   static lv_disp_drv_t dd;
   lv_disp_drv_init(&dd);
@@ -354,7 +365,7 @@ void setup() {
   lv_indev_drv_register(&id);
 
   sdSPI.begin(18, 19, 23, 5);
-  sdOk = SD.begin(5, sdSPI, 20000000);
+  sdOk = SD.begin(5, sdSPI, 10000000);  // 10 MHz: long writes (web uploads) stay reliable on this board
 
   pinMode(0, INPUT_PULLUP);  // hold BOOT while powering up to redo touch calibration
   if (digitalRead(0) == LOW || !touchLoadCal()) touchCalibrate();

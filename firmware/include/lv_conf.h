@@ -14,6 +14,15 @@
 #define LV_TICK_CUSTOM_INCLUDE "Arduino.h"
 #define LV_TICK_CUSTOM_SYS_TIME_EXPR (millis())
 #define LV_USE_LOG 0
+/* A failed assert (usually out of memory) restarts the device with a log line instead of hanging forever. */
+#ifdef __cplusplus
+extern "C" {
+#endif
+void lv_assert_fail(void);
+#ifdef __cplusplus
+}
+#endif
+#define LV_ASSERT_HANDLER lv_assert_fail();
 #define LV_DRAW_COMPLEX 1
 #define LV_SHADOW_CACHE_SIZE 0
 #define LV_FONT_MONTSERRAT_12 1

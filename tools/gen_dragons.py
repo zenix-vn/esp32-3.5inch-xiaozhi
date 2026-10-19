@@ -12,14 +12,14 @@ import sys
 
 from PIL import Image, ImageDraw, ImageFilter
 
-SS = 4  # supersampling
+SS = 1  # no supersampling: hard pixel edges (pixel-art look, shown zoomed x2 without smoothing)
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_C = os.path.join(ROOT, 'firmware', 'src', 'dragon_img.c')
 OUT_H = os.path.join(ROOT, 'firmware', 'src', 'dragon_img.h')
 
 W0, H0 = 230, 172  # logical canvas (dragon faces right, feet on y ~ 164)
 OY = 22  # headroom above the drawing for wings, horns and halo
-FIT = 0.80  # the game picture box is 140 px tall
+FIT = 0.40  # stored at half size; the firmware zooms the sprites with nearest-neighbour sampling
 
 
 def hexc(h, a=255):
@@ -267,7 +267,7 @@ def draw_dragon(scale, body_c, belly_c, accent_c, wing_c, p):
 
 
 def draw_egg(cold, crack):
-    scale = 0.95
+    scale = 0.5
     k = scale * SS
     pen = Pen(k)
     base = hexc(0xCFE6FF if cold else 0xFFF1D6)
@@ -327,6 +327,7 @@ def main():
                 ox, oy = x + (W0 - im.size[0]) // 2, y + (H0 - im.size[1])
                 d.ellipse([ox + ex - er, oy + ey - er, ox + ex + er, oy + ey + er], fill=(255, 255, 255, 255))
                 d.ellipse([ox + ex - er * 0.25, oy + ey - er * 0.6, ox + ex + er * 0.75, oy + ey + er * 0.6], fill=(30, 20, 50, 255))
+        sheet = sheet.resize((sheet.size[0] * 2, sheet.size[1] * 2), Image.NEAREST)
         sheet.save(sys.argv[1])
 
     total = 0
