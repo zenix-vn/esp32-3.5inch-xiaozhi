@@ -134,6 +134,18 @@ def glyph_clock(g, c):
     g.rect(60, 14, 72, 20, 3)
 
 
+def glyph_calendar(g, c):
+    g.rect(18, 24, 82, 82, 8)  # page
+    g.rect(18, 24, 82, 42, 8, hexc(c))  # coloured header band (rounded top, square join below)
+    g.rect(18, 34, 82, 42, 0, hexc(c))
+    g.rect(32, 14, 40, 30, 3)  # binder rings
+    g.rect(60, 14, 68, 30, 3)
+    for r in range(3):  # day cells
+        for k in range(4):
+            g.rect(26 + k * 13.5, 49 + r * 10.5, 26 + k * 13.5 + 8, 49 + r * 10.5 + 6, 1.5, hexc(c, 255 if (r, k) != (1, 2) else 255))
+    g.rect(52.5, 59.5, 60.5, 65.5, 1.5, hexc(0xFFD54A))  # today
+
+
 def glyph_qr(g, c):
     for x, y in ((20, 20), (58, 20), (20, 58)):
         g.rect(x, y, x + 22, y + 22, 4)
@@ -191,6 +203,7 @@ ICONS = [
     ('ic_about', 0x7BDCB5, 0x2A7F86, glyph_about),
     ('ic_clock', 0xFF8FA3, 0xD03A6A, glyph_clock),
     ('ic_qr', 0xFFD54A, 0xD98A12, glyph_qr),
+    ('ic_calendar', 0xFF8A7A, 0xD2402F, glyph_calendar),
     ('ic_2048', 0xFFB86B, 0xE0603A, glyph_2048),
     ('ic_caro', 0x6BE0C8, 0x2A78B8, glyph_caro),
 ]

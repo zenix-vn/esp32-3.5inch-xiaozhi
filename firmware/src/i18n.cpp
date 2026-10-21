@@ -58,6 +58,7 @@ static const Pair TABLE[] = {
     {"Weather", "Thời tiết"},
     {"Clock", "Đồng hồ"},
     {"Payment", "Thanh toán"},
+    {"Calendar", "Lịch"},
     {"Reincarnate?", "Luân hồi?"},
     {"Your divine dragon leaves a new egg. You keep your coins and the next dragon grows faster.",
      "Rồng thần để lại một quả trứng mới. Bạn giữ nguyên xu và rồng kế tiếp sẽ lớn nhanh hơn."},

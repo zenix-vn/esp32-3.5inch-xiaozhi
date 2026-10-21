@@ -384,3 +384,32 @@ Số đo bản 2.0.0 lấy lúc máy đã chạy 12 phút, bản 2.1.0 lúc vừ
 Nạp firmware: `cd firmware && ~/.platformio/penv/bin/pio run -t upload` (cắm USB). Chưa có OTA vì phân vùng `huge_app.csv` chỉ có một vùng app.
 
 Việc tiếp theo có thể làm: tăng buffer vẽ từ 8 lên 12-16 dòng (mượt hơn, tốn thêm 8-15 KB RAM); giảm stack task Xiaozhi xuống 8 KB; sửa lỗi lệch màu của công cụ chụp màn hình.
+
+---
+---
+
+# Lịch (Calendar) - lịch tháng và âm lịch
+
+App **Lịch** nằm ở trang Ứng dụng (id 10) và mở nhanh bằng cách chạm vào cụm giờ/ngày trên trang chủ.
+
+- **Lịch tháng**: tuần bắt đầu từ Thứ Hai; mỗi ô có ngày dương (to) và ngày âm (nhỏ, mùng 1 hiện `1/tháng`, tháng nhuận thêm `n`). Chủ nhật và ngày nghỉ lễ màu đỏ, ngày hôm nay có viền, ngày chọn tô nền. Chấm nhỏ: ngày lễ (đỏ = nghỉ lễ). Vuốt trái/phải hoặc dùng mũi tên để đổi tháng; chạm ngày của tháng khác để nhảy sang tháng đó; **Hôm nay** chỉ hiện khi đang chọn ngày khác hôm nay. Phạm vi 1901-2099.
+- **Bảng ngày** (bên phải): ngày, thứ, ngày âm lịch, Can Chi của ngày, tên ngày lễ. Chạm lại ngày đang chọn hoặc **Chi tiết** để mở trang chi tiết.
+- **Trang chi tiết** (có nút ‹ › sang ngày trước/sau): ngày dương và âm, ngày lễ, Nguyệt kỵ / Tam nương, Can Chi ngày-tháng-năm, tiết khí hiện tại và tiết sắp tới, Trực, Sao, pha trăng, việc nên làm / không nên, hướng Thần tài - Hỷ thần - Hung thần, giờ Hoàng đạo (giờ hiện tại có viền).
+
+## Thuật toán
+
+Lấy từ project LichSo (bản Android, giống bản iOS): thuật toán Hồ Ngọc Đức với giờ sóc theo chuỗi Meeus.
+
+| File | Nội dung |
+|---|---|
+| `firmware/src/lunar_core.h` | Đổi dương sang âm, tháng nhuận, độ dài tháng âm, Can Chi năm (không phụ thuộc Arduino) |
+| `firmware/src/almanac.h` | Can Chi ngày/tháng, Trực, Sao, giờ Hoàng đạo, pha trăng, 24 tiết khí, ngày lễ, nên/không nên, hướng |
+| `firmware/src/calendar_app.h` | Giao diện: lưới tháng tự vẽ trong một đối tượng (không tạo widget cho từng ngày nên tốn rất ít RAM) và trang chi tiết |
+| `tools/test_calendar.cpp` | Kiểm thử trên máy tính |
+
+Kiểm thử: `g++ -std=c++17 -O2 -o /tmp/cal_test tools/test_calendar.cpp && /tmp/cal_test` chạy các ngày đã biết (Tết 2025, 2026...). `/tmp/cal_test 1901 2100` in từng ngày; kết quả được so với chương trình Swift biên dịch từ `Util/*.swift` của LichSo và **trùng khớp cả 73 049 ngày** của 1901-2100 (bao gồm âm lịch, Can Chi, Trực, Sao, giờ Hoàng đạo, pha trăng, tiết khí).
+
+Ghi chú:
+- Mùng 1 tháng 7 năm 2026 là 13/8 (trăng mới lúc 00:37 giờ Việt Nam, sát nửa đêm); thuật toán cho kết quả này.
+- Tháng âm 12: "Tất niên" là ngày cuối tháng (29 hoặc 30) theo độ dài tháng thực.
+- Ngày nghỉ lễ đỏ: 1/1, 30/4, 1/5, 2/9, mùng 1-3 Tết và Giỗ Tổ (10/3 âm). Không tính ngày nghỉ bù.

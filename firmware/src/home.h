@@ -12,6 +12,7 @@ static const char *const DAYS_EN[] = {"Sunday", "Monday", "Tuesday", "Wednesday"
 static const char *const MONTHS_EN[] = {"January", "February", "March",     "April",   "May",      "June",
                                         "July",    "August",   "September", "October", "November", "December"};
 static void pageWeather();  // weather_page.h
+static void pageCalendar();  // calendar_app.h
 
 static void startAnim(lv_obj_t *o, lv_anim_exec_xcb_t cb, int32_t from, int32_t to, uint32_t t, uint32_t playback,
                       uint32_t repeatDelay, lv_anim_path_cb_t path = lv_anim_path_ease_in_out, uint32_t delay = 0) {
@@ -514,7 +515,8 @@ static void buildHome(lv_obj_t *tile) {
   lv_obj_remove_style_all(clockBox);
   lv_obj_set_size(clockBox, 228, 120);
   lv_obj_set_pos(clockBox, 248, SB_H + 2);
-  lv_obj_clear_flag(clockBox, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_flag(clockBox, LV_OBJ_FLAG_CLICKABLE);  // tap the date to open the Calendar
+  lv_obj_add_event_cb(clockBox, [](lv_event_t *) { pageCalendar(); }, LV_EVENT_SHORT_CLICKED, nullptr);
   lblGreet = makeLabel(clockBox, "", F_LABEL, lv_color_hex(0xC9D2F2));
   lblTime = makeLabel(clockBox, "--:--", F_DISPLAY, C_TEXT);
   lv_obj_set_pos(lblTime, 0, 18);

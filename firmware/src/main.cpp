@@ -180,6 +180,7 @@ static bool screenOff = false;  // backlight off until the next touch (see scree
 #include "home.h"
 #include "weather_page.h"
 #include "clock_app.h"
+#include "calendar_app.h"
 #include "photos.h"
 #include "qr_page.h"
 #include "ambient.h"
@@ -255,6 +256,7 @@ static const App apps[] = {
     {&ic_photos, "Photos", pagePhotos},        {&ic_wifi, "Wi-Fi", pageWifi},          {&ic_storage, "Storage", pageStorage},
     {&ic_settings, "Settings", pageSettings},  {&ic_about, "About", pageAbout},        {&ic_clock, "Clock", pageClock},
     {&ic_qr, "Payment", pageQr},
+    {&ic_calendar, "Calendar", pageCalendar},
 };
 static_assert(sizeof(apps) / sizeof(apps[0]) == APP_COUNT, "APP_COUNT must match apps[]");
 static const char *appName(int i) { return apps[i].name; }
