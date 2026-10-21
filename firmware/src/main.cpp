@@ -382,6 +382,7 @@ void setup() {
   Serial.begin(115200);
   i18nLoad();
   cfgLoad();
+  clockBegin();  // alarms ring whether or not the Clock app is ever opened
   tft.init();
   tft.setRotation(1);
   tft.fillScreen(TFT_BLACK);

@@ -53,9 +53,11 @@ static void ambRefreshPet() {
 
 static void ambRefreshInfo(const struct tm *t) {
   String s;
-  if (cfg.alarmOn) {
-    char b[48];
-    snprintf(b, sizeof(b), isVi() ? LV_SYMBOL_BELL "  Báo thức %02d:%02d" : LV_SYMBOL_BELL "  Alarm %02d:%02d", cfg.alarmH, cfg.alarmM);
+  int next = alarmNext();
+  if (next >= 0) {  // the alarm that rings next
+    char tm[12], b[48];
+    alarmTimeText(alarms[next].h, alarms[next].m, tm, sizeof(tm));
+    snprintf(b, sizeof(b), "%s  %s %s", LV_SYMBOL_BELL, DL("Báo thức", "Alarm"), tm);
     s += b;
   }
   if (tmrEnd && t) {  // running timer: when it ends
