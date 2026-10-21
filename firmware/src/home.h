@@ -30,7 +30,8 @@ static void startAnim(lv_obj_t *o, lv_anim_exec_xcb_t cb, int32_t from, int32_t 
 }
 static void animY(void *o, int32_t v) { lv_obj_set_y((lv_obj_t *)o, v); }
 static void animX(void *o, int32_t v) { lv_obj_set_x((lv_obj_t *)o, v); }
-static void animOpa(void *o, int32_t v) { lv_obj_set_style_opa((lv_obj_t *)o, v, 0); }
+// bg_opa, not style opa: a widget with opa < 100% is rendered through a temporary layer buffer every frame
+static void animOpa(void *o, int32_t v) { lv_obj_set_style_bg_opa((lv_obj_t *)o, v, 0); }
 static void animH(void *o, int32_t v) { lv_obj_set_height((lv_obj_t *)o, v); }
 
 // ---------- weather icons (drawn with shapes into a 44x44 box) ----------
@@ -85,7 +86,7 @@ static void drawWxIcon(lv_obj_t *box, int kind) {
     case WK_STORM: {
       cloudShape(box, 0, 0, 0x7B84A8);
       lv_obj_t *z = lv_label_create(box);
-      lv_label_set_text(z, LV_SYMBOL_CHARGE);
+      setText(z, LV_SYMBOL_CHARGE);
       lv_obj_set_style_text_color(z, lv_color_hex(0xFFC93C), 0);
       lv_obj_set_pos(z, 16, 26);
       break;
@@ -343,25 +344,25 @@ static void refreshWeather() {
   WeatherData w = weatherGet();
   int key = WK_NONE;
   if (!w.valid) {
-    lv_label_set_text(wTemp, "--");
-    lv_label_set_text(wDesc, tr(w.failed ? "Weather unavailable" : (wifiConnected() ? "Loading weather..." : "Waiting for network")));
+    setText(wTemp, "--");
+    setText(wDesc, tr(w.failed ? "Weather unavailable" : (wifiConnected() ? "Loading weather..." : "Waiting for network")));
     for (int i = 0; i < 3; i++) {
-      lv_label_set_text(wHr[i], "");
-      lv_label_set_text(wHt[i], "");
-      lv_label_set_text(wHp[i], "");
+      setText(wHr[i], "");
+      setText(wHt[i], "");
+      setText(wHp[i], "");
     }
   } else {
     key = iconKindFor(w.code, w.isDay);
-    lv_label_set_text_fmt(wTemp, "%d%s", tempOut(w.temp), DEG);
-    lv_label_set_text_fmt(wDesc, "%s - %s", tr(weatherText(w.code)), w.city);
+    setTextFmt(wTemp, "%d%s", tempOut(w.temp), DEG);
+    setTextFmt(wDesc, "%s - %s", tr(weatherText(w.code)), w.city);
     for (int i = 0; i < 3; i++) {
       int idx = 2 + i * 2;  // +2h, +4h, +6h
       if (idx < w.nHours) {
         const WxHour &h = w.hours[idx];
-        lv_label_set_text_fmt(wHr[i], "%dh", h.hour);
-        lv_label_set_text_fmt(wHt[i], "%d%s", tempOut(h.temp), DEG);
-        if (h.pop >= 20) lv_label_set_text_fmt(wHp[i], "%d%%", h.pop);
-        else lv_label_set_text(wHp[i], "");
+        setTextFmt(wHr[i], "%dh", h.hour);
+        setTextFmt(wHt[i], "%d%s", tempOut(h.temp), DEG);
+        if (h.pop >= 20) setTextFmt(wHp[i], "%d%%", h.pop);
+        else setText(wHp[i], "");
       }
     }
   }
@@ -376,7 +377,7 @@ static void refreshHome() {
   XzState st = xiaozhiState();
   bool wifiOn = wifiConnected();
   if (st == XZ_CODE) {
-    lv_label_set_text(lblCode, xiaozhiCode());
+    setText(lblCode, xiaozhiCode());
     lv_obj_add_flag(clockBox, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(codeBox, LV_OBJ_FLAG_HIDDEN);
   } else {
@@ -390,32 +391,32 @@ static void refreshHome() {
   if (timeOk) {
     int h = t.tm_hour;
     const char *g = h >= 5 && h < 12 ? "Good morning" : h < 18 && h >= 12 ? "Good afternoon" : h >= 18 && h < 22 ? "Good evening" : "Good night";
-    if (!cfg.greetOn) lv_label_set_text(lblGreet, "");
-    else if (cfg.userName.length()) lv_label_set_text_fmt(lblGreet, "%s, %s", tr(g), cfg.userName.c_str());
-    else lv_label_set_text(lblGreet, tr(g));
+    if (!cfg.greetOn) setText(lblGreet, "");
+    else if (cfg.userName.length()) setTextFmt(lblGreet, "%s, %s", tr(g), cfg.userName.c_str());
+    else setText(lblGreet, tr(g));
     if (cfg.clock24) {
-      lv_label_set_text_fmt(lblTime, "%02d:%02d", h, t.tm_min);
-      lv_label_set_text(lblAmPm, "");
+      setTextFmt(lblTime, "%02d:%02d", h, t.tm_min);
+      setText(lblAmPm, "");
     } else {
-      lv_label_set_text_fmt(lblTime, "%d:%02d", h % 12 ? h % 12 : 12, t.tm_min);
-      lv_label_set_text(lblAmPm, isVi() ? (h < 12 ? "SA" : "CH") : (h < 12 ? "AM" : "PM"));
+      setTextFmt(lblTime, "%d:%02d", h % 12 ? h % 12 : 12, t.tm_min);
+      setText(lblAmPm, isVi() ? (h < 12 ? "SA" : "CH") : (h < 12 ? "AM" : "PM"));
       lv_obj_align_to(lblAmPm, lblTime, LV_ALIGN_OUT_RIGHT_BOTTOM, 4, -8);
     }
-    if (cfg.dateFmt == 2) lv_label_set_text(lblDate, "");
-    else if (cfg.dateFmt == 1) lv_label_set_text_fmt(lblDate, "%02d/%02d/%d", t.tm_mday, t.tm_mon + 1, t.tm_year + 1900);
-    else if (isVi()) lv_label_set_text_fmt(lblDate, "%s, %d tháng %d", DAYS_VI[t.tm_wday], t.tm_mday, t.tm_mon + 1);
-    else lv_label_set_text_fmt(lblDate, "%s, %d %s", DAYS_EN[t.tm_wday], t.tm_mday, MONTHS_EN[t.tm_mon]);
-    lv_label_set_text(lblLunar, cfg.lunarOn ? lunarText(t.tm_mday, t.tm_mon + 1, t.tm_year + 1900).c_str() : "");
+    if (cfg.dateFmt == 2) setText(lblDate, "");
+    else if (cfg.dateFmt == 1) setTextFmt(lblDate, "%02d/%02d/%d", t.tm_mday, t.tm_mon + 1, t.tm_year + 1900);
+    else if (isVi()) setTextFmt(lblDate, "%s, %d tháng %d", DAYS_VI[t.tm_wday], t.tm_mday, t.tm_mon + 1);
+    else setTextFmt(lblDate, "%s, %d %s", DAYS_EN[t.tm_wday], t.tm_mday, MONTHS_EN[t.tm_mon]);
+    setText(lblLunar, cfg.lunarOn ? lunarText(t.tm_mday, t.tm_mon + 1, t.tm_year + 1900).c_str() : "");
     if (t.tm_yday != quoteDay || !cfg.quoteOn) {
       quoteDay = cfg.quoteOn ? t.tm_yday : -1;
-      lv_label_set_text(hQuote, cfg.quoteOn ? quoteOfDay(t.tm_yday) : "");
+      setText(hQuote, cfg.quoteOn ? quoteOfDay(t.tm_yday) : "");
     }
   } else {
-    lv_label_set_text(lblGreet, cfg.greetOn ? tr("Hello") : "");
-    lv_label_set_text(lblTime, "--:--");
-    lv_label_set_text(lblAmPm, "");
-    lv_label_set_text(lblDate, tr(wifiOn ? "Syncing time..." : "Waiting for network"));
-    lv_label_set_text(lblLunar, "");
+    setText(lblGreet, cfg.greetOn ? tr("Hello") : "");
+    setText(lblTime, "--:--");
+    setText(lblAmPm, "");
+    setText(lblDate, tr(wifiOn ? "Syncing time..." : "Waiting for network"));
+    setText(lblLunar, "");
   }
 
   homeDrawPet();
@@ -426,7 +427,7 @@ static void refreshHome() {
     lv_point_t sz;  // a content-sized label never wraps, so cap its width when the text is long
     lv_txt_get_size(&sz, bt, F_LABEL, 0, 0, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
     lv_obj_set_width(hBubbleLbl, sz.x > 224 ? 224 : LV_SIZE_CONTENT);
-    lv_label_set_text(hBubbleLbl, bt);
+    setText(hBubbleLbl, bt);
   }
   refreshWeather();
   int fx = fxWanted();
@@ -453,6 +454,10 @@ static void homeTick(lv_timer_t *) {
   XzState st = xiaozhiState();
   if (st == XZ_ACTIVATED && lastState != XZ_ACTIVATED && lastState != -1) bannerUntil = millis() + 4000;
   lastState = st;
+  if (lv_scr_act() != mainScr) {  // a page covers the home screen: nothing to update until it slides back
+    if (fxKind != FX_NONE) fxStart(FX_NONE);
+    return;
+  }
   refreshHome();
 }
 

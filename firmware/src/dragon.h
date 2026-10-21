@@ -711,7 +711,9 @@ static lv_obj_t *dgOpenOverlay() {
 
 // ---------- effects ----------
 static void fxDel(lv_anim_t *a) { lv_obj_del((lv_obj_t *)a->var); }
-static void fxOpa(void *o, int32_t v) { lv_obj_set_style_opa((lv_obj_t *)o, v, 0); }
+// img_opa / bg_opa, not style opa: that would composite each fading sprite through a layer buffer every frame
+static void fxImgOpa(void *o, int32_t v) { lv_obj_set_style_img_opa((lv_obj_t *)o, v, 0); }
+static void fxBgOpa(void *o, int32_t v) { lv_obj_set_style_bg_opa((lv_obj_t *)o, v, 0); }
 static void fxY(void *o, int32_t v) { lv_obj_set_y((lv_obj_t *)o, v); }
 static void fxX(void *o, int32_t v) { lv_obj_set_x((lv_obj_t *)o, v); }
 
@@ -722,7 +724,7 @@ static lv_obj_t *dgFloat(const lv_img_dsc_t *src, int x, int y, int rise, uint32
   lv_img_set_src(o, src);
   lv_obj_set_pos(o, x - src->header.w / 2, y - src->header.h / 2);
   lv_obj_clear_flag(o, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_set_style_opa(o, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_img_opa(o, LV_OPA_TRANSP, 0);
   lv_anim_t a;
   lv_anim_init(&a);
   lv_anim_set_var(&a, o);
@@ -733,7 +735,7 @@ static lv_obj_t *dgFloat(const lv_img_dsc_t *src, int x, int y, int rise, uint32
   lv_anim_set_early_apply(&a, false);
   lv_anim_set_path_cb(&a, lv_anim_path_ease_out);
   lv_anim_start(&a);
-  lv_anim_set_exec_cb(&a, fxOpa);
+  lv_anim_set_exec_cb(&a, fxImgOpa);
   lv_anim_set_values(&a, 255, 0);
   lv_anim_set_path_cb(&a, lv_anim_path_ease_in);
   lv_anim_set_ready_cb(&a, fxDel);
@@ -783,7 +785,7 @@ static void dgFxFlash() {
   lv_anim_t a;
   lv_anim_init(&a);
   lv_anim_set_var(&a, f);
-  lv_anim_set_exec_cb(&a, fxOpa);
+  lv_anim_set_exec_cb(&a, fxBgOpa);
   lv_anim_set_values(&a, 240, 0);
   lv_anim_set_time(&a, 800);
   lv_anim_set_ready_cb(&a, fxDel);
@@ -922,7 +924,7 @@ static void mgEnd();
 static void mgJewelTap(lv_event_t *e) {
   if (mg.over) return;
   mg.score++;
-  lv_label_set_text_fmt(mg.lblScore, "%d", mg.score);
+  setTextFmt(mg.lblScore, "%d", mg.score);
   soundPlay(SND(SND_TAP), 0, false);
   lv_obj_del_async((lv_obj_t *)lv_event_get_target(e));
   mg.jewel = nullptr;
@@ -947,7 +949,7 @@ static void mgTick(lv_timer_t *) {
     mgEnd();
     return;
   }
-  lv_label_set_text_fmt(mg.lblTime, "%d", (int)((12000 - el + 999) / 1000));
+  setTextFmt(mg.lblTime, "%d", (int)((12000 - el + 999) / 1000));
   if (mg.jewel && now > mg.jewelDie) {
     lv_obj_del(mg.jewel);
     mg.jewel = nullptr;
@@ -1056,7 +1058,7 @@ static void fbTick(lv_timer_t *) {
     if (!fb.passed[i] && fb.cx[i] + FB_W < FB_PX) {
       fb.passed[i] = true;
       fb.score++;
-      lv_label_set_text_fmt(fb.lbl, "%d", fb.score);
+      setTextFmt(fb.lbl, "%d", fb.score);
       soundPlay(SND(SND_TAP), 0, false);
     }
     int x0 = FB_PX + 14, x1 = FB_PX + pw - 14, y0 = (int)fb.y + 14, y1 = (int)fb.y + ph - 10;
@@ -1190,7 +1192,7 @@ static void dgOpenShop() {
   lv_obj_t *t = pxText(card, DL("Trang trí khu vườn", "Decorate the garden"), F_TITLE);
   lv_obj_set_pos(t, 14, 8);
   lv_obj_t *cn = pxText(card, "", F_LABEL);
-  lv_label_set_text_fmt(cn, "%u %s", (unsigned)dg.coins, DL("xu", "coins"));
+  setTextFmt(cn, "%u %s", (unsigned)dg.coins, DL("xu", "coins"));
   lv_obj_align(cn, LV_ALIGN_TOP_RIGHT, -14, 10);
   for (int i = 0; i < 6; i++) {
     bool owned = dg.decor & (1 << i);
@@ -1209,8 +1211,8 @@ static void dgOpenShop() {
     lv_obj_t *n = pxText(it, isVi() ? DECOR[i].vi : DECOR[i].en, F_BODY);
     lv_obj_set_pos(n, 66, 8);
     lv_obj_t *p = pxText(it, "", F_CAPTION);
-    if (owned) lv_label_set_text(p, DL("Đã có", "Owned"));
-    else lv_label_set_text_fmt(p, "%u %s", (unsigned)DECOR[i].price, DL("xu", "coins"));
+    if (owned) setText(p, DL("Đã có", "Owned"));
+    else setTextFmt(p, "%u %s", (unsigned)DECOR[i].price, DL("xu", "coins"));
     lv_obj_set_style_text_color(p, lv_color_hex(owned ? 0x2E8B3E : 0xD0582A), 0);
     lv_obj_set_pos(p, 66, 32);
     if (!owned) {
@@ -1231,10 +1233,10 @@ static void dgOpenBadges() {
   int got = 0;
   for (int i = 0; i < 12; i++) got += (dg.ach >> i) & 1;
   lv_obj_t *t = pxText(card, "", F_TITLE);
-  lv_label_set_text_fmt(t, isVi() ? "Huy hiệu  %d/12" : "Badges  %d/12", got);
+  setTextFmt(t, isVi() ? "Huy hiệu  %d/12" : "Badges  %d/12", got);
   lv_obj_set_pos(t, 14, 8);
   lv_obj_t *st = pxText(card, "", F_CAPTION);
-  lv_label_set_text_fmt(st, isVi() ? "Chuỗi %u ngày  -  Thế hệ %u" : "Streak %u days  -  Generation %u", (unsigned)dg.streak, (unsigned)dg.gen);
+  setTextFmt(st, isVi() ? "Chuỗi %u ngày  -  Thế hệ %u" : "Streak %u days  -  Generation %u", (unsigned)dg.streak, (unsigned)dg.gen);
   lv_obj_align(st, LV_ALIGN_TOP_RIGHT, -14, 14);
   for (int i = 0; i < 12; i++) {
     bool on = dg.ach & (1 << i);
@@ -1257,7 +1259,7 @@ static void dgOpenBadges() {
         cell,
         [](lv_event_t *e) {
           int k = (int)(intptr_t)lv_event_get_user_data(e);
-          lv_label_set_text_fmt(achDesc, "%s: %s%s", isVi() ? ACH[k].vi : ACH[k].en, isVi() ? ACH[k].dvi : ACH[k].den,
+          setTextFmt(achDesc, "%s: %s%s", isVi() ? ACH[k].vi : ACH[k].en, isVi() ? ACH[k].dvi : ACH[k].den,
                                 (dg.ach & (1 << k)) ? (isVi() ? "  (đã đạt)" : "  (done)") : "");
         },
         LV_EVENT_CLICKED, (void *)(intptr_t)i);
@@ -1330,9 +1332,9 @@ static void dgRefreshUi() {
     lv_bar_set_value(dBars[i], (int)vals[i], LV_ANIM_OFF);
     lv_obj_set_style_bg_color(dBars[i], lv_color_hex(vals[i] < 25 ? 0xE5484D : cols[i]), LV_PART_INDICATOR);
   }
-  lv_label_set_text_fmt(dCoins, "%u", (unsigned)dg.coins);
-  lv_label_set_text(dName, dgName().c_str());
-  lv_label_set_text_fmt(dStageLbl, "%s%s", dgStageName(dg.stage), dg.gen > 1 ? (String(" - G") + dg.gen).c_str() : "");
+  setTextFmt(dCoins, "%u", (unsigned)dg.coins);
+  setText(dName, dgName().c_str());
+  setTextFmt(dStageLbl, "%s%s", dgStageName(dg.stage), dg.gen > 1 ? (String(" - G") + dg.gen).c_str() : "");
   int moodLv = dg.mood < 30 ? 0 : dg.mood < 65 ? 1 : 2;
   if (moodLv != dFaceLv) {
     dFaceLv = moodLv;
@@ -1340,12 +1342,12 @@ static void dgRefreshUi() {
   }
   if (dg.stage == ST_DIVINE) {
     lv_bar_set_value(dXpBar, 100, LV_ANIM_OFF);
-    lv_label_set_text(dXpTxt, DL("Cấp cao nhất", "Max level"));
+    setText(dXpTxt, DL("Cấp cao nhất", "Max level"));
     lv_obj_clear_flag(dReinc, LV_OBJ_FLAG_HIDDEN);
   } else {
     int pct = (int)(dg.growth * 100 / dgNeed());
     lv_bar_set_value(dXpBar, pct > 100 ? 100 : pct, LV_ANIM_OFF);
-    lv_label_set_text_fmt(dXpTxt, "%s %d%%", egg ? DL("Ấp trứng", "Hatching") : DL("Tiến hóa", "Evolution"), pct);
+    setTextFmt(dXpTxt, "%s %d%%", egg ? DL("Ấp trứng", "Hatching") : DL("Tiến hóa", "Evolution"), pct);
     lv_obj_add_flag(dReinc, LV_OBJ_FLAG_HIDDEN);
   }
 
@@ -1366,7 +1368,7 @@ static void dgRefreshUi() {
     lv_point_t sz;
     lv_txt_get_size(&sz, msg.c_str(), F_BODY, 0, 0, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
     lv_obj_set_width(dBubbleLbl, sz.x > 250 ? 250 : LV_SIZE_CONTENT);
-    lv_label_set_text(dBubbleLbl, msg.c_str());
+    setText(dBubbleLbl, msg.c_str());
   }
 
   // buttons (icons only): feed / play / bath / sleep (a bolt to wake up) / medicine; the egg only has "warm"

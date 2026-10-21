@@ -9,7 +9,15 @@
 #define LV_MEM_CUSTOM_ALLOC malloc
 #define LV_MEM_CUSTOM_FREE free
 #define LV_MEM_CUSTOM_REALLOC realloc
-#define LV_DISP_DEF_REFR_PERIOD 30
+#define LV_MEMCPY_MEMSET_STD 1       /* libc memcpy/memset (ROM, word-optimised) instead of LVGL's byte loops */
+#define LV_DISP_DEF_REFR_PERIOD 20   /* up to 50 fps; frames are drawn and sent over DMA in parallel (main.cpp) */
+#define LV_INDEV_DEF_READ_PERIOD 20  /* touch polled more often: swipes follow the finger more closely */
+/* The screen background is a full-screen vertical gradient that every redrawn strip needs: cache the colour
+   map (~1 KB each) instead of allocating and recomputing it for each 8-line strip. */
+#define LV_GRAD_CACHE_DEF_SIZE 2048
+/* Widgets with opa < 100% are composited in a temporary buffer; 24 KB (default) competes with TLS for the
+   largest free block. 8 KB just renders big translucent widgets in more strips. */
+#define LV_LAYER_SIMPLE_BUF_SIZE (8 * 1024)
 #define LV_TICK_CUSTOM 1
 #define LV_TICK_CUSTOM_INCLUDE "Arduino.h"
 #define LV_TICK_CUSTOM_SYS_TIME_EXPR (millis())
@@ -24,7 +32,13 @@ void lv_assert_fail(void);
 #endif
 #define LV_ASSERT_HANDLER lv_assert_fail();
 #define LV_DRAW_COMPLEX 1
-#define LV_SHADOW_CACHE_SIZE 0
+/* Hot drawing code (blending, image and font rendering) runs from IRAM instead of through the flash cache.
+   Free IRAM cannot hold ordinary data on the ESP32, so this costs no heap. */
+#include "esp_attr.h"
+#define LV_ATTRIBUTE_FAST_MEM IRAM_ATTR
+/* Shadow corner masks are expensive (a blur per strip, every frame of the control-center / toast slide).
+   Cache one: corner = shadow width + radius, 44 px for the control center -> 48*48 = 2.3 KB. */
+#define LV_SHADOW_CACHE_SIZE 48
 #define LV_FONT_MONTSERRAT_12 1
 #define LV_FONT_MONTSERRAT_14 1
 #define LV_FONT_MONTSERRAT_16 1

@@ -42,11 +42,11 @@ static void ambRefreshPet() {
   const char *al = dgAlert();
   String n = dgName();
   if (al) {
-    lv_label_set_text(ambPetLbl, al);
+    setText(ambPetLbl, al);
     lv_obj_set_style_text_color(ambPetLbl, lv_color_hex(0xFFB84A), 0);
   } else {
-    if (dg.stage == ST_EGG) lv_label_set_text(ambPetLbl, DL("Quả trứng đang được ấp ấm", "The egg is keeping warm"));
-    else lv_label_set_text_fmt(ambPetLbl, isVi() ? "%s đang ngủ ngon" : "%s is fast asleep", n.c_str());
+    if (dg.stage == ST_EGG) setText(ambPetLbl, DL("Quả trứng đang được ấp ấm", "The egg is keeping warm"));
+    else setTextFmt(ambPetLbl, isVi() ? "%s đang ngủ ngon" : "%s is fast asleep", n.c_str());
     lv_obj_set_style_text_color(ambPetLbl, lv_color_hex(0xB7C3EE), 0);
   }
 }
@@ -73,18 +73,18 @@ static void ambRefreshInfo(const struct tm *t) {
     s += DL("  Mất Wi-Fi", "  Wi-Fi offline");
   }
   if (!s.length()) s = DL("Chạm vào màn hình để quay lại", "Touch the screen to go back");
-  lv_label_set_text(ambInfo, s.c_str());
+  setText(ambInfo, s.c_str());
 }
 
 static void ambRefreshWeather() {
   WeatherData w = weatherGet();
   if (!w.valid) {
-    lv_label_set_text(ambTemp, "--");
-    lv_label_set_text(ambDesc, tr(wifiConnected() ? "Loading weather..." : "Waiting for network"));
-    lv_label_set_text(ambHiLo, "");
+    setText(ambTemp, "--");
+    setText(ambDesc, tr(wifiConnected() ? "Loading weather..." : "Waiting for network"));
+    setText(ambHiLo, "");
     for (int i = 0; i < 3; i++) {
-      lv_label_set_text(ambHr[i], "");
-      lv_label_set_text(ambHt[i], "");
+      setText(ambHr[i], "");
+      setText(ambHt[i], "");
     }
     return;
   }
@@ -93,19 +93,19 @@ static void ambRefreshWeather() {
     drawWxIcon(ambWxIcon, key);
     ambWxKey = key;
   }
-  lv_label_set_text_fmt(ambTemp, "%d%s", tempOut(w.temp), DEG);
-  lv_label_set_text_fmt(ambDesc, "%s  -  %s", tr(weatherText(w.code)), w.city);
+  setTextFmt(ambTemp, "%d%s", tempOut(w.temp), DEG);
+  setTextFmt(ambDesc, "%s  -  %s", tr(weatherText(w.code)), w.city);
   if (w.nDays) {
     const WxDay &d = w.days[0];
     char rain[24] = "";
     if (d.pop >= 30) snprintf(rain, sizeof(rain), isVi() ? "   mưa %d%%" : "   rain %d%%", d.pop);
-    lv_label_set_text_fmt(ambHiLo, LV_SYMBOL_UP " %d%s   " LV_SYMBOL_DOWN " %d%s%s", tempOut(d.tmax), DEG, tempOut(d.tmin), DEG, rain);
+    setTextFmt(ambHiLo, LV_SYMBOL_UP " %d%s   " LV_SYMBOL_DOWN " %d%s%s", tempOut(d.tmax), DEG, tempOut(d.tmin), DEG, rain);
   }
   for (int i = 0; i < 3; i++) {
     int idx = 2 + i * 2;
     if (idx < w.nHours) {
-      lv_label_set_text_fmt(ambHr[i], "%dh", w.hours[idx].hour);
-      lv_label_set_text_fmt(ambHt[i], "%d%s", tempOut(w.hours[idx].temp), DEG);
+      setTextFmt(ambHr[i], "%dh", w.hours[idx].hour);
+      setTextFmt(ambHt[i], "%d%s", tempOut(w.hours[idx].temp), DEG);
     }
   }
 }
@@ -119,24 +119,24 @@ static void ambientRefresh(lv_timer_t *) {
   ambMinute = minute;
   if (ok) {
     if (cfg.clock24) {
-      lv_label_set_text_fmt(ambTime, "%02d:%02d", t.tm_hour, t.tm_min);
-      lv_label_set_text(ambAmPm, "");
+      setTextFmt(ambTime, "%02d:%02d", t.tm_hour, t.tm_min);
+      setText(ambAmPm, "");
     } else {
-      lv_label_set_text_fmt(ambTime, "%d:%02d", t.tm_hour % 12 ? t.tm_hour % 12 : 12, t.tm_min);
-      lv_label_set_text(ambAmPm, isVi() ? (t.tm_hour < 12 ? "SA" : "CH") : (t.tm_hour < 12 ? "AM" : "PM"));
+      setTextFmt(ambTime, "%d:%02d", t.tm_hour % 12 ? t.tm_hour % 12 : 12, t.tm_min);
+      setText(ambAmPm, isVi() ? (t.tm_hour < 12 ? "SA" : "CH") : (t.tm_hour < 12 ? "AM" : "PM"));
       lv_obj_align_to(ambAmPm, ambTime, LV_ALIGN_OUT_RIGHT_BOTTOM, 6, -18);
     }
-    if (isVi()) lv_label_set_text_fmt(ambDate, "%s, %d tháng %d", DAYS_VI[t.tm_wday], t.tm_mday, t.tm_mon + 1);
-    else lv_label_set_text_fmt(ambDate, "%s, %d %s", DAYS_EN[t.tm_wday], t.tm_mday, MONTHS_EN[t.tm_mon]);
-    lv_label_set_text(ambLunar, lunarText(t.tm_mday, t.tm_mon + 1, t.tm_year + 1900).c_str());
-    lv_label_set_text(ambQuote, quoteOfDay(t.tm_yday));
+    if (isVi()) setTextFmt(ambDate, "%s, %d tháng %d", DAYS_VI[t.tm_wday], t.tm_mday, t.tm_mon + 1);
+    else setTextFmt(ambDate, "%s, %d %s", DAYS_EN[t.tm_wday], t.tm_mday, MONTHS_EN[t.tm_mon]);
+    setText(ambLunar, lunarText(t.tm_mday, t.tm_mon + 1, t.tm_year + 1900).c_str());
+    setText(ambQuote, quoteOfDay(t.tm_yday));
     int dx = (minute * 7) % 13 - 6, dy = (minute * 5) % 11 - 5;  // drift
     lv_obj_set_pos(ambBox, dx, dy);
   } else {
-    lv_label_set_text(ambTime, "--:--");
-    lv_label_set_text(ambAmPm, "");
-    lv_label_set_text(ambDate, tr("Syncing time..."));
-    lv_label_set_text(ambLunar, "");
+    setText(ambTime, "--:--");
+    setText(ambAmPm, "");
+    setText(ambDate, tr("Syncing time..."));
+    setText(ambLunar, "");
   }
   ambRefreshWeather();
   ambRefreshPet();

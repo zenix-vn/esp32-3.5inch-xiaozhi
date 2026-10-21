@@ -73,11 +73,11 @@ static void payRender() {
   String code = payActive ? vietQrWithAmount(base, payDigits) : base;
   if (!code.length()) code = base;
   lv_qrcode_update(payQr, code.c_str(), code.length());
-  lv_label_set_text_fmt(payAmountLbl, "%s đ", payDigits.length() ? vndFormat(payDigits).c_str() : "0");
+  setTextFmt(payAmountLbl, "%s đ", payDigits.length() ? vndFormat(payDigits).c_str() : "0");
   if (payActive)
-    lv_label_set_text_fmt(payState, isVi() ? "Mã có số tiền %s đ" : "Code for %s VND", vndFormat(payDigits).c_str());
+    setTextFmt(payState, isVi() ? "Mã có số tiền %s đ" : "Code for %s VND", vndFormat(payDigits).c_str());
   else
-    lv_label_set_text(payState, DL("Mã tĩnh (khách tự nhập tiền)", "Static code (payer types the amount)"));
+    setText(payState, DL("Mã tĩnh (khách tự nhập tiền)", "Static code (payer types the amount)"));
   lv_obj_set_style_text_color(payState, payActive ? C_OK : C_MUTED, 0);
 }
 

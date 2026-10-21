@@ -71,7 +71,7 @@ static lv_obj_t *infoRow(lv_obj_t *parent, const char *key, const char *value, l
   lv_obj_align(v, LV_ALIGN_RIGHT_MID, -16, 0);
   return r;
 }
-static void setRowValue(lv_obj_t *row, const char *text) { lv_label_set_text(lv_obj_get_child(row, 1), text); }
+static void setRowValue(lv_obj_t *row, const char *text) { setText(lv_obj_get_child(row, 1), text); }
 
 static lv_obj_t *actionBtn(lv_obj_t *parent, const char *text, lv_color_t color, lv_event_cb_t cb) {
   lv_obj_t *b = lv_btn_create(parent);
@@ -219,10 +219,10 @@ static void connPoll(lv_timer_t *t) {
   lv_timer_pause(t);
   lv_obj_add_flag(connSpinner, LV_OBJ_FLAG_HIDDEN);
   bool ok = r == 1;
-  lv_label_set_text(connLabel, tr(ok ? "Connected" : "Could not connect. Check the password and try again."));
+  setText(connLabel, tr(ok ? "Connected" : "Could not connect. Check the password and try again."));
   lv_obj_set_style_text_color(connLabel, ok ? C_OK : C_WARN, 0);
   lv_obj_t *bl = lv_obj_get_child(connBtn, 0);
-  lv_label_set_text(bl, tr(ok ? "Done" : "Try again"));
+  setText(bl, tr(ok ? "Done" : "Try again"));
   lv_obj_remove_event_cb(connBtn, connDone);
   lv_obj_remove_event_cb(connBtn, connRetry);
   lv_obj_add_event_cb(connBtn, ok ? connDone : connRetry, LV_EVENT_CLICKED, nullptr);
@@ -447,7 +447,7 @@ static void brightnessEvent(lv_event_t *e) {
   lv_obj_t *sl = lv_event_get_target(e);
   int v = lv_slider_get_value(sl);
   setBacklight(v);
-  lv_label_set_text_fmt(brightnessPct, "%d%%", v * 100 / 255);
+  setTextFmt(brightnessPct, "%d%%", v * 100 / 255);
   if (lv_event_get_code(e) == LV_EVENT_RELEASED) {
     Preferences p;
     p.begin("ui", false);
@@ -482,7 +482,7 @@ static void askLang(lv_event_t *e) {
 
 static lv_obj_t *tzLabel;
 static int tzCur;
-static void tzShow() { lv_label_set_text_fmt(tzLabel, "UTC%+d", tzCur); }
+static void tzShow() { setTextFmt(tzLabel, "UTC%+d", tzCur); }
 static void tzStep(lv_event_t *e) {
   tzCur = constrain(tzCur + (int)(intptr_t)lv_event_get_user_data(e), -12, 14);
   tzShow();
@@ -499,7 +499,7 @@ static void pageSettings() {
   lv_obj_align(bt, LV_ALIGN_TOP_LEFT, 16, 10);
   brightnessPct = makeLabel(card, "", F_BODY, C_TEXT);
   lv_obj_align(brightnessPct, LV_ALIGN_TOP_RIGHT, -16, 10);
-  lv_label_set_text_fmt(brightnessPct, "%d%%", blLevel * 100 / 255);
+  setTextFmt(brightnessPct, "%d%%", blLevel * 100 / 255);
   lv_obj_t *sl = lv_slider_create(card);
   lv_slider_set_range(sl, 20, 255);
   lv_slider_set_value(sl, blLevel, LV_ANIM_OFF);

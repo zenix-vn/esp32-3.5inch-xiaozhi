@@ -89,17 +89,17 @@ static uint32_t tmrRemaining() { return tmrEnd ? (int32_t)(tmrEnd - millis()) > 
 static uint32_t swElapsed() { return swAcc + (swRun ? millis() - swStart : 0); }
 
 static void ckAlarmText() {
-  if (cfg.alarmOn) lv_label_set_text_fmt(ckAlarmLbl, isVi() ? "Báo thức lúc %02d:%02d mỗi ngày" : "Alarm at %02d:%02d every day", cfg.alarmH, cfg.alarmM);
-  else lv_label_set_text(ckAlarmLbl, DL("Báo thức đang tắt", "Alarm is off"));
+  if (cfg.alarmOn) setTextFmt(ckAlarmLbl, isVi() ? "Báo thức lúc %02d:%02d mỗi ngày" : "Alarm at %02d:%02d every day", cfg.alarmH, cfg.alarmM);
+  else setText(ckAlarmLbl, DL("Báo thức đang tắt", "Alarm is off"));
 }
 static void ckRefresh(lv_timer_t *) {
   uint32_t r = tmrRemaining();
   if (!tmrEnd && !tmrLeft) r = tmrTotal;
-  lv_label_set_text_fmt(ckTmrLbl, "%02lu:%02lu", (unsigned long)(r / 60000), (unsigned long)((r / 1000) % 60));
-  lv_label_set_text(lv_obj_get_child(ckTmrBtn, 0), tmrEnd ? DL("Tạm dừng", "Pause") : DL("Bắt đầu", "Start"));
+  setTextFmt(ckTmrLbl, "%02lu:%02lu", (unsigned long)(r / 60000), (unsigned long)((r / 1000) % 60));
+  setText(lv_obj_get_child(ckTmrBtn, 0), tmrEnd ? DL("Tạm dừng", "Pause") : DL("Bắt đầu", "Start"));
   uint32_t e = swElapsed();
-  lv_label_set_text_fmt(ckSwLbl, "%02lu:%02lu.%lu", (unsigned long)(e / 60000), (unsigned long)((e / 1000) % 60), (unsigned long)((e / 100) % 10));
-  lv_label_set_text(lv_obj_get_child(ckSwBtn, 0), swRun ? DL("Dừng", "Stop") : DL("Bắt đầu", "Start"));
+  setTextFmt(ckSwLbl, "%02lu:%02lu.%lu", (unsigned long)(e / 60000), (unsigned long)((e / 1000) % 60), (unsigned long)((e / 100) % 10));
+  setText(lv_obj_get_child(ckSwBtn, 0), swRun ? DL("Dừng", "Stop") : DL("Bắt đầu", "Start"));
 }
 static void ckShowTab(int i) {
   for (int k = 0; k < 3; k++) {

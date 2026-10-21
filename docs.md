@@ -319,3 +319,68 @@ Cách dùng nhanh:
 
 Huy hiệu (mỗi huy hiệu +20 xu): Phá vỏ, Lớn khôn (Rồng cấp 3), Trưởng thành, Thần long, Sành ăn (100 lần ăn), Sạch bong (50 lần tắm), Thợ săn ngọc (Bắt ngọc 20 điểm), Phi công (Rồng bay 10 điểm), Đại gia (1000 xu), Bạn thân (7 ngày liền), Nhà trang trí (đủ 6 món), Luân hồi (thế hệ 2).
 
+
+---
+---
+
+# Zin100 2.1.0 - tối ưu độ mượt màn hình và RAM
+
+Firmware 2.1.0 làm màn hình mượt hơn rõ rệt: khung hình được gửi bằng DMA song song với lúc vẽ, bus màn hình chạy 80 MHz, và LVGL bớt vẽ lại những phần không đổi. Đã nạp và kiểm tra trên thiết bị `voi.local`: hiển thị đúng màu, cảm ứng, Wi-Fi, Xiaozhi và thời tiết hoạt động bình thường. Chưa đo số khung hình mỗi giây (fps).
+
+## 1. Các thay đổi tăng độ mượt
+
+| Thay đổi | Trước | Sau | Vì sao mượt hơn | Mã nguồn |
+|---|---|---|---|---|
+| Gửi khung hình bằng DMA | CPU chờ ~1,5 ms cho mỗi dải 8 dòng (40 dải/khung) | DMA gửi dải này trong lúc LVGL vẽ dải tiếp theo | Vẽ và truyền chạy song song | `main.cpp` |
+| SPI màn hình | 40 MHz, cổng VSPI qua GPIO matrix | 80 MHz, cổng HSPI đúng chân IO_MUX (12/13/14/15) | Thời gian gửi mỗi khung giảm khoảng một nửa | `platformio.ini` |
+| Thẻ nhớ | HSPI | VSPI (18/19/23/5, chân gốc); đi dây không đổi | Nhường HSPI cho màn hình | `main.cpp` |
+| Đọc flash | 40 MHz | 80 MHz | Sprite rồng, icon, font, hình nền đọc thẳng từ flash nhanh hơn | `platformio.ini` |
+| Hàm vẽ LVGL trong IRAM | Chạy qua cache flash | `LV_ATTRIBUTE_FAST_MEM` = IRAM (+11,6 KB IRAM) | Trộn màu, vẽ ảnh, vẽ chữ không chờ cache | `lv_conf.h` |
+| Chu kỳ vẽ / đọc cảm ứng | 30 ms / 30 ms | 20 ms / 20 ms | Tối đa 50 fps; vuốt bám tay hơn | `lv_conf.h` |
+| Vòng `loop()` | `delay(5)` cố định | Chỉ ngủ đến lần chạy kế tiếp của LVGL (1-5 ms) | Khung hình và cảm ứng không bị trễ thêm | `main.cpp` |
+| Cache gradient nền | Tính lại và cấp phát cho từng dải | Cache 2 KB | Nền toàn màn vẽ nhanh hơn | `lv_conf.h` |
+| Cache bóng đổ | Không có | 48x48 (2,3 KB) | Kéo trung tâm điều khiển và toast trơn hơn | `lv_conf.h` |
+| `memcpy`/`memset` | Vòng lặp của LVGL | libc (ROM) | Sao chép ảnh, hình nền nhanh hơn | `lv_conf.h` |
+| Label chỉ vẽ khi đổi | Mọi label vẽ lại mỗi giây (đồng hồ: mỗi 100 ms) | `setText`/`setTextFmt` so sánh trước khi đặt | Bớt vùng phải vẽ lại | `main.cpp` + các file giao diện |
+| Hiệu ứng mờ dần | `style_opa` (ghép qua buffer tạm mỗi khung) | `bg_opa` / `img_opa` | Sao, nắng, tim, bong bóng, chớp trắng 472x188 không còn cần layer | `home.h`, `dragon.h` |
+| Trang chủ khi đang mở app | Vẫn cập nhật mỗi giây | Bỏ qua; cập nhật lại khi trượt về | CPU rảnh cho trang đang xem | `home.h`, `main.cpp` |
+
+Màn hình và cảm ứng dùng chung bus SPI: trước mỗi lần đọc cảm ứng, vẽ ảnh JPG hoặc chụp màn hình, firmware gọi `tftIdle()` để chờ DMA xong và nhả bus.
+
+## 2. Tối ưu RAM
+
+RAM trống giữ ở mức tương đương bản cũ; phần lợi chính là bớt các đỉnh cấp phát lớn và bớt phân mảnh heap.
+
+- Buffer tạm cho widget trong suốt: tối đa 24 KB -> 8 KB, để khối RAM lớn còn trống cho TLS.
+- Stack task kích hoạt Xiaozhi: 16 KB -> 12 KB (đo thực tế chỉ dùng khoảng 4 KB).
+- `wifiLoop()` tạo 2 `String` mỗi vòng lặp (~200 lần/giây) -> chỉ cập nhật mỗi 250 ms.
+- JSON thời tiết được lọc, chỉ giữ các khối `current`, `hourly`, `daily`.
+- Buffer chụp màn hình qua web (2,4 KB) chỉ cấp phát khi có request.
+- Log `MEM free=... min=... largest=... wifi=...` in ra Serial mỗi 30 giây.
+
+| Số đo | Firmware 2.0.0 | Firmware 2.1.0 |
+|---|---|---|
+| RAM trống | 114 KB | 111 KB |
+| Khối RAM liền lớn nhất (sau TLS) | 45 KB | 43 KB |
+| RAM tĩnh lúc build | 61,8 KB | 62,2 KB |
+
+Số đo bản 2.0.0 lấy lúc máy đã chạy 12 phút, bản 2.1.0 lúc vừa khởi động vài phút, nên chỉ để so sánh tương đối. "RAM trống" của bản mới có thể thấp hơn thực tế vài KB vì nó đếm cả IRAM trống, phần nay đã dùng cho mã vẽ LVGL.
+
+## 3. Lỗi phát sinh khi kiểm tra
+
+| Lỗi | Nguyên nhân | Xử lý | Trạng thái |
+|---|---|---|---|
+| Watchdog reset (task `weather` chiếm core 0) | Đọc JSON thời tiết thẳng từ socket: ArduinoJson chờ bận khi mạng chậm | Quay về `getString()`, giữ bộ lọc JSON | Đã sửa |
+| Ảnh `/api/screenshot` lệch màu | Khi bật DMA, dữ liệu đọc ngược từ màn hình bị lem bit | Trả thanh ghi `SPI_CTRL2` về mặc định, đọc ở 8 MHz: cải thiện nhưng chưa hết | Còn tồn tại; chỉ ảnh hưởng công cụ chụp ảnh, màn hình thật đúng màu |
+
+## 4. Khôi phục nếu có sự cố
+
+| Triệu chứng | Cách lùi lại |
+|---|---|
+| Màn hình nhiễu, sai màu | `-DSPI_FREQUENCY=40000000` trong `platformio.ini` |
+| Cảm ứng loạn hoặc màn hình lỗi do DMA | Thêm `-DTFT_USE_DMA=0` vào `build_flags` |
+| Không khởi động / reset liên tục | Xoá dòng `board_build.f_flash = 80000000L` |
+
+Nạp firmware: `cd firmware && ~/.platformio/penv/bin/pio run -t upload` (cắm USB). Chưa có OTA vì phân vùng `huge_app.csv` chỉ có một vùng app.
+
+Việc tiếp theo có thể làm: tăng buffer vẽ từ 8 lên 12-16 dòng (mượt hơn, tốn thêm 8-15 KB RAM); giảm stack task Xiaozhi xuống 8 KB; sửa lỗi lệch màu của công cụ chụp màn hình.

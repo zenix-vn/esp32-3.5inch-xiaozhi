@@ -51,6 +51,7 @@ static void phScan() {
 static void phDraw() {
   const char *path = phFiles[phIdx].c_str();
   uint16_t w = 0, h = 0;
+  tftIdle();
   tft.fillScreen(TFT_BLACK);
   if (TJpgDec.getSdJpgSize(&w, &h, path) != JDR_OK || !w || !h) return;
   uint8_t sc = 1;

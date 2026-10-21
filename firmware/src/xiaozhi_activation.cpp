@@ -89,6 +89,7 @@ static int postLocked(const String &url, const String &body, String &resp) {
   Serial.printf("XZ heap=%u maxblock=%u dns=%d\n", ESP.getFreeHeap(), ESP.getMaxAllocHeap(),
                 WiFi.hostByName("api.tenclass.net", ip));
   int status = http.POST(body);
+  Serial.printf("XZ stack left=%u\n", (unsigned)uxTaskGetStackHighWaterMark(nullptr));  // bytes never used
   if (status > 0) {
     resp = http.getString();
   } else {
@@ -191,7 +192,8 @@ void xiaozhiBegin() {
     p.putString("uuid", uuid);
   }
   p.end();
-  xTaskCreatePinnedToCore(task, "xz_act", 16384, nullptr, 1, nullptr, 0);
+  // 16 KB was generous for TLS + HTTP + JSON; 12 KB still leaves a margin ("XZ stack left" on the log)
+  xTaskCreatePinnedToCore(task, "xz_act", 12288, nullptr, 1, nullptr, 0);
 }
 
 XzState xiaozhiState() { return state; }

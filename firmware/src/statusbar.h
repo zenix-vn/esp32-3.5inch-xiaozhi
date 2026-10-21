@@ -214,22 +214,22 @@ static void statusbarRefresh(lv_timer_t * = nullptr) {
   struct tm t;
   bool timeOk = time(nullptr) > 1700000000 && getLocalTime(&t, 0);
   if (homeIsActive() || !timeOk) {
-    lv_label_set_text(sbTime, "");
+    setText(sbTime, "");
   } else if (cfg.clock24) {
-    lv_label_set_text_fmt(sbTime, "%02d:%02d", t.tm_hour, t.tm_min);
+    setTextFmt(sbTime, "%02d:%02d", t.tm_hour, t.tm_min);
   } else {
-    lv_label_set_text_fmt(sbTime, "%d:%02d %s", t.tm_hour % 12 ? t.tm_hour % 12 : 12, t.tm_min, t.tm_hour < 12 ? "AM" : "PM");
+    setTextFmt(sbTime, "%d:%02d %s", t.tm_hour % 12 ? t.tm_hour % 12 : 12, t.tm_min, t.tm_hour < 12 ? "AM" : "PM");
   }
   const char *al = dgAlert();
   if (al) {
-    lv_label_set_text(sbDragon, al);
+    setText(sbDragon, al);
     lv_obj_clear_flag(sbDragon, LV_OBJ_FLAG_HIDDEN);
   } else {
     lv_obj_add_flag(sbDragon, LV_OBJ_FLAG_HIDDEN);
   }
   bool ai = xiaozhiState() == XZ_ACTIVATED;
   lv_obj_set_style_text_color(sbAi, ai ? C_OK : C_MUTED, 0);
-  lv_label_set_text(sbAi, cfg.dnd ? LV_SYMBOL_MUTE "  AI" : "AI");
+  setText(sbAi, cfg.dnd ? LV_SYMBOL_MUTE "  AI" : "AI");
   bool on = wifiConnected();
   int rssi = on ? WiFi.RSSI() : -100;
   int level = !on ? 0 : rssi > -55 ? 4 : rssi > -65 ? 3 : rssi > -75 ? 2 : 1;

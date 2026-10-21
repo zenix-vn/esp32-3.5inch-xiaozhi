@@ -20,7 +20,7 @@
 #include "weather.h"
 #include "icons_img.h"
 
-#define FW_VERSION "2.0.0"
+#define FW_VERSION "2.1.0"
 static const int PIN_BL = 27;
 
 TFT_eSPI tft;
@@ -32,7 +32,7 @@ extern "C" void lv_assert_fail(void) {
   delay(200);
   ESP.restart();
 }
-static SPIClass sdSPI(HSPI);  // TF slot: CS5 SCK18 MISO19 MOSI23
+static SPIClass sdSPI(VSPI);  // TF slot: CS5 SCK18 MISO19 MOSI23 (VSPI's native pins; HSPI drives the display)
 static bool sdOk = false;
 static lv_color_t *buf1, *buf2;  // draw buffers, allocated at boot (not .bss: keeps the big RAM region free for TLS)
 
@@ -56,15 +56,49 @@ static lv_color_t *buf1, *buf2;  // draw buffers, allocated at boot (not .bss: k
 #define F_DISPLAY  (&lv_font_montserrat_48)
 
 // ---------- display / backlight ----------
+// DMA flush: a strip is sent to the panel while LVGL renders the next one into the other buffer, instead
+// of the CPU waiting ~1.5 ms per strip on SPI. Build with -DTFT_USE_DMA=0 for the old blocking transfer.
+#ifndef TFT_USE_DMA
+#define TFT_USE_DMA 1
+#endif
 static volatile uint32_t gFlushCount = 0;  // photos.h redraws its picture when LVGL paints over it
+static bool tftBusOpen = false;            // a DMA strip may still be in flight; the display holds the SPI bus
+
+// Call before any other use of the shared SPI bus (touch, photos, screenshot): finishes the last DMA
+// strip and releases the bus.
+static void tftIdle() {
+  if (!tftBusOpen) return;
+  tft.dmaWait();
+  tft.endWrite();
+  tftBusOpen = false;
+  // The IDF driver behind the DMA sets a MISO sampling delay tuned for 80 MHz; the slow CPU reads that follow
+  // (touch at 2.5 MHz, screen readback at 16 MHz) need Arduino's default of no delay or they read shifted bits.
+  WRITE_PERI_REG(SPI_CTRL2_REG(2), 0);  // SPI2 = HSPI, the display bus
+}
+
 static void dispFlush(lv_disp_drv_t *drv, const lv_area_t *a, lv_color_t *c) {
   gFlushCount++;
-  uint32_t w = a->x2 - a->x1 + 1, h = a->y2 - a->y1 + 1;
+  uint32_t w = a->x2 - a->x1 + 1, h = a->y2 - a->y1 + 1, n = w * h;
+#if TFT_USE_DMA
+  // LVGL renders little-endian RGB565, the panel wants big-endian: swap in place, two pixels per word
+  uint32_t *q = (uint32_t *)&c->full;
+  for (uint32_t i = 0; i < n / 2; i++) q[i] = ((q[i] & 0x00FF00FFu) << 8) | ((q[i] >> 8) & 0x00FF00FFu);
+  if (n & 1) c[n - 1].full = __builtin_bswap16(c[n - 1].full);
+  if (tftBusOpen) {
+    tft.dmaWait();  // the previous strip must be out before the address window changes
+  } else {
+    tft.startWrite();
+    tftBusOpen = true;
+  }
+  tft.setAddrWindow(a->x1, a->y1, w, h);
+  tft.pushPixelsDMA((uint16_t *)&c->full, n);
+#else
   tft.startWrite();
   tft.setAddrWindow(a->x1, a->y1, w, h);
-  tft.pushColors((uint16_t *)&c->full, w * h, true);
+  tft.pushColors((uint16_t *)&c->full, n, true);
   tft.endWrite();
-  lv_disp_flush_ready(drv);
+#endif
+  lv_disp_flush_ready(drv);  // double-buffered: LVGL draws into the other buffer while this one is sent
 }
 
 static uint8_t blLevel = 255;
@@ -93,6 +127,22 @@ static lv_obj_t *makeLabel(lv_obj_t *parent, const char *text, const lv_font_t *
   lv_obj_set_style_text_font(l, font, 0);
   lv_obj_set_style_text_color(l, color, 0);
   return l;
+}
+
+// lv_label_set_text() re-lays out and repaints a label even when the text is unchanged. The refresh timers
+// (home, status bar, game, clock...) rewrite every label each tick, so they go through these instead and
+// only labels whose text really changed are redrawn.
+static void setText(lv_obj_t *l, const char *t) {
+  if (strcmp(lv_label_get_text(l), t) != 0) lv_label_set_text(l, t);
+}
+static void setTextFmt(lv_obj_t *l, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+static void setTextFmt(lv_obj_t *l, const char *fmt, ...) {
+  char b[256];
+  va_list ap;
+  va_start(ap, fmt);
+  vsnprintf(b, sizeof(b), fmt, ap);
+  va_end(ap);
+  setText(l, b);
 }
 
 static lv_obj_t *makeCard(lv_obj_t *parent, int w, int h) {
@@ -323,6 +373,8 @@ static void buildUI() {
   updateDots(activeTileIndex());
 
   lv_timer_create(homeTick, 1000, nullptr);
+  // homeTick skips the home screen while a page covers it; bring it up to date as the slide back starts
+  lv_obj_add_event_cb(mainScr, [](lv_event_t *) { refreshHome(); }, LV_EVENT_SCREEN_LOAD_START, nullptr);
   refreshHome();
 }
 
@@ -333,6 +385,9 @@ void setup() {
   tft.init();
   tft.setRotation(1);
   tft.fillScreen(TFT_BLACK);
+#if TFT_USE_DMA
+  tft.initDMA();
+#endif
   backlightInit();
   {
     Preferences p;
@@ -420,7 +475,7 @@ static void idleReturnTick() {
 void loop() {
   wifiLoop();
   webTick();
-  lv_timer_handler();
+  uint32_t idle = lv_timer_handler();  // ms until LVGL's next timer is due
   photosLoop();
   sleepTick();
   idleReturnTick();
@@ -436,5 +491,12 @@ void loop() {
     themeTick();
     ambientTick();
   }
-  delay(5);
+  static uint32_t memAt = 0;
+  if (millis() - memAt > 30000) {  // heap health on the serial log: TLS needs ~40 KB in one block
+    memAt = millis();
+    Serial.printf("MEM free=%u min=%u largest=%u wifi=%d %s\n", (unsigned)ESP.getFreeHeap(), (unsigned)ESP.getMinFreeHeap(),
+                  (unsigned)ESP.getMaxAllocHeap(), (int)WiFi.status(), wifiStatus());
+  }
+  // sleep only until LVGL needs to run again (was a fixed 5 ms, which delayed every frame and touch read)
+  delay(idle < 1 ? 1 : idle > 5 ? 5 : idle);
 }

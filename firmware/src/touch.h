@@ -8,6 +8,7 @@
 #include "vi_fonts.h"
 
 extern TFT_eSPI tft;
+static void tftIdle();  // main.cpp: wait for the display's DMA and release the shared SPI bus
 static const int XPT_IRQ = 36;  // touch shares the display SPI bus; CS is TOUCH_CS (33)
 
 struct TouchCal {
@@ -21,6 +22,7 @@ static void xptInit() { pinMode(XPT_IRQ, INPUT); }
 // Returns true while pressed; raw 12-bit values in rx/ry (read through TFT_eSPI on the shared bus).
 static bool xptSample(int &rx, int &ry) {
   if (digitalRead(XPT_IRQ) != LOW) return false;
+  tftIdle();
   uint16_t x = 0, y = 0;
   if (tft.getTouchRawZ() < 80) return false;
   tft.getTouchRaw(&x, &y);
@@ -168,6 +170,7 @@ static void touchCalibrate() {
       if (millis() - lastDiag > 700) {  // diagnostics: raw reads whether or not touched
         lastDiag = millis();
         uint16_t dx = 0, dy = 0;
+        tftIdle();
         tft.getTouchRaw(&dx, &dy);
         Serial.printf("XPT irq=%d x=%u y=%u z=%u\n", digitalRead(XPT_IRQ), dx, dy, tft.getTouchRawZ());
       }

@@ -180,6 +180,11 @@ void wifiLoop() {
     }
   }
 
+  // The status text is only read by the UI: rebuilding it (two String allocations) on every loop pass
+  // churned the heap a couple of hundred times a second.
+  static uint32_t statusAt = 0;
+  if (millis() - statusAt < 250) return;
+  statusAt = millis();
   if (WiFi.status() == WL_CONNECTED) {
     snprintf(statusBuf, sizeof(statusBuf), "%s  %s", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
     if (!ntpStarted) startNtp();

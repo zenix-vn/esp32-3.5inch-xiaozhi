@@ -17,171 +17,299 @@ static const char *appName(int i);  // main.cpp
 static const char WEB_PAGE[] PROGMEM = R"HTML(<!doctype html><html><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1"><title>Zin100</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--card:#151b33;--line:#2a3359;--txt:#f2f5ff;--mut:#8a93b8;--acc:#38e1ff;--warn:#ffb84a;--bad:#ff5c7a;--ok:#3deba0}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:16px system-ui,sans-serif}
-main{max-width:560px;margin:auto;padding:20px 16px 60px}h1{font-size:22px;margin:4px 0 2px}
-.sub{color:var(--mut);font-size:14px;margin-bottom:12px}
-section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0}
-h2{font-size:13px;letter-spacing:.08em;color:var(--mut);margin:0 0 6px;font-weight:600;text-transform:uppercase}
-p.hint{color:var(--mut);font-size:13px;margin:2px 0 8px}
-label{display:block;color:var(--mut);font-size:14px;margin:10px 0 4px}
-input,select,textarea,button{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:#0b1020;color:var(--txt);font:inherit}
-textarea{min-height:92px;font-family:ui-monospace,monospace;font-size:13px;word-break:break-all}
-input[type=checkbox]{width:20px;height:20px;padding:0;accent-color:var(--acc)}
-.chk{display:flex;align-items:center;gap:10px;color:var(--txt);margin:12px 0 2px}
-button{background:var(--acc);color:#04101a;font-weight:600;border:0;margin-top:12px;cursor:pointer}
-button.sec{background:#1f2849;color:var(--txt);border:1px solid var(--line)}
-.row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:15px}.row span:first-child{color:var(--mut)}
-.row span:last-child{text-align:right;word-break:break-all}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.app{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}.app:first-child{border-top:0}
-.app span{flex:1}.app button{width:40px;margin:0;padding:6px 0}.app input{margin:0}
-.res{padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-top:8px;cursor:pointer}.res:hover{border-color:var(--acc)}
-.res small{color:var(--mut);display:block}
-.f{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:15px}.f:first-child{border-top:0}
-.f .n{flex:1;word-break:break-all;cursor:default}.f .n.dir{color:var(--acc);cursor:pointer}.f small{color:var(--mut)}
-.f a,.f button{width:auto;margin:0;padding:6px 10px;font-size:13px;border-radius:8px;text-decoration:none}
-.f a{background:#1f2849;color:var(--txt);border:1px solid var(--line)}
-#msg{position:fixed;left:16px;right:16px;bottom:16px;max-width:528px;margin:auto;padding:12px 14px;border-radius:12px;background:var(--ok);color:#04101a;font-weight:600;display:none}
-#msg.err{background:var(--bad)}
-</style></head><body><main>
-<h1>Zin100</h1><div class=sub id=addr></div>
-<section><h2 data-t=status></h2><div id=info></div></section>
+:root{color-scheme:dark;--bg:#0a0e1a;--surf:#121829;--surf2:#1a2137;--line:#262e48;--txt:#eef1fb;--mut:#8b93b0;--acc:#4cc9f0;--onacc:#03111c;--accs:rgba(76,201,240,.14);--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--sh:0 1px 2px rgba(0,0,0,.3)}
+@media(prefers-color-scheme:light){:root{color-scheme:light;--bg:#f3f5fa;--surf:#fff;--surf2:#f1f3f9;--line:#e1e5ef;--txt:#131a2e;--mut:#667089;--acc:#0a7fd0;--onacc:#fff;--accs:rgba(10,127,208,.1);--ok:#059669;--warn:#d97706;--bad:#dc2626;--sh:0 1px 3px rgba(20,30,60,.08)}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* top bar */
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar{max-width:1060px;margin:auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--acc),#7b5cff);color:#fff;display:grid;place-items:center;font-weight:800}
+.brand{flex:1;min-width:0}.brand b{display:block;font-size:16px}.brand small{color:var(--mut);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chips{display:flex;gap:6px}.chip{display:flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line);border-radius:99px;font-size:12px;color:var(--mut);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mut)}.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}
+/* layout */
+.wrap{max-width:1060px;margin:auto;padding:20px 16px 90px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:28px;align-items:start}
+nav{position:sticky;top:76px;display:flex;flex-direction:column;gap:2px}
+nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--mut);text-decoration:none;font-weight:500}
+nav a:hover{background:var(--surf2);color:var(--txt)}nav a.on{background:var(--accs);color:var(--acc)}
+main{max-width:680px;width:100%}.panel{display:none}.panel.on{display:block;animation:fd .2s}
+@keyframes fd{from{opacity:0;transform:translateY(4px)}}
+h1.pt{font-size:22px;margin:2px 0 14px}
+@media(max-width:820px){.wrap{display:block;padding-top:0}.chips .chip.w{display:none}
+ nav{position:sticky;top:57px;z-index:4;flex-direction:row;overflow-x:auto;scrollbar-width:none;margin:0 -16px 14px;padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--line)}
+ nav::-webkit-scrollbar{display:none}nav a{flex:none;padding:7px 12px;font-size:14px}nav a .i{width:16px;height:16px}h1.pt{display:none}}
+/* cards */
+.card{background:var(--surf);border:1px solid var(--line);border-radius:16px;margin:0 0 14px;box-shadow:var(--sh)}
+.card>.hd{padding:14px 18px 0}.card h2{font-size:15px;margin:0}.card .hd p{margin:3px 0 0;color:var(--mut);font-size:13px}
+.bd{padding:6px 18px 14px}.ft{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:12px 18px;border-top:1px solid var(--line);flex-wrap:wrap}
+.rn{margin-right:auto;font-size:12px;color:var(--warn);display:flex;align-items:center;gap:6px}.rn::before{content:"↻";font-weight:700}
+.hint{color:var(--mut);font-size:13px;margin:6px 0}
+.fld{margin:12px 0 0}.fld>label,.lbl{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;font-weight:500;margin:0 0 6px}
+.lbl output{color:var(--txt);font-variant-numeric:tabular-nums}
+input,select,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surf2);color:var(--txt);font:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--accs)}
+select{appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238b93b0' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+textarea{min-height:96px;font:13px ui-monospace,Menlo,monospace;word-break:break-all;resize:vertical}
+input[type=range]{padding:0;border:0;background:none;accent-color:var(--acc);box-shadow:none;height:24px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.two>.fld{margin-top:12px}
+.rng{display:flex;align-items:center;gap:10px}.rng span{color:var(--mut)}
+/* switch rows */
+.sw-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-top:1px solid var(--line);cursor:pointer}
+.bd>.sw-row:first-child{border-top:0}
+.sw{appearance:none;flex:none;width:42px;height:24px;margin:0;padding:0;border-radius:99px;background:var(--line);position:relative;cursor:pointer;border:0;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .2s}
+.sw:checked{background:var(--acc)}.sw:checked::after{transform:translateX(18px)}.sw:disabled{opacity:.5}.sw:focus{box-shadow:0 0 0 3px var(--accs)}
+/* segmented */
+.segw{display:flex;flex-wrap:wrap;gap:4px;padding:4px;background:var(--surf2);border:1px solid var(--line);border-radius:12px}
+.segw button{flex:1 1 auto;min-width:0;padding:8px 10px;border:0;border-radius:8px;background:none;color:var(--mut);font:inherit;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.segw button.on{background:var(--surf);color:var(--txt);box-shadow:var(--sh);outline:1px solid var(--line)}
+.segw.th button::before{content:"";width:12px;height:12px;border-radius:50%}
+.segw.th button:nth-child(1)::before{background:linear-gradient(135deg,#7dd3fc,#2563eb)}.segw.th button:nth-child(2)::before{background:linear-gradient(135deg,#86efac,#15803d)}
+.segw.th button:nth-child(3)::before{background:linear-gradient(135deg,#fdba74,#db2777)}.segw.th button:nth-child(4)::before{background:linear-gradient(135deg,#e5e7eb,#4b5563)}
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 16px;border-radius:10px;border:1px solid transparent;font:inherit;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;white-space:nowrap;transition:filter .15s,background .15s}
+.pri{background:var(--acc);color:var(--onacc);min-width:96px}.pri:hover{filter:brightness(1.08)}
+.sec{background:var(--surf2);color:var(--txt);border-color:var(--line)}.sec:hover{border-color:var(--mut)}
+.ghost{background:none;color:var(--acc);padding:8px 0}.dan{background:none;color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent)}.dan:hover{background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.ib{width:34px;height:34px;padding:0;border-radius:9px}.ib .i{width:16px;height:16px}
+.btn:disabled{opacity:.4;cursor:default}
+.grp{display:flex;gap:8px}.grp input{flex:1}
+/* status tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:14px 18px 18px}
+.tile{background:var(--surf2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.tile small{display:block;color:var(--mut);font-size:12px}.tile b{display:block;font-size:16px;margin-top:2px;overflow-wrap:anywhere}.tile em{font-style:normal;font-size:12px;color:var(--mut)}
+.sig{display:inline-flex;gap:2px;align-items:flex-end;height:12px;margin-left:6px}.sig i{width:3px;background:var(--line);border-radius:1px}.sig i.on{background:var(--ok)}
+/* lists */
+.lst{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:10px}
+.it{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 12px;border-top:1px solid var(--line);min-height:50px}.it:first-child{border-top:0}
+.it .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.it .n small{color:var(--mut);margin-left:6px}
+.it.dir{cursor:pointer}.it.dir:hover,.res:hover{background:var(--surf2)}.it .ico{color:var(--mut)}.it.dir .ico{color:var(--acc)}
+.it .tag{font-size:12px;color:var(--mut)}.empty{padding:22px;text-align:center;color:var(--mut);font-size:14px}
+.res{display:block;width:100%;text-align:left;padding:10px 12px;background:none;border:0;border-top:1px solid var(--line);color:var(--txt);font:inherit;cursor:pointer}.res:first-child{border-top:0}.res small{color:var(--mut);display:block}
+.loc{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surf2);border-radius:12px;margin-top:10px}.loc .i{color:var(--acc);width:22px;height:22px}.loc b{display:block}.loc small{color:var(--mut)}
+/* card manager */
+.crumb{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px}
+.crumb code{font:13px ui-monospace,Menlo,monospace;color:var(--txt);overflow-wrap:anywhere}
+.meter{height:6px;border-radius:9px;background:var(--surf2);overflow:hidden;margin-top:8px}.meter i{display:block;height:100%;background:var(--acc);border-radius:9px}
+.drop{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px;border:1.5px dashed var(--line);border-radius:12px;color:var(--mut);text-align:center;cursor:pointer;margin-top:12px;transition:border-color .15s,background .15s}
+.drop:hover,.drop.ov{border-color:var(--acc);background:var(--accs);color:var(--txt)}.drop .i{width:26px;height:26px;color:var(--acc)}
+.prog{font-size:13px;color:var(--mut);margin:4px 0 0}.prog:empty{display:none}
+canvas#wpPrev{display:block;width:100%;aspect-ratio:3/2;border-radius:12px;background:#000;margin-top:10px;border:1px solid var(--line)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 10px;border-radius:99px;background:var(--surf2);color:var(--mut);border:1px solid var(--line)}
+/* dragon */
+.dgh{display:flex;align-items:center;gap:14px;padding:16px 18px 4px}.dgh .av{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#f97316,#db2777);display:grid;place-items:center;color:#fff}.dgh .av .i{width:28px;height:28px}
+.dgh b{font-size:18px;display:block}.dgh small{color:var(--mut)}
+.pb{padding:10px 18px 0}.pb .meter{height:8px}.pb .lbl{margin:0}
+.tl{list-style:none;margin:0;padding:0 18px 16px}.tl li{position:relative;padding:0 0 12px 20px;font-size:14px}.tl li::before{content:"";position:absolute;left:3px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--acc)}
+.tl li::after{content:"";position:absolute;left:6.5px;top:16px;bottom:0;width:1px;background:var(--line)}.tl li:last-child::after{display:none}.tl small{display:block;color:var(--mut);font-size:12px}
+.card.danger{border-color:color-mix(in srgb,var(--bad) 35%,var(--line))}
+/* toast */
+#msg{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);max-width:calc(100% - 32px);padding:11px 18px;border-radius:12px;background:var(--txt);color:var(--bg);font-weight:600;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:9;display:flex;gap:8px;align-items:center}
+#msg.show{opacity:1;transform:translate(-50%,0)}#msg::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}#msg.err::before{background:var(--bad)}
+@media(max-width:480px){.two{grid-template-columns:1fr;gap:0}.ft .pri{flex:1}}
+</style></head><body>
+<svg width=0 height=0 style="position:absolute"><defs>
+<symbol id=i-home viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id=i-disp viewBox="0 0 24 24"><rect x=3 y=4 width=18 height=12 rx=2 /><path d="M8 20h8M12 16v4"/></symbol>
+<symbol id=i-img viewBox="0 0 24 24"><rect x=3 y=3 width=18 height=18 rx=2 /><circle cx=9 cy=9 r=2 /><path d="m21 15-5-5L5 21"/></symbol>
+<symbol id=i-cloud viewBox="0 0 24 24"><path d="M17.5 19H7a5 5 0 1 1 1.6-9.7A6 6 0 0 1 20 11.5 3.8 3.8 0 0 1 17.5 19z"/></symbol>
+<symbol id=i-qr viewBox="0 0 24 24"><rect x=3 y=3 width=7 height=7 rx=1 /><rect x=14 y=3 width=7 height=7 rx=1 /><rect x=3 y=14 width=7 height=7 rx=1 /><path d="M14 14h3v3h-3zM21 14v.01M14 21h.01M17 21h4v-4"/></symbol>
+<symbol id=i-apps viewBox="0 0 24 24"><rect x=3 y=3 width=7 height=7 rx=2 /><rect x=14 y=3 width=7 height=7 rx=2 /><rect x=3 y=14 width=7 height=7 rx=2 /><rect x=14 y=14 width=7 height=7 rx=2 /></symbol>
+<symbol id=i-dg viewBox="0 0 24 24"><path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.2-3.8 2.5-5 0 2 .8 3.2 2 3.5C11 9 10.8 6 12 3z"/></symbol>
+<symbol id=i-sys viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx=15 cy=6 r=2 /><circle cx=9 cy=12 r=2 /><circle cx=17 cy=18 r=2 /></symbol>
+<symbol id=i-dir viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+<symbol id=i-file viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5"/></symbol>
+<symbol id=i-dl viewBox="0 0 24 24"><path d="M12 4v11m-4-4 4 4 4-4M5 20h14"/></symbol>
+<symbol id=i-up viewBox="0 0 24 24"><path d="M12 20V9m-4 4 4-4 4 4M5 4h14"/></symbol>
+<symbol id=i-del viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+<symbol id=i-cu viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
+<symbol id=i-cd viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id=i-back viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+<symbol id=i-pin viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx=12 cy=9 r=2.5 /></symbol>
+<symbol id=i-plus viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id=i-lock viewBox="0 0 24 24"><rect x=5 y=11 width=14 height=10 rx=2 /><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+</defs></svg>
+<header class=top><div class=bar><div class=logo>Z</div><div class=brand><b id=hName>Zin100</b><small id=addr></small></div><div class=chips id=chips></div></div></header>
+<div class=wrap>
+<nav id=nav>
+<a href=#ov data-p=ov><svg class=i><use href=#i-home /></svg><span data-t=nOv></span></a>
+<a href=#disp data-p=disp><svg class=i><use href=#i-disp /></svg><span data-t=nDisp></span></a>
+<a href=#media data-p=media><svg class=i><use href=#i-img /></svg><span data-t=nMedia></span></a>
+<a href=#wx data-p=wx><svg class=i><use href=#i-cloud /></svg><span data-t=wxTitle></span></a>
+<a href=#qr data-p=qr><svg class=i><use href=#i-qr /></svg><span data-t=nQr></span></a>
+<a href=#apps data-p=apps><svg class=i><use href=#i-apps /></svg><span data-t=appsTitle></span></a>
+<a href=#dg data-p=dg><svg class=i><use href=#i-dg /></svg><span data-t=nDg></span></a>
+<a href=#sys data-p=sys><svg class=i><use href=#i-sys /></svg><span data-t=nSys></span></a>
+</nav>
+<main>
 
-<section><h2 data-t=lang></h2>
-<select id=lang><option value=0>Tiếng Việt<option value=1>English</select>
-<p class=hint data-t=restartNote></p>
-<button id=saveLang data-t=save></button></section>
+<div class=panel id=p-ov><h1 class=pt data-t=nOv></h1>
+<section class=card><div class=hd><h2 data-t=status></h2></div><div class=tiles id=info></div></section>
+<section class=card><div class=hd><h2 data-t=dragonTitle></h2></div><div id=ovDg></div></section>
+</div>
 
-<section><h2 data-t=startTitle></h2>
-<label data-t=startLbl></label><select id=start><option value=0 data-t=tHome><option value=1 data-t=tQr><option value=2 data-t=tApps></select>
-<label data-t=idleLbl></label><select id=idle><option value=0 data-t=never><option value=30>30 s<option value=60>1 min<option value=120>2 min<option value=300>5 min<option value=600>10 min</select>
-<label class=chk><input type=checkbox id=qrOn><span data-t=qrOn></span></label>
-<p class=hint data-t=restartNote></p>
-<button id=saveStart data-t=save></button></section>
+<div class=panel id=p-disp><h1 class=pt data-t=nDisp></h1>
+<section class=card><div class=hd><h2 data-t=startTitle></h2></div><div class=bd>
+<div class=fld><label for=start data-t=startLbl></label><select id=start><option value=0 data-t=tHome><option value=1 data-t=tQr><option value=2 data-t=tApps></select></div>
+<div class=fld><label for=idle data-t=idleLbl></label><select id=idle><option value=0 data-t=never><option value=30>30 s<option value=60>1 min<option value=120>2 min<option value=300>5 min<option value=600>10 min</select></div>
+<label class=sw-row style="margin-top:12px"><span data-t=qrOn></span><input type=checkbox class=sw id=qrOn></label>
+</div><div class=ft><span class=rn data-t=restartNote></span><button class="btn pri" id=saveStart data-t=save></button></div></section>
 
-<section><h2 data-t=lookTitle></h2>
-<label data-t=themeLbl></label><select id=theme><option value=0 data-t=thSky><option value=1 data-t=thForest><option value=2 data-t=thSunset><option value=3 data-t=thMono></select>
-<label class=chk><input type=checkbox id=fx><span data-t=fxOn></span></label>
-<label class=chk><input type=checkbox id=lunar><span data-t=lunarOn></span></label>
-<label class=chk><input type=checkbox id=quote><span data-t=quoteOn></span></label>
-<label data-t=phLbl></label><select id=phS><option value=5>5 s<option value=10>10 s<option value=20>20 s<option value=30>30 s<option value=60>60 s</select>
-<button id=saveLook data-t=save></button></section>
+<section class=card><div class=hd><h2 data-t=lookTitle></h2></div><div class=bd>
+<div class=fld><span class=lbl data-t=themeLbl></span><select id=theme class=seg data-k=th><option value=0 data-t=thSky><option value=1 data-t=thForest><option value=2 data-t=thSunset><option value=3 data-t=thMono></select></div>
+<label class=sw-row style="margin-top:8px"><span data-t=fxOn></span><input type=checkbox class=sw id=fx></label>
+<label class=sw-row><span data-t=lunarOn></span><input type=checkbox class=sw id=lunar></label>
+<label class=sw-row><span data-t=quoteOn></span><input type=checkbox class=sw id=quote></label>
+<div class=fld style="margin-top:4px"><label for=phS data-t=phLbl></label><select id=phS><option value=5>5 s<option value=10>10 s<option value=20>20 s<option value=30>30 s<option value=60>60 s</select></div>
+</div><div class=ft><button class="btn pri" id=saveLook data-t=save></button></div></section>
 
-<section><h2 data-t=ambTitle></h2>
-<label data-t=idleMLbl></label><select id=idleM><option value=1 data-t=idleAmb><option value=0 data-t=idleOff></select>
-<p class=hint data-t=idleHint></p>
-<label data-t=ambSched></label>
-<div class=two><select id=ambS></select><select id=ambE></select></div>
-<label data-t=volLbl></label><input type=range id=vol min=0 max=100>
-<button id=saveAmb data-t=save></button></section>
+<section class=card><div class=hd><h2 data-t=clockTitle></h2></div><div class=bd>
+<div class=two><div class=fld><span class=lbl data-t=timeFmt></span><select id=c24 class=seg><option value=1 data-t=h24><option value=0 data-t=h12></select></div>
+<div class=fld><label for=datef data-t=dateFmt></label><select id=datef><option value=0 data-t=dLong><option value=1 data-t=dNum><option value=2 data-t=dHide></select></div></div>
+<label class=sw-row style="margin-top:12px"><span data-t=greetOn></span><input type=checkbox class=sw id=greet></label>
+<div class=fld style="margin-top:0"><label for=name data-t=nameLbl></label><input id=name maxlength=20 autocomplete=off></div>
+</div><div class=ft><button class="btn pri" id=saveClock data-t=save></button></div></section>
 
-<section><h2 data-t=clockTitle></h2>
-<div class=two><div><label data-t=timeFmt></label><select id=c24><option value=1 data-t=h24><option value=0 data-t=h12></select></div>
-<div><label data-t=dateFmt></label><select id=datef><option value=0 data-t=dLong><option value=1 data-t=dNum><option value=2 data-t=dHide></select></div></div>
-<label class=chk><input type=checkbox id=greet><span data-t=greetOn></span></label>
-<label data-t=nameLbl></label><input id=name maxlength=20 autocomplete=off>
-<button id=saveClock data-t=save></button></section>
+<section class=card><div class=hd><h2 data-t=ambTitle></h2><p data-t=idleHint></p></div><div class=bd>
+<div class=fld><label for=idleM data-t=idleMLbl></label><select id=idleM><option value=1 data-t=idleAmb><option value=0 data-t=idleOff></select></div>
+<div class=fld><span class=lbl data-t=ambSched></span><div class=rng><select id=ambS></select><span>→</span><select id=ambE></select></div></div>
+<div class=fld><span class=lbl><span data-t=volLbl></span><output id=volV></output></span><input type=range id=vol min=0 max=100></div>
+</div><div class=ft><button class="btn pri" id=saveAmb data-t=save></button></div></section>
+</div>
 
-<section><h2 data-t=wxTitle></h2>
-<div class=row><span data-t=wxNow></span><span id=wxNow></span></div>
-<label data-t=wxSearch></label><div class=two><input id=wxQ data-ph=wxPh><button class=sec id=wxFind data-t=search style="margin:0"></button></div>
+<div class=panel id=p-media><h1 class=pt data-t=nMedia></h1>
+<section class=card><div class=hd><h2 data-t=wpTitle></h2><p data-t=wpHint></p></div><div class=bd>
+<canvas id=wpPrev width=480 height=320></canvas>
+<div class=crumb><span class=badge id=wpState></span><label class="btn sec"><input type=file id=wpFile accept="image/*" hidden><svg class=i><use href=#i-img /></svg><span data-t=wpChoose></span></label></div>
+<div class=fld><span class=lbl><span data-t=wpDim></span><output id=wpDimV></output></span><input type=range id=wpDim min=0 max=70 value=35></div>
+</div><div class=ft><button class="btn dan" id=wpOff data-t=wpOff></button><button class="btn pri" id=wpSet data-t=wpSet></button></div></section>
+
+<section class=card><div class=hd><h2 data-t=sdTitle></h2></div><div class=bd>
+<div class=crumb><code id=sdPath>/</code><span class=hint style="margin:0" id=sdFree></span></div>
+<div class=meter><i id=sdBar style="width:0"></i></div>
+<div class=lst id=sdList></div>
+<label class=drop id=sdDrop><input type=file id=sdFiles multiple hidden><svg class=i><use href=#i-up /></svg><span id=sdPick data-t=sdChoose></span></label>
+<label class=sw-row style="border:0"><span data-t=sdShrink></span><input type=checkbox class=sw id=sdShrink checked></label>
+<p class=prog id=sdProg></p>
+</div><div class=ft><button class="btn sec" id=sdMk><svg class=i><use href=#i-plus /></svg><span data-t=sdMkdir></span></button><button class="btn pri" id=sdUp data-t=sdUpload></button></div></section>
+</div>
+
+<div class=panel id=p-wx><h1 class=pt data-t=wxTitle></h1>
+<section class=card><div class=hd><h2 data-t=wxNow></h2></div><div class=bd>
+<div class=loc><svg class=i><use href=#i-pin /></svg><div><b id=wxCity>—</b><small id=wxNow></small></div></div>
+<div class=fld><label for=wxQ data-t=wxSearch></label><div class=grp><input id=wxQ data-ph=wxPh type=search><button class="btn sec" id=wxFind data-t=search></button></div></div>
 <div id=wxRes></div>
-<button class=sec id=wxAuto data-t=wxAuto></button>
-<label data-t=unit></label><select id=tempF><option value=0>°C<option value=1>°F</select>
-<button id=saveUnit data-t=save></button></section>
+<button class="btn ghost" id=wxAuto><svg class=i><use href=#i-pin /></svg><span data-t=wxAuto></span></button>
+</div></section>
+<section class=card><div class=hd><h2 data-t=unit></h2></div><div class=bd><div class=fld style="margin-top:6px"><select id=tempF class=seg><option value=0>°C<option value=1>°F</select></div></div>
+<div class=ft><button class="btn pri" id=saveUnit data-t=save></button></div></section>
+</div>
 
-<section><h2 data-t=qrTitle></h2>
-<p class=hint data-t=qrHint></p>
-<label data-t=qrT></label><input id=qrT maxlength=30 data-ph=qrTPh>
-<label data-t=qrB></label><input id=qrB maxlength=38>
-<div class=two><div><label data-t=qrN></label><input id=qrN maxlength=38></div><div><label data-t=qrA></label><input id=qrA maxlength=22 inputmode=numeric></div></div>
-<label data-t=qrP></label><textarea id=qrP maxlength=500 spellcheck=false></textarea>
-<p class=hint data-t=restartNote></p>
-<button id=saveQr data-t=save></button></section>
+<div class=panel id=p-qr><h1 class=pt data-t=nQr></h1>
+<section class=card><div class=hd><h2 data-t=qrTitle></h2><p data-t=qrHint></p></div><div class=bd>
+<div class=fld><label for=qrT data-t=qrT></label><input id=qrT maxlength=30 data-ph=qrTPh></div>
+<div class=fld><label for=qrB data-t=qrB></label><input id=qrB maxlength=38></div>
+<div class=two><div class=fld><label for=qrN data-t=qrN></label><input id=qrN maxlength=38></div><div class=fld><label for=qrA data-t=qrA></label><input id=qrA maxlength=22 inputmode=numeric></div></div>
+<div class=fld><label for=qrP><span data-t=qrP></span><output id=qrLen></output></label><textarea id=qrP maxlength=500 spellcheck=false placeholder="000201..."></textarea></div>
+</div><div class=ft><span class=rn data-t=restartNote></span><button class="btn pri" id=saveQr data-t=save></button></div></section>
+</div>
 
-<section><h2 data-t=appsTitle></h2>
-<p class=hint data-t=appsHint></p><div id=apps></div>
-<p class=hint data-t=restartNote></p>
-<button id=saveApps data-t=save></button></section>
+<div class=panel id=p-apps><h1 class=pt data-t=appsTitle></h1>
+<section class=card><div class=hd><h2 data-t=appsTitle></h2><p data-t=appsHint></p></div><div class=bd><div class=lst id=apps></div></div>
+<div class=ft><span class=rn data-t=restartNote></span><button class="btn pri" id=saveApps data-t=save></button></div></section>
+</div>
 
-<section><h2 data-t=wpTitle></h2>
-<p class=hint data-t=wpHint></p>
-<canvas id=wpPrev width=480 height=320 style="width:100%;border-radius:10px;background:#000"></canvas>
-<p class=hint id=wpState></p>
-<input type=file id=wpFile accept="image/*">
-<label data-t=wpDim></label><input type=range id=wpDim min=0 max=70 value=35>
-<div class=two><button id=wpSet data-t=wpSet></button><button class=sec id=wpOff data-t=wpOff></button></div></section>
+<div class=panel id=p-dg><h1 class=pt data-t=nDg></h1>
+<section class=card><div id=dgInfo></div></section>
+<section class=card><div class=hd><h2 data-t=dgName></h2></div><div class=bd><div class=fld style="margin-top:6px"><input id=dgNameIn maxlength=20 autocomplete=off></div></div>
+<div class=ft><button class="btn pri" id=saveDg data-t=save></button></div></section>
+<section class="card danger"><div class=hd><h2 data-t=danger></h2><p data-t=dgConfirm></p></div><div class=ft><button class="btn dan" id=dgReset data-t=dgReset></button></div></section>
+</div>
 
-<section><h2 data-t=sdTitle></h2>
-<div class=row><span id=sdPath>/</span><span id=sdFree></span></div>
-<div id=sdList></div>
-<label class=chk><input type=checkbox id=sdShrink checked><span data-t=sdShrink></span></label>
-<input type=file id=sdFiles multiple>
-<div class=two><button id=sdUp data-t=sdUpload></button><button class=sec id=sdMk data-t=sdMkdir></button></div>
-<p class=hint id=sdProg></p></section>
-
-<section><h2 data-t=dragonTitle></h2>
-<div id=dgInfo></div>
-<label data-t=dgName></label><input id=dgNameIn maxlength=20 autocomplete=off>
-<button id=saveDg data-t=save></button>
-<button class=sec id=dgReset data-t=dgReset></button></section>
-
-<section><h2 data-t=accessTitle></h2>
-<label data-t=hostLbl></label><input id=host autocapitalize=off maxlength=24>
-<button id=saveHost data-t=save></button>
-<label data-t=pwLbl></label><input id=wpw type=password autocomplete=new-password>
-<button id=savePw data-t=save></button></section>
-</main><div id=msg></div>
+<div class=panel id=p-sys><h1 class=pt data-t=nSys></h1>
+<section class=card><div class=hd><h2 data-t=lang></h2></div><div class=bd><div class=fld style="margin-top:6px"><select id=lang class=seg><option value=0>Tiếng Việt<option value=1>English</select></div></div>
+<div class=ft><span class=rn data-t=restartNote></span><button class="btn pri" id=saveLang data-t=save></button></div></section>
+<section class=card><div class=hd><h2 data-t=hostLbl></h2></div><div class=bd><div class=fld style="margin-top:6px"><div class=grp><input id=host autocapitalize=off autocomplete=off spellcheck=false maxlength=24><span class=hint style="align-self:center;margin:0">.local</span></div></div></div>
+<div class=ft><span class=rn data-t=restartNote></span><button class="btn pri" id=saveHost data-t=save></button></div></section>
+<section class=card><div class=hd><h2 data-t=pwLbl></h2><p data-t=pwHint></p></div><div class=bd><div class=fld style="margin-top:6px"><input id=wpw type=password autocomplete=new-password></div></div>
+<div class=ft><button class="btn pri" id=savePw data-t=save></button></div></section>
+</div>
+</main></div><div id=msg role=status></div>
 <script>
 const $=id=>document.getElementById(id);
-const D={vi:{status:'Trạng thái',lang:'Ngôn ngữ',restartNote:'Thiết bị sẽ tự khởi động lại để áp dụng.',save:'Lưu',startTitle:'Màn hình chính',startLbl:'Màn hình khi bật máy',tHome:'Trang chủ',tQr:'Mã QR thanh toán',tApps:'Ứng dụng',idleLbl:'Tự quay về màn hình chính sau',never:'Không bao giờ',qrOn:'Hiện trang QR thanh toán',
-clockTitle:'Đồng hồ & chào hỏi',timeFmt:'Định dạng giờ',h24:'24 giờ',h12:'12 giờ (SA/CH)',dateFmt:'Hiển thị ngày',dLong:'Đầy đủ (Thứ Hai, 19 tháng 10)',dNum:'Số (19/10/2026)',dHide:'Ẩn',greetOn:'Hiện lời chào',nameLbl:'Tên trong lời chào (để trống nếu không cần)',
-wxTitle:'Thời tiết',wxNow:'Vị trí hiện tại',wxSearch:'Tìm thành phố',wxPh:'Ví dụ: Đà Nẵng',search:'Tìm',wxAuto:'Tự xác định vị trí (theo IP)',unit:'Đơn vị nhiệt độ',auto:'tự động',noRes:'Không tìm thấy',
+const D={vi:{status:'Trạng thái',lang:'Ngôn ngữ',restartNote:'Thiết bị sẽ khởi động lại',save:'Lưu',startTitle:'Màn hình chính',startLbl:'Màn hình khi bật máy',tHome:'Trang chủ',tQr:'Mã QR thanh toán',tApps:'Ứng dụng',idleLbl:'Tự quay về màn hình chính sau',never:'Không bao giờ',qrOn:'Hiện trang QR thanh toán',
+clockTitle:'Đồng hồ & chào hỏi',timeFmt:'Định dạng giờ',h24:'24 giờ',h12:'12 giờ',dateFmt:'Hiển thị ngày',dLong:'Đầy đủ (Thứ Hai, 19 tháng 10)',dNum:'Số (19/10/2026)',dHide:'Ẩn',greetOn:'Hiện lời chào',nameLbl:'Tên trong lời chào (không bắt buộc)',
+wxTitle:'Thời tiết',wxNow:'Vị trí hiện tại',wxSearch:'Đổi thành phố',wxPh:'Ví dụ: Đà Nẵng',search:'Tìm',wxAuto:'Tự xác định vị trí (theo IP)',unit:'Đơn vị nhiệt độ',auto:'Tự động',manual:'Đặt thủ công',noRes:'Không tìm thấy',
 qrTitle:'QR thanh toán',qrHint:'Dán chuỗi VietQR/EMV (bắt đầu bằng 000201...) lấy từ ứng dụng ngân hàng.',qrT:'Tiêu đề',qrTPh:'Quét để thanh toán',qrB:'Dòng ngân hàng',qrN:'Tên tài khoản',qrA:'Số tài khoản',qrP:'Nội dung mã QR',
-appsTitle:'Ứng dụng',appsHint:'Chọn ứng dụng hiển thị và dùng mũi tên để đổi thứ tự. Cài đặt luôn hiển thị.',
-accessTitle:'Truy cập',hostLbl:'Tên thiết bị (mở bằng tên.local)',pwLbl:'Mật khẩu trang web (để trống = không cần)',
-wifi:'Wi-Fi',ip:'Địa chỉ IP',fw:'Phần mềm',sd:'Thẻ nhớ',heap:'RAM trống',up:'Thời gian chạy',sdOk:'Có thẻ',sdNo:'Không có thẻ',
-lookTitle:'Giao diện',phLbl:'Khung ảnh: thời gian mỗi ảnh',themeLbl:'Chủ đề màu',thSky:'Bầu trời',thForest:'Rừng xanh',thSunset:'Hoàng hôn',thMono:'Đơn sắc',fxOn:'Hiệu ứng thời tiết trên trang chủ (mưa, sao, nắng...)',lunarOn:'Hiện lịch âm',quoteOn:'Hiện câu nói mỗi ngày',ambTitle:'Màn hình chờ & âm thanh',idleMLbl:'Khi không dùng một lúc thì',idleAmb:'Hiện màn hình chờ (đồng hồ lớn, tối dần)',idleOff:'Tắt màn hình',idleHint:'Thời gian chờ chỉnh trong Cài đặt trên thiết bị.',ambSched:'Tự vào màn hình chờ ban đêm (từ - đến)',schedOff:'Tắt',volLbl:'Âm lượng loa',wpTitle:'Hình nền',wpHint:'Chọn ảnh từ máy tính hoặc bấm "Nền" ở một ảnh trong thẻ nhớ. Ảnh được cắt và nén về 480x320 rồi lưu vào bộ nhớ trong của thiết bị.',wpDim:'Làm tối ảnh để chữ dễ đọc',wpSet:'Đặt làm hình nền',wpOff:'Bỏ hình nền',wpNone:'Chưa có hình nền',wpHas:'Đang dùng hình nền',wpPick:'Hãy chọn ảnh trước',wpSending:'Đang gửi hình nền...',sdTitle:'Thẻ nhớ',sdShrink:'Thu nhỏ ảnh về 480x320 trước khi chép (khuyên dùng cho khung ảnh)',sdUpload:'Chép file lên thẻ',sdMkdir:'Thư mục mới',sdNoCard:'Không có thẻ nhớ',sdEmpty:'Thư mục trống',sdDel:'Xóa',sdDelQ:'Xóa ',sdBg:'Nền',sdFree:' trống',sdNewName:'Tên thư mục mới',sdPickFiles:'Hãy chọn file trước',sdUploading:'Đang chép ',sdDone:'Đã chép xong',dragonTitle:'Luyện rồng',dgName:'Tên rồng',dgReset:'Nuôi lại từ đầu (xóa dữ liệu rồng)',dgConfirm:'Xóa toàn bộ dữ liệu rồng và bắt đầu lại từ quả trứng?',dgNoSd:'Chưa có thẻ nhớ',dgStage:'Cấp độ',dgGrow:'Tiến độ',dgCoins:'Số xu',dgGen:'Thế hệ',dgBest:'Kỷ lục mini game',dgSick:'Đang ốm',dgAch:'Huy hiệu',dgStreak:'Chuỗi ngày',dgBest2:'Kỷ lục Rồng bay',dgJournal:'Nhật ký rồng',dgDays:' ngày',saved:'Đã lưu',restarting:'Đã lưu. Thiết bị đang khởi động lại...',failed:'Lỗi: ',pwSet:'Đã đặt mật khẩu',pwOff:'Đã xóa mật khẩu',wxSaved:'Đã đặt vị trí thời tiết',needName:'Nhập tên thiết bị'},
-en:{status:'Status',lang:'Language',restartNote:'The device restarts to apply this.',save:'Save',startTitle:'Main screen',startLbl:'Screen shown at power-on',tHome:'Home',tQr:'Payment QR',tApps:'Apps',idleLbl:'Return to the main screen after',never:'Never',qrOn:'Show the payment QR page',
-clockTitle:'Clock & greeting',timeFmt:'Time format',h24:'24-hour',h12:'12-hour (AM/PM)',dateFmt:'Date display',dLong:'Long (Monday, 19 October)',dNum:'Numeric (19/10/2026)',dHide:'Hidden',greetOn:'Show greeting',nameLbl:'Name in the greeting (optional)',
-wxTitle:'Weather',wxNow:'Current location',wxSearch:'Search city',wxPh:'e.g. Da Nang',search:'Search',wxAuto:'Detect location automatically (by IP)',unit:'Temperature unit',auto:'automatic',noRes:'No results',
+appsTitle:'Ứng dụng',appsHint:'Bật ứng dụng muốn hiển thị, dùng mũi tên để đổi thứ tự.',lock:'Luôn hiện',
+hostLbl:'Tên thiết bị',pwLbl:'Mật khẩu trang web',pwHint:'Tên đăng nhập là admin. Để trống rồi lưu để bỏ mật khẩu.',
+wifi:'Wi-Fi',ip:'Địa chỉ IP',fw:'Phần mềm',sd:'Thẻ nhớ',heap:'RAM trống',up:'Thời gian chạy',sdOk:'Có thẻ',sdNo:'Không có thẻ',sigS:'Mạnh',sigM:'Khá',sigW:'Yếu',
+nOv:'Tổng quan',nDisp:'Màn hình',nMedia:'Ảnh & thẻ nhớ',nQr:'Thanh toán',nDg:'Luyện rồng',nSys:'Hệ thống',danger:'Nuôi lại từ đầu',
+lookTitle:'Giao diện',phLbl:'Khung ảnh: thời gian mỗi ảnh',themeLbl:'Chủ đề màu',thSky:'Bầu trời',thForest:'Rừng',thSunset:'Hoàng hôn',thMono:'Đơn sắc',fxOn:'Hiệu ứng thời tiết trên trang chủ',lunarOn:'Hiện lịch âm',quoteOn:'Hiện câu nói mỗi ngày',ambTitle:'Màn hình chờ & âm thanh',idleMLbl:'Khi không dùng một lúc thì',idleAmb:'Hiện màn hình chờ (đồng hồ lớn, tối dần)',idleOff:'Tắt màn hình',idleHint:'Thời gian chờ chỉnh trong Cài đặt trên thiết bị.',ambSched:'Tự vào màn hình chờ ban đêm (từ → đến)',schedOff:'Tắt',volLbl:'Âm lượng loa',wpTitle:'Hình nền',wpHint:'Chọn ảnh từ máy hoặc bấm biểu tượng ảnh ở một file trong thẻ nhớ. Ảnh được cắt về 480×320 và lưu trong thiết bị.',wpChoose:'Chọn ảnh',wpDim:'Làm tối ảnh để chữ dễ đọc',wpSet:'Đặt làm hình nền',wpOff:'Bỏ hình nền',wpNone:'Chưa có hình nền',wpHas:'Đang dùng hình nền',wpPick:'Hãy chọn ảnh trước',wpSending:'Đang gửi hình nền...',sdTitle:'Thẻ nhớ',sdShrink:'Thu nhỏ ảnh về 480×320 trước khi chép (khuyên dùng)',sdChoose:'Kéo thả file vào đây hoặc bấm để chọn',sdPicked:' file đã chọn',sdUpload:'Chép lên thẻ',sdMkdir:'Thư mục mới',sdNoCard:'Không có thẻ nhớ',sdEmpty:'Thư mục trống',sdDel:'Xóa',sdDelQ:'Xóa ',sdBg:'Đặt làm nền',sdFree:' trống',sdNewName:'Tên thư mục mới',sdPickFiles:'Hãy chọn file trước',sdUploading:'Đang chép ',sdDone:'Đã chép xong',dragonTitle:'Luyện rồng',dgName:'Tên rồng',dgReset:'Xóa dữ liệu rồng',dgConfirm:'Xóa toàn bộ dữ liệu rồng và bắt đầu lại từ quả trứng?',dgNoSd:'Cần thẻ nhớ để nuôi rồng',dgStage:'Cấp độ',dgGrow:'Tiến độ',dgCoins:'Số xu',dgGen:'Thế hệ',dgBest:'Kỷ lục mini game',dgSick:'Đang ốm',dgAch:'Huy hiệu',dgStreak:'Chuỗi ngày',dgBest2:'Kỷ lục Rồng bay',dgJournal:'Nhật ký',dgDays:' ngày',dgNoName:'Rồng chưa có tên',saved:'Đã lưu',restarting:'Đã lưu. Thiết bị đang khởi động lại...',failed:'Lỗi: ',pwSet:'Đã đặt mật khẩu',pwOff:'Đã xóa mật khẩu',wxSaved:'Đã đặt vị trí thời tiết',needName:'Nhập tên thiết bị'},
+en:{status:'Status',lang:'Language',restartNote:'The device will restart',save:'Save',startTitle:'Main screen',startLbl:'Screen shown at power-on',tHome:'Home',tQr:'Payment QR',tApps:'Apps',idleLbl:'Return to the main screen after',never:'Never',qrOn:'Show the payment QR page',
+clockTitle:'Clock & greeting',timeFmt:'Time format',h24:'24-hour',h12:'12-hour',dateFmt:'Date display',dLong:'Long (Monday, 19 October)',dNum:'Numeric (19/10/2026)',dHide:'Hidden',greetOn:'Show greeting',nameLbl:'Name in the greeting (optional)',
+wxTitle:'Weather',wxNow:'Current location',wxSearch:'Change city',wxPh:'e.g. Da Nang',search:'Search',wxAuto:'Detect location automatically (by IP)',unit:'Temperature unit',auto:'Automatic',manual:'Set manually',noRes:'No results',
 qrTitle:'Payment QR',qrHint:'Paste the VietQR/EMV string (starts with 000201...) from your banking app.',qrT:'Title',qrTPh:'Scan to pay',qrB:'Bank line',qrN:'Account name',qrA:'Account number',qrP:'QR content',
-appsTitle:'Apps',appsHint:'Tick the apps to show and use the arrows to reorder. Settings is always shown.',
-accessTitle:'Access',hostLbl:'Device name (opens as name.local)',pwLbl:'Web page password (empty = none)',
-wifi:'Wi-Fi',ip:'IP address',fw:'Firmware',sd:'microSD',heap:'Free RAM',up:'Uptime',sdOk:'Detected',sdNo:'No card',
-lookTitle:'Look',phLbl:'Photo frame: time per picture',themeLbl:'Colour theme',thSky:'Sky',thForest:'Forest',thSunset:'Sunset',thMono:'Mono',fxOn:'Weather effects on the home screen (rain, stars, sun...)',lunarOn:'Show the lunar date',quoteOn:'Show the quote of the day',ambTitle:'Ambient screen & sound',idleMLbl:'After a while without use',idleAmb:'Show the ambient clock (dims)',idleOff:'Turn the screen off',idleHint:'The idle time is set in Settings on the device.',ambSched:'Ambient clock at night (from - to)',schedOff:'Off',volLbl:'Speaker volume',wpTitle:'Wallpaper',wpHint:'Pick a picture from this computer or press "Bg" on a picture on the card. It is cropped and compressed to 480x320 and stored inside the device.',wpDim:'Darken the picture so text stays readable',wpSet:'Set as wallpaper',wpOff:'Remove wallpaper',wpNone:'No wallpaper',wpHas:'Wallpaper in use',wpPick:'Pick a picture first',wpSending:'Sending the wallpaper...',sdTitle:'Memory card',sdShrink:'Shrink pictures to 480x320 before copying (recommended for the photo frame)',sdUpload:'Copy files to the card',sdMkdir:'New folder',sdNoCard:'No memory card',sdEmpty:'Empty folder',sdDel:'Delete',sdDelQ:'Delete ',sdBg:'Bg',sdFree:' free',sdNewName:'New folder name',sdPickFiles:'Pick files first',sdUploading:'Copying ',sdDone:'All files copied',dragonTitle:'Dragon training',dgName:'Dragon name',dgReset:'Start over (erase dragon data)',dgConfirm:'Erase all dragon data and start again from an egg?',dgNoSd:'No microSD card',dgStage:'Stage',dgGrow:'Progress',dgCoins:'Coins',dgGen:'Generation',dgBest:'Mini-game best',dgSick:'Sick',dgAch:'Badges',dgStreak:'Day streak',dgBest2:'Dragon flight best',dgJournal:'Dragon journal',dgDays:' days',saved:'Saved',restarting:'Saved. The device is restarting...',failed:'Failed: ',pwSet:'Password set',pwOff:'Password removed',wxSaved:'Weather location set',needName:'Enter a device name'}};
+appsTitle:'Apps',appsHint:'Switch on the apps to show and use the arrows to reorder.',lock:'Always shown',
+hostLbl:'Device name',pwLbl:'Web page password',pwHint:'The user name is admin. Save it empty to remove the password.',
+wifi:'Wi-Fi',ip:'IP address',fw:'Firmware',sd:'microSD',heap:'Free RAM',up:'Uptime',sdOk:'Detected',sdNo:'No card',sigS:'Strong',sigM:'Fair',sigW:'Weak',
+nOv:'Overview',nDisp:'Display',nMedia:'Photos & card',nQr:'Payment',nDg:'Dragon',nSys:'System',danger:'Start over',
+lookTitle:'Look',phLbl:'Photo frame: time per picture',themeLbl:'Colour theme',thSky:'Sky',thForest:'Forest',thSunset:'Sunset',thMono:'Mono',fxOn:'Weather effects on the home screen',lunarOn:'Show the lunar date',quoteOn:'Show the quote of the day',ambTitle:'Ambient screen & sound',idleMLbl:'After a while without use',idleAmb:'Show the ambient clock (dims)',idleOff:'Turn the screen off',idleHint:'The idle time is set in Settings on the device.',ambSched:'Ambient clock at night (from → to)',schedOff:'Off',volLbl:'Speaker volume',wpTitle:'Wallpaper',wpHint:'Pick a picture from this computer or press the picture icon on a file on the card. It is cropped to 480×320 and stored inside the device.',wpChoose:'Choose picture',wpDim:'Darken the picture so text stays readable',wpSet:'Set as wallpaper',wpOff:'Remove wallpaper',wpNone:'No wallpaper',wpHas:'Wallpaper in use',wpPick:'Pick a picture first',wpSending:'Sending the wallpaper...',sdTitle:'Memory card',sdShrink:'Shrink pictures to 480×320 before copying (recommended)',sdChoose:'Drop files here or click to choose',sdPicked:' file(s) selected',sdUpload:'Copy to card',sdMkdir:'New folder',sdNoCard:'No memory card',sdEmpty:'Empty folder',sdDel:'Delete',sdDelQ:'Delete ',sdBg:'Use as wallpaper',sdFree:' free',sdNewName:'New folder name',sdPickFiles:'Pick files first',sdUploading:'Copying ',sdDone:'All files copied',dragonTitle:'Dragon training',dgName:'Dragon name',dgReset:'Erase dragon data',dgConfirm:'Erase all dragon data and start again from an egg?',dgNoSd:'A microSD card is needed to raise a dragon',dgStage:'Stage',dgGrow:'Progress',dgCoins:'Coins',dgGen:'Generation',dgBest:'Mini-game best',dgSick:'Sick',dgAch:'Badges',dgStreak:'Day streak',dgBest2:'Dragon flight best',dgJournal:'Journal',dgDays:' days',dgNoName:'Unnamed dragon',saved:'Saved',restarting:'Saved. The device is restarting...',failed:'Failed: ',pwSet:'Password set',pwOff:'Password removed',wxSaved:'Weather location set',needName:'Enter a device name'}};
 let T=D.vi,S=null,order=[];
-function toast(t,err){const m=$('msg');m.textContent=t;m.className=err?'err':'';m.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>m.style.display='none',3500)}
+const ic=n=>'<svg class=i><use href=#i-'+n+' /></svg>';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+function toast(t,err){const m=$('msg');m.textContent=t;m.className='show'+(err?' err':'');clearTimeout(toast.t);toast.t=setTimeout(()=>m.className=m.className.replace('show',''),3500)}
+function go(p){if(!$('p-'+p))p='ov';document.querySelectorAll('.panel').forEach(e=>e.classList.toggle('on',e.id=='p-'+p));
+ document.querySelectorAll('nav a').forEach(a=>{const on=a.dataset.p==p;a.classList.toggle('on',on);if(on&&a.scrollIntoView&&innerWidth<820)a.scrollIntoView({block:'nearest',inline:'center'})});scrollTo(0,0)}
+onhashchange=()=>go(location.hash.slice(1));
+function segs(){document.querySelectorAll('select.seg').forEach(s=>{let w=s.nextElementSibling;
+ if(!w||!w.classList.contains('segw')){w=document.createElement('div');w.className='segw '+(s.dataset.k||'');s.after(w);s.hidden=true}
+ w.innerHTML=[...s.options].map(o=>'<button type=button data-v="'+o.value+'"'+(o.value==s.value?' class=on':'')+'>'+o.textContent+'</button>').join('');
+ w.querySelectorAll('button').forEach(b=>b.onclick=()=>{s.value=b.dataset.v;segs()})})}
 function applyLang(l){T=D[l==1?'en':'vi'];document.documentElement.lang=l==1?'en':'vi';
  document.querySelectorAll('[data-t]').forEach(e=>e.textContent=T[e.dataset.t]);
  document.querySelectorAll('[data-ph]').forEach(e=>e.placeholder=T[e.dataset.ph])}
 async function post(path,body){try{const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(body)});
  if(!r.ok)throw new Error(await r.text()||r.status);return await r.json().catch(()=>({}))}catch(e){toast(T.failed+e.message,1);return null}}
+async function busy(b,fn){b.disabled=true;try{await fn()}finally{b.disabled=false}}
 async function saveCfg(body){const r=await post('/api/cfg',body);if(!r)return;
  if(r.restart){toast(T.restarting);setTimeout(()=>location.reload(),12000)}else{toast(T.saved);load()}}
-function row(k,v){return '<div class=row><span>'+k+'</span><span>'+v+'</span></div>'}
-function drawApps(){$('apps').innerHTML=order.map((a,i)=>'<div class=app><input type=checkbox '+(a.on?'checked':'')+(a.lock?' disabled':'')+' data-i='+i+'><span>'+a.name+'</span>'+
- '<button class=sec data-up='+i+'>↑</button><button class=sec data-dn='+i+'>↓</button></div>').join('');
+function tile(k,v,sub){return '<div class=tile><small>'+k+'</small><b>'+v+'</b>'+(sub?'<em>'+sub+'</em>':'')+'</div>'}
+function sig(r){const n=r>-60?4:r>-67?3:r>-75?2:1;return '<span class=sig>'+[4,7,10,13].map((h,i)=>'<i style="height:'+h+'px"'+(i<n?' class=on':'')+'></i>').join('')+'</span>'}
+function drawApps(){$('apps').innerHTML=order.map((a,i)=>'<div class=it><input type=checkbox class=sw '+(a.on||a.lock?'checked':'')+(a.lock?' disabled':'')+' data-i='+i+' aria-label="'+esc(a.name)+'"><span class=n>'+esc(a.name)+(a.lock?'<small>'+T.lock+'</small>':'')+'</span>'+
+ '<button class="btn sec ib" data-up='+i+(i?'':' disabled')+' aria-label=up>'+ic('cu')+'</button><button class="btn sec ib" data-dn='+i+(i<order.length-1?'':' disabled')+' aria-label=down>'+ic('cd')+'</button></div>').join('');
  $('apps').querySelectorAll('input').forEach(c=>c.onchange=()=>{order[c.dataset.i].on=c.checked});
  $('apps').querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>mv(+b.dataset.up,-1));
  $('apps').querySelectorAll('[data-dn]').forEach(b=>b.onclick=()=>mv(+b.dataset.dn,1))}
 function mv(i,d){const j=i+d;if(j<0||j>=order.length)return;[order[i],order[j]]=[order[j],order[i]];drawApps()}
+function dragon(g,full){if(!g.ok)return '<div class=empty>'+T.dgNoSd+'</div>';
+ let h='<div class=dgh><div class=av>'+ic('dg')+'</div><div><b>'+esc(g.name||T.dgNoName)+'</b><small>'+esc(g.stageName)+(g.sick?' · '+T.dgSick:'')+' · '+T.dgGen+' '+g.gen+'</small></div></div>'+
+ '<div class=pb><span class=lbl><span>'+T.dgGrow+'</span><output>'+g.pct+'%</output></span><div class=meter><i style="width:'+g.pct+'%"></i></div></div>'+
+ '<div class=tiles>'+tile(T.dgCoins,g.coins)+tile(T.dgStreak,g.streak+T.dgDays)+tile(T.dgAch,g.ach+'/12')+(full?tile(T.dgBest,g.best)+tile(T.dgBest2,g.best2):'')+'</div>';
+ if(full&&g.journal&&g.journal.length)h+='<h2 style="font-size:15px;margin:4px 18px 12px">'+T.dgJournal+'</h2><ul class=tl>'+g.journal.map(e=>'<li>'+esc(e.text)+'<small>'+(e.ts?new Date(e.ts*1000).toLocaleString():'—')+'</small></li>').join('')+'</ul>';
+ return h}
 async function load(){S=await (await fetch('/api/state')).json();applyLang(S.lang);
- $('addr').textContent='http://'+S.host+'.local  ·  '+S.ip;
- $('info').innerHTML=row(T.wifi,S.ssid+' ('+S.rssi+' dBm)')+row(T.ip,S.ip)+row('Xiaozhi',S.xiaozhi)+row(T.fw,S.fw)+row(T.sd,S.sd?T.sdOk:T.sdNo)+row(T.heap,Math.round(S.heap/1024)+' KB')+row(T.up,S.up);
+ $('hName').textContent=S.host;document.title=S.host+' · Zin100';$('addr').textContent=S.host+'.local · '+S.ip;
+ const sq=S.rssi>-60?T.sigS:S.rssi>-75?T.sigM:T.sigW;
+ $('chips').innerHTML='<span class="chip w" title="Wi-Fi '+S.rssi+' dBm"><i class="dot '+(S.rssi>-75?'ok':'warn')+'"></i><span>'+esc(S.ssid)+'</span></span><span class=chip title="Xiaozhi"><i class="dot '+(S.xzOk?'ok':'warn')+'"></i><span>Xiaozhi</span></span>';
+ $('info').innerHTML=tile(T.wifi,esc(S.ssid)+sig(S.rssi),sq+' · '+S.rssi+' dBm')+tile('Xiaozhi',esc(S.xiaozhi))+tile(T.ip,S.ip,S.host+'.local')+tile(T.sd,S.sd?T.sdOk:T.sdNo)+tile(T.heap,Math.round(S.heap/1024)+' KB')+tile(T.up,S.up)+tile(T.fw,esc(S.fw));
  $('lang').value=S.lang;$('start').value=S.start;$('idle').value=S.idle;$('qrOn').checked=S.qrOn;
  $('c24').value=S.c24?1:0;$('datef').value=S.datef;$('greet').checked=S.greet;$('name').value=S.name;
- $('wxNow').textContent=(S.wx.city||'—')+' ('+(S.wx.manual?'':T.auto+', ')+S.wx.lat.toFixed(2)+', '+S.wx.lon.toFixed(2)+')';$('tempF').value=S.tempF?1:0;
- $('qrT').value=S.qrT;$('qrB').value=S.qrB;$('qrN').value=S.qrN;$('qrA').value=S.qrA;$('qrP').value=S.qrP;
+ $('wxCity').textContent=S.wx.city||'—';$('wxNow').textContent=(S.wx.manual?T.manual:T.auto)+' · '+S.wx.lat.toFixed(2)+', '+S.wx.lon.toFixed(2);$('tempF').value=S.tempF?1:0;
+ $('qrT').value=S.qrT;$('qrB').value=S.qrB;$('qrN').value=S.qrN;$('qrA').value=S.qrA;$('qrP').value=S.qrP;qrLen();
  $('host').value=S.host;
  $('wpState').textContent=S.wall?T.wpHas:T.wpNone;
- $('theme').value=S.theme;$('phS').value=S.phS;$('fx').checked=S.fx;$('lunar').checked=S.lunar;$('quote').checked=S.quote;$('idleM').value=S.idleM;$('vol').value=S.vol;
+ $('theme').value=S.theme;$('phS').value=S.phS;$('fx').checked=S.fx;$('lunar').checked=S.lunar;$('quote').checked=S.quote;$('idleM').value=S.idleM;$('vol').value=S.vol;$('volV').textContent=S.vol+'%';
  fillHours('ambS',S.ambS);fillHours('ambE',S.ambE);
- const g=S.dragon;$('dgInfo').innerHTML=g.ok?row(T.dgStage,g.stageName+(g.sick?' ('+T.dgSick+')':''))+row(T.dgGrow,g.pct+'%')+row(T.dgCoins,g.coins)+row(T.dgGen,g.gen)+row(T.dgBest,g.best)+row(T.dgBest2,g.best2)+row(T.dgAch,g.ach+'/12')+row(T.dgStreak,g.streak+T.dgDays)+(g.journal&&g.journal.length?'<h2 style="margin-top:12px">'+T.dgJournal+'</h2>'+g.journal.map(e=>row(e.ts?new Date(e.ts*1000).toLocaleString():'-',e.text)).join(''):''):row(T.dgStage,T.dgNoSd);
+ const g=S.dragon;$('dgInfo').innerHTML=dragon(g,1);$('ovDg').innerHTML=dragon(g,0);
  if(document.activeElement!==$('dgNameIn'))$('dgNameIn').value=g.ok?g.name:'';
- order=S.apps.map(a=>({id:a.id,name:a.name,on:a.on,lock:a.lock}));drawApps()}
+ $('saveDg').disabled=$('dgReset').disabled=!g.ok;
+ order=S.apps.map(a=>({id:a.id,name:a.name,on:a.on,lock:a.lock}));drawApps();segs();wpDimV()}
 function fillHours(id,v){const s=$(id);s.innerHTML=(id=='ambS'?'<option value=-1>'+T.schedOff:'')+Array.from({length:24},(_,h)=>'<option value='+h+'>'+h+':00').join('');s.value=v}
+function qrLen(){$('qrLen').textContent=$('qrP').value.trim().length+'/500'}
+$('qrP').oninput=qrLen;$('vol').oninput=()=>$('volV').textContent=$('vol').value+'%';
 $('saveLook').onclick=()=>saveCfg({phS:$('phS').value,theme:$('theme').value,fx:$('fx').checked?1:0,lunar:$('lunar').checked?1:0,quote:$('quote').checked?1:0});
 $('saveAmb').onclick=()=>saveCfg({idleM:$('idleM').value,ambS:$('ambS').value,ambE:$('ambE').value,vol:$('vol').value});
 $('saveLang').onclick=()=>saveCfg({lang:$('lang').value});
@@ -190,14 +318,14 @@ $('saveClock').onclick=()=>saveCfg({c24:$('c24').value,datef:$('datef').value,gr
 $('saveUnit').onclick=()=>saveCfg({tempF:$('tempF').value});
 $('saveQr').onclick=()=>saveCfg({qrT:$('qrT').value,qrB:$('qrB').value,qrN:$('qrN').value,qrA:$('qrA').value,qrP:$('qrP').value.trim()});
 $('saveApps').onclick=()=>saveCfg({apps:order.filter(a=>a.on||a.lock).map(a=>a.id).join(',')});
-$('wxFind').onclick=async()=>{const q=$('wxQ').value.trim();if(!q)return;
+$('wxFind').onclick=()=>{const q=$('wxQ').value.trim();if(!q)return $('wxQ').focus();busy($('wxFind'),async()=>{
  try{const r=await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=6&name='+encodeURIComponent(q)+'&language='+(S.lang==1?'en':'vi'))).json();
-  const list=r.results||[];$('wxRes').innerHTML=list.length?'':'<p class=hint>'+T.noRes+'</p>';
-  list.forEach(c=>{const d=document.createElement('div');d.className='res';d.innerHTML=c.name+'<small>'+[c.admin1,c.country].filter(Boolean).join(', ')+'</small>';
-   d.onclick=async()=>{if(await post('/api/weather',{lat:c.latitude,lon:c.longitude,city:c.name})){toast(T.wxSaved);$('wxRes').innerHTML='';setTimeout(load,800)}};$('wxRes').appendChild(d)})}
- catch(e){toast(T.failed+e.message,1)}};
+  const list=r.results||[];const box=$('wxRes');box.className=list.length?'lst':'';box.innerHTML=list.length?'':'<p class=hint>'+T.noRes+'</p>';
+  list.forEach(c=>{const d=document.createElement('button');d.className='res';d.innerHTML=esc(c.name)+'<small>'+esc([c.admin1,c.country].filter(Boolean).join(', '))+'</small>';
+   d.onclick=async()=>{if(await post('/api/weather',{lat:c.latitude,lon:c.longitude,city:c.name})){toast(T.wxSaved);box.innerHTML='';box.className='';$('wxQ').value='';setTimeout(load,800)}};box.appendChild(d)})}
+ catch(e){toast(T.failed+e.message,1)}})};
 $('wxQ').onkeydown=e=>{if(e.key==='Enter')$('wxFind').click()};
-$('wxAuto').onclick=async()=>{if(await post('/api/weather',{auto:1})){toast(T.saved);setTimeout(load,1500)}};
+$('wxAuto').onclick=()=>busy($('wxAuto'),async()=>{if(await post('/api/weather',{auto:1})){toast(T.saved);setTimeout(load,1500)}});
 $('saveHost').onclick=async()=>{const h=$('host').value.trim().toLowerCase();if(!h)return toast(T.needName,1);
  if(await post('/api/host',{h})){toast(T.restarting);setTimeout(()=>location.href='http://'+h+'.local/',12000)}};
 $('savePw').onclick=async()=>{if(await post('/api/password',{pw:$('wpw').value})){toast($('wpw').value?T.pwSet:T.pwOff);$('wpw').value=''}};
@@ -206,18 +334,19 @@ $('dgReset').onclick=async()=>{if(confirm(T.dgConfirm)&&await post('/api/dragon'
 
 // ---------- wallpaper: crop to 480x320, darken, RGB565 ----------
 let wpImg=null;
+function wpDimV(){$('wpDimV').textContent=$('wpDim').value+'%'}
 function wpDraw(){const c=$('wpPrev'),x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,480,320);if(!wpImg)return;
  const s=Math.max(480/wpImg.width,320/wpImg.height),w=wpImg.width*s,h=wpImg.height*s;x.drawImage(wpImg,(480-w)/2,(320-h)/2,w,h);
  x.fillStyle='rgba(0,0,0,'+($('wpDim').value/100)+')';x.fillRect(0,0,480,320)}
 function wpLoad(src){const i=new Image();i.onload=()=>{wpImg=i;wpDraw();$('wpPrev').scrollIntoView({behavior:'smooth',block:'center'})};i.src=src}
 $('wpFile').onchange=()=>{const f=$('wpFile').files[0];if(f)wpLoad(URL.createObjectURL(f))};
-$('wpDim').oninput=wpDraw;
+$('wpDim').oninput=()=>{wpDimV();wpDraw()};
 $('wpSet').onclick=()=>{if(!wpImg)return toast(T.wpPick,1);wpDraw();
  const d=$('wpPrev').getContext('2d').getImageData(0,0,480,320).data,buf=new Uint8Array(16+480*320*2);
  buf.set([90,87,80,49,224,1,64,1]);  // "ZWP1", 480, 320
  for(let i=0,o=16;i<d.length;i+=4,o+=2){const v=((d[i]>>3)<<11)|((d[i+1]>>2)<<5)|(d[i+2]>>3);buf[o]=v&255;buf[o+1]=v>>8}
  const fd=new FormData();fd.append('f',new Blob([buf]),'wall.bin');toast(T.wpSending);
- send('/api/wallpaper',fd,p=>$('wpState').textContent=T.wpSending+' '+p+'%').then(ok=>{if(ok){toast(T.saved);load()}})};
+ busy($('wpSet'),()=>send('/api/wallpaper',fd,p=>$('wpState').textContent=T.wpSending+' '+p+'%').then(ok=>{if(ok){toast(T.saved);load()}}))};
 $('wpOff').onclick=async()=>{if(await post('/api/wallpaper/off',{})){toast(T.saved);load()}};
 
 // ---------- memory card ----------
@@ -230,30 +359,35 @@ function human(n){return n>1048576?(n/1048576).toFixed(1)+' MB':n>1024?Math.roun
 function join(a,b){return (a.endsWith('/')?a:a+'/')+b}
 async function sdLoad(dir){const r=await fetch('/api/sd/list?dir='+encodeURIComponent(dir));
  if(r.status==404&&dir!='/')return sdLoad('/');
- if(!r.ok){$('sdList').innerHTML='<p class=hint>'+T.sdNoCard+'</p>';return}
- const j=await r.json();sdDir=j.dir;$('sdPath').textContent=sdDir;$('sdFree').textContent=(j.total-j.used)+' MB'+T.sdFree;
+ if(!r.ok){$('sdList').innerHTML='<div class=empty>'+T.sdNoCard+'</div>';$('sdUp').disabled=$('sdMk').disabled=true;return}
+ const j=await r.json();sdDir=j.dir;$('sdUp').disabled=$('sdMk').disabled=false;$('sdPath').textContent=sdDir;$('sdFree').textContent=(j.total-j.used)+' MB'+T.sdFree+' / '+j.total+' MB';
+ $('sdBar').style.width=(j.total?Math.round(j.used*100/j.total):0)+'%';
  const items=j.items.sort((a,b)=>(b.d-a.d)||a.n.localeCompare(b.n));let h='';
- if(sdDir!='/')h+='<div class=f><span class="n dir" data-up=1>.. /</span></div>';
- for(const it of items){const p=join(sdDir,it.n),e=encodeURIComponent(p);
-  if(it.d)h+='<div class=f><span class="n dir" data-dir="'+p+'">'+it.n+' /</span><button class=sec data-del="'+p+'">'+T.sdDel+'</button></div>';
-  else h+='<div class=f><span class=n>'+it.n+' <small>'+human(it.s)+'</small></span>'+(/\.(jpe?g|png|bmp|gif)$/i.test(it.n)?'<button class=sec data-bg="'+p+'">'+T.sdBg+'</button>':'')+
-   '<a href="/api/sd/get?path='+e+'" download="'+it.n+'">&#8681;</a><button class=sec data-del="'+p+'">'+T.sdDel+'</button></div>'}
- $('sdList').innerHTML=h||'<p class=hint>'+T.sdEmpty+'</p>';
- $('sdList').querySelectorAll('[data-dir]').forEach(b=>b.onclick=()=>sdLoad(b.dataset.dir));
+ if(sdDir!='/')h+='<div class="it dir" data-up=1><span class=ico>'+ic('back')+'</span><span class=n>..</span></div>';
+ for(const it of items){const p=join(sdDir,it.n),e=encodeURIComponent(p),a=esc(p);
+  if(it.d)h+='<div class="it dir" data-dir="'+a+'"><span class=ico>'+ic('dir')+'</span><span class=n>'+esc(it.n)+'</span><button class="btn sec ib" data-del="'+a+'" title="'+T.sdDel+'">'+ic('del')+'</button></div>';
+  else h+='<div class=it><span class=ico>'+ic('file')+'</span><span class=n>'+esc(it.n)+'<small>'+human(it.s)+'</small></span>'+(/\.(jpe?g|png|bmp|gif)$/i.test(it.n)?'<button class="btn sec ib" data-bg="'+a+'" title="'+T.sdBg+'">'+ic('img')+'</button>':'')+
+   '<a class="btn sec ib" href="/api/sd/get?path='+e+'" download="'+esc(it.n)+'">'+ic('dl')+'</a><button class="btn sec ib" data-del="'+a+'" title="'+T.sdDel+'">'+ic('del')+'</button></div>'}
+ $('sdList').innerHTML=h||'<div class=empty>'+T.sdEmpty+'</div>';
+ if(h&&!items.length)$('sdList').innerHTML+='<div class=empty>'+T.sdEmpty+'</div>';
+ $('sdList').querySelectorAll('[data-dir]').forEach(b=>b.onclick=e=>{if(!e.target.closest('button'))sdLoad(b.dataset.dir)});
  $('sdList').querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>sdLoad(sdDir.replace(/\/[^\/]+\/?$/,'')||'/'));
  $('sdList').querySelectorAll('[data-bg]').forEach(b=>b.onclick=()=>wpLoad('/api/sd/get?path='+encodeURIComponent(b.dataset.bg)));
  $('sdList').querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(confirm(T.sdDelQ+b.dataset.del+'?')&&await post('/api/sd/delete',{path:b.dataset.del}))sdLoad(sdDir)})}
 function shrink(file){return new Promise(res=>{const i=new Image();i.onload=()=>{const s=Math.min(1,480/i.width,320/i.height),c=document.createElement('canvas');
  c.width=Math.round(i.width*s);c.height=Math.round(i.height*s);c.getContext('2d').drawImage(i,0,0,c.width,c.height);
  c.toBlob(b=>res(b?new File([b],file.name.replace(/\.[^.]+$/,'')+'.jpg'):file),'image/jpeg',0.85)};i.onerror=()=>res(file);i.src=URL.createObjectURL(file)})}
-$('sdUp').onclick=async()=>{const fs=[...$('sdFiles').files];if(!fs.length)return toast(T.sdPickFiles,1);
- for(let k=0;k<fs.length;k++){let f=fs[k];if($('sdShrink').checked&&/^image\//.test(f.type))f=await shrink(f);
+function sdPicked(){const n=$('sdFiles').files.length;$('sdPick').textContent=n?n+T.sdPicked:T.sdChoose}
+$('sdFiles').onchange=sdPicked;
+const dz=$('sdDrop');dz.ondragover=e=>{e.preventDefault();dz.classList.add('ov')};dz.ondragleave=()=>dz.classList.remove('ov');
+dz.ondrop=e=>{e.preventDefault();dz.classList.remove('ov');$('sdFiles').files=e.dataTransfer.files;sdPicked()};
+$('sdUp').onclick=()=>{const fs=[...$('sdFiles').files];if(!fs.length)return toast(T.sdPickFiles,1);busy($('sdUp'),async()=>{
+ let ok=true;for(let k=0;k<fs.length&&ok;k++){let f=fs[k];if($('sdShrink').checked&&/^image\//.test(f.type))f=await shrink(f);
   const fd=new FormData();fd.append('f',f,f.name);
-  const ok=await send('/api/sd/upload?dir='+encodeURIComponent(sdDir),fd,p=>$('sdProg').textContent=T.sdUploading+(k+1)+'/'+fs.length+': '+f.name+' '+p+'%');
-  if(!ok)break}
- $('sdProg').textContent=T.sdDone;$('sdFiles').value='';sdLoad(sdDir)};
+  ok=await send('/api/sd/upload?dir='+encodeURIComponent(sdDir),fd,p=>$('sdProg').textContent=T.sdUploading+(k+1)+'/'+fs.length+': '+f.name+' '+p+'%')}
+ $('sdProg').textContent=ok?T.sdDone:'';if(ok)toast(T.sdDone);$('sdFiles').value='';sdPicked();sdLoad(sdDir)})};
 $('sdMk').onclick=async()=>{const n=prompt(T.sdNewName);if(n&&await post('/api/sd/mkdir',{path:join(sdDir,n)}))sdLoad(join(sdDir,n))};
-load();sdLoad(sdDir);
+go(location.hash.slice(1));wpDraw();load();sdLoad(sdDir);
 </script></body></html>)HTML";
 
 static bool webAuthOk() {
@@ -318,6 +452,7 @@ static void webSendState() {
   d["ssid"] = WiFi.SSID();
   d["rssi"] = WiFi.RSSI();
   d["xiaozhi"] = xiaozhiState() == XZ_ACTIVATED ? String(tr("Connected")) : String(tr(xiaozhiMessage()));
+  d["xzOk"] = xiaozhiState() == XZ_ACTIVATED;
   d["fw"] = FW_VERSION;
   d["sd"] = sdOk;
   d["heap"] = ESP.getFreeHeap();
@@ -529,12 +664,19 @@ static void webBegin() {
     h[26] = 1;
     h[28] = 24;
     le32(34, row * H);
+    // row buffers live only for the request (they used to sit in RAM permanently)
+    uint16_t *line = (uint16_t *)malloc(W * sizeof(uint16_t));
+    uint8_t *out = (uint8_t *)malloc(row);
+    if (!line || !out) {
+      free(line);
+      free(out);
+      return web.send(503, "text/plain", "out of memory");
+    }
     web.setContentLength(size);
     web.send(200, "image/bmp", "");
     web.sendContent((const char *)h, 54);
-    static uint16_t line[480];
-    static uint8_t out[480 * 3];
     for (int y = H - 1; y >= 0; y--) {
+      tftIdle();  // the last DMA strip of LVGL's frame may still hold the bus
       tft.readRect(0, y, W, 1, line);
       for (int x = 0; x < W; x++) {
         uint16_t c = line[x];
@@ -545,6 +687,8 @@ static void webBegin() {
       }
       web.sendContent((const char *)out, row);
     }
+    free(line);
+    free(out);
   });
   web.on("/api/touch", HTTP_ANY, []() {
     if (!webAuthOk()) return;

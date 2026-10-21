@@ -15,13 +15,13 @@ static void pageWeather() {
   lv_obj_t *ic = wxIconBox(now, iconKindFor(w.code, w.isDay));
   lv_obj_align(ic, LV_ALIGN_LEFT_MID, 14, 0);
   lv_obj_t *t = makeLabel(now, "", F_HEADING, C_TEXT);
-  lv_label_set_text_fmt(t, "%d%s%c", tempOut(w.temp), DEG, cfg.tempF ? 'F' : 'C');
+  setTextFmt(t, "%d%s%c", tempOut(w.temp), DEG, cfg.tempF ? 'F' : 'C');
   lv_obj_set_pos(t, 72, 10);
   lv_obj_t *d = makeLabel(now, "", F_BODY, C_TEXT);
-  lv_label_set_text_fmt(d, "%s  -  %s", tr(weatherText(w.code)), w.city);
+  setTextFmt(d, "%s  -  %s", tr(weatherText(w.code)), w.city);
   lv_obj_set_pos(d, 72, 48);
   lv_obj_t *hm = makeLabel(now, "", F_CAPTION, C_MUTED);
-  lv_label_set_text_fmt(hm, isVi() ? "Độ ẩm %d%%\nGió %d km/h" : "Humidity %d%%\nWind %d km/h", w.humidity, (int)lroundf(w.wind));
+  setTextFmt(hm, isVi() ? "Độ ẩm %d%%\nGió %d km/h" : "Humidity %d%%\nWind %d km/h", w.humidity, (int)lroundf(w.wind));
   lv_obj_align(hm, LV_ALIGN_RIGHT_MID, -14, 0);
   lv_obj_set_style_text_align(hm, LV_TEXT_ALIGN_RIGHT, 0);
 
@@ -40,15 +40,15 @@ static void pageWeather() {
     lv_obj_t *cell = makeCard(strip, 64, 74);
     lv_obj_clear_flag(cell, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_t *hl = makeLabel(cell, "", F_CAPTION, C_MUTED);
-    lv_label_set_text_fmt(hl, i == 0 ? (isVi() ? "Bây giờ" : "Now") : "%dh", h.hour);
+    setTextFmt(hl, i == 0 ? (isVi() ? "Bây giờ" : "Now") : "%dh", h.hour);
     lv_obj_align(hl, LV_ALIGN_TOP_MID, 0, 6);
     shape(cell, 27, 26, 10, 10, dotCol[iconKindFor(h.code, h.hour >= 6 && h.hour < 18)]);
     lv_obj_t *tl = makeLabel(cell, "", F_LABEL, C_TEXT);
-    lv_label_set_text_fmt(tl, "%d%s", tempOut(h.temp), DEG);
+    setTextFmt(tl, "%d%s", tempOut(h.temp), DEG);
     lv_obj_align(tl, LV_ALIGN_BOTTOM_MID, 0, -16);
     if (h.pop >= 20) {
       lv_obj_t *pl = makeLabel(cell, "", F_CAPTION, lv_color_hex(0x7FB8FF));
-      lv_label_set_text_fmt(pl, "%d%%", h.pop);
+      setTextFmt(pl, "%d%%", h.pop);
       lv_obj_align(pl, LV_ALIGN_BOTTOM_MID, 0, -2);
     }
   }
@@ -61,7 +61,7 @@ static void pageWeather() {
     lv_obj_t *dl = makeLabel(r, i == 0 ? DL("Hôm nay", "Today") : (isVi() ? DAYS_VI[x.wday] : DAYS_EN[x.wday]), F_BODY, C_TEXT);
     lv_obj_align(dl, LV_ALIGN_LEFT_MID, 14, -8);
     lv_obj_t *dd = makeLabel(r, "", F_CAPTION, C_MUTED);
-    lv_label_set_text_fmt(dd, "%02d/%02d", x.mday, x.mon);
+    setTextFmt(dd, "%02d/%02d", x.mday, x.mon);
     lv_obj_align(dd, LV_ALIGN_LEFT_MID, 14, 10);
     lv_obj_t *ib = wxIconBox(r, iconKindFor(x.code, true));
     lv_obj_align(ib, LV_ALIGN_LEFT_MID, 124, 0);
@@ -71,11 +71,11 @@ static void pageWeather() {
     lv_obj_align(tx, LV_ALIGN_LEFT_MID, 176, 0);
     if (x.pop >= 20) {
       lv_obj_t *pl = makeLabel(r, "", F_CAPTION, lv_color_hex(0x7FB8FF));
-      lv_label_set_text_fmt(pl, "%d%%", x.pop);
+      setTextFmt(pl, "%d%%", x.pop);
       lv_obj_align(pl, LV_ALIGN_RIGHT_MID, -110, 0);
     }
     lv_obj_t *mm = makeLabel(r, "", F_LABEL, C_TEXT);
-    lv_label_set_text_fmt(mm, "%d%s / %d%s", tempOut(x.tmin), DEG, tempOut(x.tmax), DEG);
+    setTextFmt(mm, "%d%s / %d%s", tempOut(x.tmin), DEG, tempOut(x.tmax), DEG);
     lv_obj_align(mm, LV_ALIGN_RIGHT_MID, -14, 0);
   }
   lv_obj_t *up = smallBtn(c, DL("Cập nhật", "Refresh"), C_ACCENT, [](lv_event_t *) {

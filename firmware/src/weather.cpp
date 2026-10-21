@@ -97,8 +97,14 @@ static bool fetch() {
     http.end();
     return false;
   }
+  // Parse a String, not http.getStream(): ArduinoJson busy-waits on a slow socket, which starved core 0's idle
+  // task until the watchdog reset the device. The filter keeps only the data blocks (drops *_units, metadata).
+  JsonDocument filter;
+  filter["current"] = true;
+  filter["hourly"] = true;
+  filter["daily"] = true;
   JsonDocument d;
-  DeserializationError err = deserializeJson(d, http.getString());
+  DeserializationError err = deserializeJson(d, http.getString(), DeserializationOption::Filter(filter));
   http.end();
   if (err || !d["current"]["temperature_2m"].is<float>()) return false;
   WeatherData w;
