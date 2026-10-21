@@ -335,10 +335,10 @@ static lv_obj_t *ckRoller(lv_obj_t *parent, const char *opts, int sel) {
   // infinite: drag past 59 and it carries on at 00, 01, ... (LV_ROLLER_INF_PAGES is 3 in lv_conf.h, see there)
   lv_obj_t *r = lv_roller_create(parent);
   lv_roller_set_options(r, opts, LV_ROLLER_MODE_INFINITE);
+  lv_obj_set_style_text_font(r, F_TITLE, 0);  // before the row count: the height is rows x this font's line height
   lv_roller_set_visible_row_count(r, 3);
   lv_roller_set_selected(r, sel, LV_ANIM_OFF);
   lv_obj_set_width(r, 96);
-  lv_obj_set_style_text_font(r, F_HEADING, 0);
   lv_obj_set_style_text_align(r, LV_TEXT_ALIGN_CENTER, 0);
   lv_obj_set_style_bg_color(r, C_CARD, 0);
   lv_obj_set_style_bg_opa(r, LV_OPA_COVER, 0);
