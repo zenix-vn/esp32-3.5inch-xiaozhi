@@ -137,18 +137,6 @@ def glyph_clock(g, c):
     g.rect(60, 14, 72, 20, 3)
 
 
-def glyph_calendar(g, c):
-    g.rect(18, 24, 82, 82, 8)  # page
-    g.rect(18, 24, 82, 42, 8, hexc(c))  # coloured header band (rounded top, square join below)
-    g.rect(18, 34, 82, 42, 0, hexc(c))
-    g.rect(32, 14, 40, 30, 3)  # binder rings
-    g.rect(60, 14, 68, 30, 3)
-    for r in range(3):  # day cells
-        for k in range(4):
-            g.rect(26 + k * 13.5, 49 + r * 10.5, 26 + k * 13.5 + 8, 49 + r * 10.5 + 6, 1.5, hexc(c, 255 if (r, k) != (1, 2) else 255))
-    g.rect(52.5, 59.5, 60.5, 65.5, 1.5, hexc(0xFFD54A))  # today
-
-
 def glyph_qr(g, c):
     for x, y in ((20, 20), (58, 20), (20, 58)):
         g.rect(x, y, x + 22, y + 22, 4)
@@ -206,14 +194,34 @@ ICONS = [
     ('ic_about', 0x7BDCB5, 0x2A7F86, glyph_about),
     ('ic_clock', 0xFF8FA3, 0xD03A6A, glyph_clock),
     ('ic_qr', 0xFFD54A, 0xD98A12, glyph_qr),
-    ('ic_calendar', 0xFF8A7A, 0xD2402F, glyph_calendar),
+    ('ic_calendar', 0, 0, 'logo'),  # the Zin100 calendar logo (tools/assets/calendar_logo.png), not a tile + glyph
     ('ic_2048', 0xFFB86B, 0xE0603A, glyph_2048),
     ('ic_caro', 0x6BE0C8, 0x2A78B8, glyph_caro),
 ]
 
 
+def logo_icon(path):
+    """The logo itself (transparent background): cropped to its content, fitted into the icon and softly shadowed."""
+    logo = Image.open(path).convert('RGBA')
+    x0, y0, x1, y1 = logo.getbbox()
+    logo = logo.crop((x0 + 22, y0, x1 - 23, y1))  # the beak and tail tips are thin: trimming them lets the calendar be larger
+    n = SZ * SS
+    k = min(n / logo.size[0], n / logo.size[1])
+    logo = logo.resize((max(1, round(logo.size[0] * k)), max(1, round(logo.size[1] * k))), Image.LANCZOS)
+    out = Image.new('RGBA', (n, n), (0, 0, 0, 0))
+    pos = ((n - logo.size[0]) // 2, (n - logo.size[1]) // 2)
+    sh = logo.split()[3].filter(ImageFilter.GaussianBlur(SS * 1.2))
+    shadow = Image.new('RGBA', (n, n), (0, 0, 0, 0))
+    shadow.paste(Image.new('RGBA', logo.size, (0, 0, 40, 90)), (pos[0], pos[1] + int(SS * 1.2)), sh)
+    out.alpha_composite(shadow)
+    out.alpha_composite(logo, pos)
+    return out
+
+
 def make(name, c1, c2, fn):
-    if fn is None:
+    if fn == 'logo':
+        big = logo_icon(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'calendar_logo.png'))
+    elif fn is None:
         big = dragon_icon(c1, c2)
     else:
         big = tile(c1, c2)
