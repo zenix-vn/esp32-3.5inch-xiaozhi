@@ -548,7 +548,7 @@ static void webSendState() {
     if (to < 0) to = cfg.apps.length();
     int idx = cfg.apps.substring(from, to).toInt();
     from = to + 1;
-    if (idx < 0 || idx >= APP_COUNT || seen[idx]) continue;
+    if (idx < 0 || idx >= APP_COUNT || seen[idx] || !appInLauncher(idx)) continue;
     seen[idx] = true;
     JsonObject o = apps.add<JsonObject>();
     o["id"] = idx;
@@ -557,7 +557,7 @@ static void webSendState() {
     o["lock"] = idx == SETTINGS_APP;
   }
   for (int i = 0; i < APP_COUNT; i++) {
-    if (seen[i]) continue;
+    if (seen[i] || !appInLauncher(i)) continue;
     JsonObject o = apps.add<JsonObject>();
     o["id"] = i;
     o["name"] = tr(appName(i));

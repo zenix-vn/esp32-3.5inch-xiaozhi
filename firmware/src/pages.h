@@ -16,7 +16,24 @@ static uint8_t sleepMin = 0;
 static bool pageReplace = false;  // set while opening a page from another page: the old one is deleted  // screen-off timeout in minutes, 0 = never
 
 // ---------- generic page plumbing ----------
-static void goBack(lv_event_t *) { lv_scr_load_anim(mainScr, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 250, 0, true); }
+// A page opened from another page (Settings > Wi-Fi ...) sets pageParent: the back button then returns to that page
+// instead of the main screen. goMain() leaves for the main screen and drops the parent too.
+static lv_obj_t *pageParent = nullptr;
+static void goBack(lv_event_t *) {
+  if (pageParent && lv_obj_is_valid(pageParent)) {
+    lv_obj_t *p = pageParent;
+    pageParent = nullptr;
+    lv_scr_load_anim(p, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 250, 0, true);  // the child page is deleted
+  } else {
+    pageParent = nullptr;
+    lv_scr_load_anim(mainScr, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 250, 0, true);
+  }
+}
+static void goMain() {
+  if (pageParent && lv_obj_is_valid(pageParent)) lv_obj_del_async(pageParent);
+  pageParent = nullptr;
+  lv_scr_load_anim(mainScr, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 250, 0, true);
+}
 static void pageShow(lv_obj_t *s, lv_scr_load_anim_t anim = LV_SCR_LOAD_ANIM_MOVE_LEFT, bool delOld = false) {
   lv_scr_load_anim(s, anim, 250, 0, delOld || pageReplace);
 }
@@ -444,247 +461,6 @@ static void pagePassword(const char *ssid) {
   lv_obj_add_event_cb(kb, pwKeyboard, LV_EVENT_READY, nullptr);
   lv_obj_add_event_cb(kb, pwKeyboard, LV_EVENT_CANCEL, nullptr);
   pageShow(s, LV_SCR_LOAD_ANIM_MOVE_LEFT, true);  // replaces the Wi-Fi page
-}
-
-// =====================================================================================
-// Settings
-// =====================================================================================
-static lv_obj_t *brightnessPct;
-static void brightnessEvent(lv_event_t *e) {
-  lv_obj_t *sl = lv_event_get_target(e);
-  int v = lv_slider_get_value(sl);
-  setBacklight(v);
-  setTextFmt(brightnessPct, "%d%%", v * 100 / 255);
-  if (lv_event_get_code(e) == LV_EVENT_RELEASED) {
-    Preferences p;
-    p.begin("ui", false);
-    p.putUChar("bl", (uint8_t)v);
-    p.end();
-  }
-}
-
-static const char *sleepMap[5];
-static const uint8_t sleepVals[] = {0, 1, 5, 10};
-static void sleepEvent(lv_event_t *e) {
-  uint32_t id = lv_btnmatrix_get_selected_btn(lv_event_get_target(e));
-  if (id >= 4) return;
-  sleepMin = sleepVals[id];
-  Preferences p;
-  p.begin("ui", false);
-  p.putUChar("sleep", sleepMin);
-  p.end();
-}
-
-static uint8_t pendingLang = LANG_VI;
-static void doChangeLang() {
-  i18nSave(pendingLang);
-  ESP.restart();
-}
-static void askLang(lv_event_t *e) {
-  uint8_t l = (uint8_t)(intptr_t)lv_event_get_user_data(e);
-  if (l == gLang) return;
-  pendingLang = l;
-  confirmDialog("Change language?", "The device restarts to apply the new language.", doChangeLang);
-}
-
-static lv_obj_t *tzLabel;
-static int tzCur;
-static void tzShow() { setTextFmt(tzLabel, "UTC%+d", tzCur); }
-static void tzStep(lv_event_t *e) {
-  tzCur = constrain(tzCur + (int)(intptr_t)lv_event_get_user_data(e), -12, 14);
-  tzShow();
-  wifiSetTimezone(tzCur);
-}
-
-static lv_obj_t *qrRows[QR_MAX];
-static void qrRowsRefresh() {  // the selected account: filled and ticked
-  for (int i = 0; i < qrCount; i++) {
-    bool on = i == qrSel;
-    lv_obj_set_style_bg_opa(qrRows[i], on ? LV_OPA_COVER : LV_OPA_10, 0);
-    lv_obj_set_style_border_opa(qrRows[i], on ? LV_OPA_COVER : LV_OPA_40, 0);
-    lv_obj_t *l = lv_obj_get_child(qrRows[i], 0);
-    lv_obj_set_style_text_color(l, on ? lv_color_hex(0x04101A) : C_ACCENT, 0);
-    String t = (on ? String(LV_SYMBOL_OK "  ") : String("")) + qrLabel(i);
-    lv_label_set_text(l, t.c_str());
-  }
-}
-
-static void pageSettings() {
-  lv_obj_t *c;
-  lv_obj_t *s = pageBegin("Settings", &c);
-
-  sectionLabel(c, "DISPLAY");
-  lv_obj_t *card = makeCard(c, 456, 74);
-  lv_obj_t *bt = makeLabel(card, "Brightness", F_BODY, C_MUTED);
-  lv_obj_align(bt, LV_ALIGN_TOP_LEFT, 16, 10);
-  brightnessPct = makeLabel(card, "", F_BODY, C_TEXT);
-  lv_obj_align(brightnessPct, LV_ALIGN_TOP_RIGHT, -16, 10);
-  setTextFmt(brightnessPct, "%d%%", blLevel * 100 / 255);
-  lv_obj_t *sl = lv_slider_create(card);
-  lv_slider_set_range(sl, 20, 255);
-  lv_slider_set_value(sl, blLevel, LV_ANIM_OFF);
-  lv_obj_set_width(sl, 420);
-  lv_obj_align(sl, LV_ALIGN_BOTTOM_MID, 0, -16);
-  lv_obj_set_style_bg_color(sl, C_BORDER, LV_PART_MAIN);
-  lv_obj_set_style_bg_color(sl, C_ACCENT, LV_PART_INDICATOR);
-  lv_obj_set_style_bg_color(sl, C_TEXT, LV_PART_KNOB);
-  lv_obj_add_event_cb(sl, brightnessEvent, LV_EVENT_VALUE_CHANGED, nullptr);
-  lv_obj_add_event_cb(sl, brightnessEvent, LV_EVENT_RELEASED, nullptr);
-
-  lv_obj_t *card2 = makeCard(c, 456, 86);
-  lv_obj_t *st = makeLabel(card2, "When idle for", F_BODY, C_MUTED);
-  lv_obj_align(st, LV_ALIGN_TOP_LEFT, 16, 10);
-  sleepMap[0] = tr("Never");
-  sleepMap[1] = tr("1 min");
-  sleepMap[2] = tr("5 min");
-  sleepMap[3] = tr("10 min");
-  sleepMap[4] = "";
-  lv_obj_t *bm = lv_btnmatrix_create(card2);
-  lv_btnmatrix_set_map(bm, sleepMap);
-  lv_btnmatrix_set_btn_ctrl_all(bm, LV_BTNMATRIX_CTRL_CHECKABLE);
-  lv_btnmatrix_set_one_checked(bm, true);
-  for (int i = 0; i < 4; i++)
-    if (sleepVals[i] == sleepMin) lv_btnmatrix_set_btn_ctrl(bm, i, LV_BTNMATRIX_CTRL_CHECKED);
-  lv_obj_set_size(bm, 424, 38);
-  lv_obj_align(bm, LV_ALIGN_BOTTOM_MID, 0, -10);
-  lv_obj_set_style_bg_opa(bm, LV_OPA_TRANSP, 0);
-  lv_obj_set_style_border_width(bm, 0, 0);
-  lv_obj_set_style_pad_all(bm, 0, 0);
-  lv_obj_set_style_pad_column(bm, 8, 0);
-  lv_obj_set_style_text_font(bm, F_BODY, LV_PART_ITEMS);
-  lv_obj_set_style_bg_color(bm, C_BORDER, LV_PART_ITEMS);
-  lv_obj_set_style_text_color(bm, C_TEXT, LV_PART_ITEMS);
-  lv_obj_set_style_border_width(bm, 0, LV_PART_ITEMS);
-  lv_obj_set_style_shadow_width(bm, 0, LV_PART_ITEMS);
-  lv_obj_set_style_radius(bm, 10, LV_PART_ITEMS);
-  lv_obj_set_style_bg_color(bm, C_ACCENT, LV_PART_ITEMS | LV_STATE_CHECKED);
-  lv_obj_set_style_text_color(bm, lv_color_hex(0x04101A), LV_PART_ITEMS | LV_STATE_CHECKED);
-  lv_obj_add_event_cb(bm, sleepEvent, LV_EVENT_VALUE_CHANGED, nullptr);
-
-  // what happens after the idle time
-  static const char *idleMap[3];
-  idleMap[0] = tr("Turn screen off");
-  idleMap[1] = tr("Ambient clock");
-  idleMap[2] = "";
-  lv_obj_t *card3 = makeCard(c, 456, 86);
-  lv_obj_t *it = makeLabel(card3, "Then", F_BODY, C_MUTED);
-  lv_obj_align(it, LV_ALIGN_TOP_LEFT, 16, 10);
-  lv_obj_t *im = lv_btnmatrix_create(card3);
-  lv_btnmatrix_set_map(im, idleMap);
-  lv_btnmatrix_set_btn_ctrl_all(im, LV_BTNMATRIX_CTRL_CHECKABLE);
-  lv_btnmatrix_set_one_checked(im, true);
-  lv_btnmatrix_set_btn_ctrl(im, cfg.idleMode ? 1 : 0, LV_BTNMATRIX_CTRL_CHECKED);
-  lv_obj_set_size(im, 424, 38);
-  lv_obj_align(im, LV_ALIGN_BOTTOM_MID, 0, -10);
-  lv_obj_set_style_bg_opa(im, LV_OPA_TRANSP, 0);
-  lv_obj_set_style_border_width(im, 0, 0);
-  lv_obj_set_style_pad_all(im, 0, 0);
-  lv_obj_set_style_pad_column(im, 8, 0);
-  lv_obj_set_style_text_font(im, F_BODY, LV_PART_ITEMS);
-  lv_obj_set_style_bg_color(im, C_BORDER, LV_PART_ITEMS);
-  lv_obj_set_style_text_color(im, C_TEXT, LV_PART_ITEMS);
-  lv_obj_set_style_border_width(im, 0, LV_PART_ITEMS);
-  lv_obj_set_style_shadow_width(im, 0, LV_PART_ITEMS);
-  lv_obj_set_style_radius(im, 10, LV_PART_ITEMS);
-  lv_obj_set_style_bg_color(im, C_ACCENT, LV_PART_ITEMS | LV_STATE_CHECKED);
-  lv_obj_set_style_text_color(im, lv_color_hex(0x04101A), LV_PART_ITEMS | LV_STATE_CHECKED);
-  lv_obj_add_event_cb(
-      im,
-      [](lv_event_t *e) {
-        uint32_t id = lv_btnmatrix_get_selected_btn(lv_event_get_target(e));
-        if (id > 1) return;
-        cfg.idleMode = id;
-        cfgSave();
-      },
-      LV_EVENT_VALUE_CHANGED, nullptr);
-
-  // payment accounts: choose which one the QR tile and the Payment app show (accounts are added on the web page)
-  if (cfg.qrOn) {
-    sectionLabel(c, DL("TÀI KHOẢN QR THANH TOÁN", "PAYMENT QR ACCOUNT"));
-    for (int i = 0; i < qrCount; i++) {
-      lv_obj_t *b = lv_btn_create(c);
-      lv_obj_set_size(b, 456, 44);
-      lv_obj_set_style_radius(b, 14, 0);
-      lv_obj_set_style_border_width(b, 1, 0);
-      lv_obj_set_style_shadow_width(b, 0, 0);
-      lv_obj_set_style_bg_color(b, C_ACCENT, 0);
-      lv_obj_set_style_border_color(b, C_ACCENT, 0);
-      lv_obj_set_style_bg_opa(b, LV_OPA_40, LV_STATE_PRESSED);
-      lv_obj_t *l = makeLabel(b, "", F_BODY, C_ACCENT);
-      lv_obj_set_size(l, 420, 20);
-      lv_label_set_long_mode(l, LV_LABEL_LONG_DOT);
-      lv_obj_center(l);
-      qrRows[i] = b;
-      lv_obj_add_event_cb(b, [](lv_event_t *e) {
-        int i = (int)(intptr_t)lv_event_get_user_data(e);
-        if (i == qrSel || i >= qrCount) return;
-        qrSel = i;
-        qrApply();
-        qrSave();
-        cfgSave();
-        qrRebuild();
-        qrRowsRefresh();
-        uiToast(DL("Đã chọn tài khoản QR", "QR account selected"), C_OK);
-      }, LV_EVENT_CLICKED, (void *)(intptr_t)i);
-    }
-    qrRowsRefresh();
-    if (qrCount < 2) {
-      lv_obj_t *h = makeLabel(c, "", F_CAPTION, C_MUTED);
-      lv_label_set_text(h, DL("Thêm tài khoản khác trong trang web của thiết bị (mục Thanh toán).", "Add more accounts on the device web page (Payment)."));
-    }
-  }
-
-  // wallpaper of the main screen: pick a picture from the memory card, or remove it
-  sectionLabel(c, DL("HÌNH NỀN", "WALLPAPER"));
-  actionBtn(c, DL("Chọn hình nền từ thẻ nhớ", "Choose a wallpaper from the card"), C_ACCENT, [](lv_event_t *) {
-    pageReplace = true;  // the Settings page is replaced by the picker
-    pageWallpaper();
-    pageReplace = false;
-  });
-  if (cfg.wallOn)
-    actionBtn(c, DL("Gỡ hình nền", "Remove the wallpaper"), C_DANGER, [](lv_event_t *) {
-      wallpaperOff();
-      cfg.wallOn = false;
-      cfgSave();
-      uiToast(DL("Đã gỡ hình nền", "Wallpaper removed"), C_ACCENT);
-    });
-
-  sectionLabel(c, "GENERAL");
-  lv_obj_t *tz = makeCard(c, 456, 52);
-  lv_obj_t *tl = makeLabel(tz, "Time zone", F_BODY, C_MUTED);
-  lv_obj_align(tl, LV_ALIGN_LEFT_MID, 16, 0);
-  tzCur = wifiTimezone();
-  lv_obj_t *plus = smallBtn(tz, LV_SYMBOL_PLUS, C_ACCENT, tzStep, (void *)(intptr_t)1);
-  lv_obj_align(plus, LV_ALIGN_RIGHT_MID, -10, 0);
-  tzLabel = makeLabel(tz, "", F_LABEL, C_TEXT);
-  lv_obj_set_width(tzLabel, 70);
-  lv_obj_set_style_text_align(tzLabel, LV_TEXT_ALIGN_CENTER, 0);
-  lv_obj_align(tzLabel, LV_ALIGN_RIGHT_MID, -50, 0);
-  tzShow();
-  lv_obj_t *minus = smallBtn(tz, LV_SYMBOL_MINUS, C_ACCENT, tzStep, (void *)(intptr_t)-1);
-  lv_obj_align(minus, LV_ALIGN_RIGHT_MID, -126, 0);
-
-  lv_obj_t *lg = makeCard(c, 456, 52);
-  lv_obj_t *ll = makeLabel(lg, "Language", F_BODY, C_MUTED);
-  lv_obj_align(ll, LV_ALIGN_LEFT_MID, 16, 0);
-  lv_obj_t *lEn = smallBtn(lg, "English", gLang == LANG_EN ? C_ACCENT : C_MUTED, askLang, (void *)(intptr_t)LANG_EN, 100);
-  lv_obj_align(lEn, LV_ALIGN_RIGHT_MID, -10, 0);
-  lv_obj_t *lVi = smallBtn(lg, "Tiếng Việt", gLang == LANG_VI ? C_ACCENT : C_MUTED, askLang, (void *)(intptr_t)LANG_VI, 110);
-  lv_obj_align(lVi, LV_ALIGN_RIGHT_MID, -118, 0);
-
-  infoRow(c, "Wi-Fi", wifiConnected() ? WiFi.SSID().c_str() : "Not connected", wifiConnected() ? C_OK : C_WARN);
-  if (wifiConnected()) {
-    String url = String("http://") + webHost() + ".local";
-    infoRow(c, "Web setup", url.c_str(), C_ACCENT);
-  }
-  infoRow(c, "Xiaozhi", xiaozhiState() == XZ_ACTIVATED ? "Connected" : xiaozhiMessage(),
-          xiaozhiState() == XZ_ACTIVATED ? C_OK : C_WARN);
-
-  sectionLabel(c, "SYSTEM");
-  actionBtn(c, "Recalibrate touch", C_ACCENT, askRecalibrate);
-  actionBtn(c, "Restart device", C_WARN, askRestart);
-  actionBtn(c, "Factory reset", C_DANGER, askFactoryReset);
-  pageShow(s);
 }
 
 // =====================================================================================

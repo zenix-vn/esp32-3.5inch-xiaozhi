@@ -245,6 +245,7 @@ static void qrRebuild() {
 }
 
 #include "wallpaper.h"
+#include "settings_page.h"
 #include "webconfig.h"
 
 // ---------- launcher ----------
@@ -297,7 +298,7 @@ static void buildLauncher(lv_obj_t *tile) {
     if (to < 0) to = cfg.apps.length();
     int idx = cfg.apps.substring(from, to).toInt();
     from = to + 1;
-    if (idx < 0 || idx >= APP_COUNT) continue;
+    if (idx < 0 || idx >= APP_COUNT || !appInLauncher(idx)) continue;
     const App &a = apps[idx];
     lv_obj_t *b = lv_obj_create(grid);
     lv_obj_remove_style_all(b);

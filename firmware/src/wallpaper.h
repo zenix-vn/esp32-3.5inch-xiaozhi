@@ -343,7 +343,7 @@ static void wpApply() {
     return;
   }
   statusbarShow(true);
-  goBack(nullptr);  // straight to the main screen to see it
+  goMain();  // straight to the main screen to see it
   uiToast(DL("Đã đặt hình nền", "Wallpaper set"), C_OK);
 }
 
@@ -416,16 +416,11 @@ static void wpLoadTick(lv_timer_t *) {  // one thumbnail per tick: the page appe
 }
 
 static void wpShowPage(int page);
-static void wpBackToSettings(lv_event_t *) {
-  pageReplace = true;
-  pageSettings();
-  pageReplace = false;
-}
 
 static void pageWallpaper() {
   wpDimLoad();
   lv_obj_t *c;
-  wpPickScr = pageBegin(DL("Chọn hình nền", "Choose a wallpaper"), &c, wpBackToSettings);
+  wpPickScr = pageBegin(DL("Chọn hình nền", "Choose a wallpaper"), &c);
   lv_obj_del(c);
   lv_obj_t *s = wpPickScr;
   lv_obj_add_event_cb(s, [](lv_event_t *) {

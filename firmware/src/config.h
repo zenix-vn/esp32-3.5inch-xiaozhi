@@ -10,8 +10,10 @@ static const int SETTINGS_APP = 6;  // index of the Settings app; it can never b
 static const char *QR_DEFAULT_PAYLOAD =
     "00020101021138570010A000000727012700069704220113VQRQAHIZT41140208QRIBFTTA53037045802VN62150107NPS686908006304C8A9";
 
+// Wi-Fi (4), Storage (5) and About (7) live in Settings now, not in the launcher.
+static bool appInLauncher(int id) { return id != 4 && id != 5 && id != 7; }
 // app ids: 0 assistant, 1 weather, 2 dragon, 3 photos, 4 wi-fi, 5 storage, 6 settings, 7 about, 8 clock, 9 payment, 10 calendar, 11 sleep sounds
-static const char *APPS_DEFAULT = "0,2,1,8,10,11,9,3,4,6,5,7";
+static const char *APPS_DEFAULT = "0,2,1,8,10,11,9,3,6";
 
 struct AppCfg {
   uint8_t startTile = 0;    // 0 home, 1 payment QR, 2 apps
@@ -66,7 +68,7 @@ static String cfgCleanApps(const String &csv) {
     t.trim();
     if (t.length() && t.length() <= 2) {
       int v = t.toInt();
-      if (v >= 0 && v < APP_COUNT && String(v) == t && !cfgAppsContain(out, v)) out += (out.length() ? "," : "") + t;
+      if (v >= 0 && v < APP_COUNT && appInLauncher(v) && String(v) == t && !cfgAppsContain(out, v)) out += (out.length() ? "," : "") + t;
     }
     from = to + 1;
   }

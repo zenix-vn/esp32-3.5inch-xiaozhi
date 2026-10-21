@@ -455,3 +455,17 @@ Ghi chú:
 
 - Thời tiết và đồng bộ giờ "tải mãi": `HTTPClient::getString()` đọc dữ liệu chunked bằng vòng lặp không nhường CPU (tối đa 10 giây), làm watchdog reset máy. Thời tiết giờ dùng HTTP/1.0 và tự đọc từng đoạn, nhường CPU khi chưa có dữ liệu, hạn chót 8 giây (`weather.cpp: readBody`).
 - Mất IP (0.0.0.0): tắt chế độ ngủ của Wi-Fi (`WiFi.setSleep(false)`), tự kết nối lại nếu đã liên kết mà không có IP quá 20 giây, và `wifiConnected()` chỉ đúng khi đã có IP.
+
+---
+---
+
+# Cài đặt được thiết kế lại
+
+- **Launcher** chỉ còn 9 app (Trợ lý, Rồng, Thời tiết, Đồng hồ, Lịch, Ru ngủ, Thanh toán, Ảnh, Cài đặt). **Wi-Fi, Bộ nhớ và Giới thiệu** nằm trong Cài đặt (id 4, 5, 7 không còn hiện ở launcher và trang web chọn app).
+- **Cài đặt** là một trang tổng hợp dạng danh sách nhóm: mỗi hàng có icon màu, tên, giá trị bên phải và mũi tên khi mở được trang khác.
+  - *Kết nối*: Wi-Fi (mở trang Wi-Fi), trang web cấu hình (`<tên>.local`), trạng thái Xiaozhi.
+  - *Thiết bị*: Màn hình (độ sáng, thời gian chờ, màn hình chờ, hình nền), Âm thanh (âm lượng, chế độ im lặng), Tài khoản QR (chọn tài khoản hiển thị), Bộ nhớ.
+  - *Chung*: Ngôn ngữ (VI/EN), Múi giờ (- +), Giới thiệu.
+  - *Hệ thống*: Hiệu chuẩn cảm ứng, Khởi động lại, Khôi phục cài đặt gốc.
+- **Quay lại**: trang mở từ Cài đặt (Wi-Fi, Bộ nhớ, Giới thiệu, chọn hình nền, các trang con) quay về đúng Cài đặt qua `pageParent` (`pages.h`); `goMain()` thoát thẳng ra màn hình chính (dùng sau khi đặt hình nền). Nút Wi-Fi ở Trung tâm điều khiển vẫn mở trang Wi-Fi.
+- Mã nguồn: `settings_page.h` (trang tổng hợp và các trang con), `pages.h` (Wi-Fi, Bộ nhớ, Giới thiệu, `pageParent`).
