@@ -579,6 +579,13 @@ static uint32_t lapsTotal() {
 
 // ---------- page ----------
 static void ckRefresh(lv_timer_t *) {
+  struct tm tt;
+  static bool wasSynced = false;
+  bool synced = clockTimeNow(tt);
+  if (synced != wasSynced) {  // the list's header depends on it (time arrives a while after boot)
+    wasSynced = synced;
+    ckAlarmsDirty = true;
+  }
   if (ckAlarmsDirty && !ckEdOv) ckAlarmList();
   // timer
   bool idle = !tmrEnd && !tmrLeft;
