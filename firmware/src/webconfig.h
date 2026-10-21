@@ -500,6 +500,10 @@ static void webSendState() {
     o["a"] = qrAccs[i].acct;
     o["p"] = qrAccs[i].payload;
   }
+  JsonObject au = d["audio"].to<JsonObject>();  // what the speaker is doing (sleep sounds + files on the card)
+  au["files"] = audioNameCount;
+  au["bg"] = audioBgPlaying() ? audioBgPlaying() : "";
+  au["left"] = audioBgLeftSec();
   JsonObject dr = d["dragon"].to<JsonObject>();
   dr["ok"] = dgOk;
   if (dgOk) {
@@ -696,6 +700,17 @@ static void webBegin() {
     qrRebuild();
     web.send(200, "application/json", "{}");
   });
+  web.on("/api/audio/stop", HTTP_POST, []() {
+    if (!webAuthOk()) return;
+    audioBgStopNow();
+    audioFxStop();
+    web.send(200, "application/json", "{}");
+  });
+  web.on("/api/audio/play", HTTP_POST, []() {  // dev: /api/audio/play?name=rain&min=0 (background) or &fx=1 (one-shot)
+    if (!webAuthOk()) return;
+    bool ok = web.hasArg("fx") ? audioFx(web.arg("name").c_str(), false) : audioBg(web.arg("name").c_str(), web.arg("min").toInt());
+    web.send(ok ? 200 : 404, "text/plain", ok ? "ok" : "no such sound");
+  });
   web.on("/api/weather", HTTP_POST, []() {
     if (!webAuthOk()) return;
     if (web.hasArg("auto")) {
@@ -857,6 +872,7 @@ static void webBegin() {
             Serial.printf("SD upload: write failed at %u bytes\n", (unsigned)upFile.size());
           }
         } else if (u.status == UPLOAD_FILE_END || u.status == UPLOAD_FILE_ABORTED) {
+          audioDirty = true;  // a sound file may have arrived
           if (upFile) {
             Serial.printf("SD upload %s: received %u, file %u\n", u.status == UPLOAD_FILE_END ? "end" : "ABORTED", (unsigned)u.totalSize,
                           (unsigned)upFile.size());
@@ -873,6 +889,7 @@ static void webBegin() {
     bool dir = f && f.isDirectory();
     if (f) f.close();
     bool ok = dir ? SD.rmdir(path) : SD.remove(path);
+    audioDirty = true;
     web.send(ok ? 200 : 409, "text/plain", ok ? "ok" : "could not delete (folders must be empty)");
   });
   web.on("/api/sd/mkdir", HTTP_POST, []() {

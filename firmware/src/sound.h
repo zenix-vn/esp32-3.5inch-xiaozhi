@@ -4,6 +4,12 @@
 static const int PIN_SPK = 26;
 static const int SPK_CH = 2;
 
+// audio.h: sound files on the memory card. soundPlay() prefers them over the beeps below.
+static bool audioFx(const char *name, bool loop);
+static void audioFxStop();
+static bool audioFxActive();
+static const char *sndFileFor(const struct Note *seq);
+
 struct Note {
   uint16_t hz, ms;  // hz 0 = rest
 };
@@ -27,6 +33,7 @@ static void soundTone(uint16_t hz) {
 }
 
 static void soundStop() {
+  audioFxStop();
   sndSeq = nullptr;
   sndRepeat = 0;
   ledcWrite(SPK_CH, 0);
@@ -35,6 +42,12 @@ static void soundStop() {
 // repeat: number of extra plays, -1 = until soundStop()
 static void soundPlay(const Note *seq, int len, int repeat = 0, bool evenInDnd = false) {
   if (cfg.volume == 0 || (cfg.dnd && !evenInDnd)) return;
+  const char *file = sndFileFor(seq);
+  if (file && audioFx(file, repeat < 0)) {  // a recording on the card replaces the beeps
+    sndSeq = nullptr;
+    ledcWrite(SPK_CH, 0);
+    return;
+  }
   sndSeq = seq;
   sndLen = len;
   sndPos = 0;
@@ -57,7 +70,7 @@ static void soundTick() {
   sndNext = millis() + n.ms;
 }
 
-static bool soundPlaying() { return sndSeq != nullptr; }
+static bool soundPlaying() { return sndSeq != nullptr || audioFxActive(); }
 
 #define SND(arr) arr, (int)(sizeof(arr) / sizeof(arr[0]))
 static const Note SND_TAP[] = {{2400, 12}, {0, 1}};
@@ -68,3 +81,24 @@ static const Note SND_ALARM[] = {{1760, 120}, {0, 60}, {1760, 120}, {0, 60}, {17
 static const Note SND_CHIRP[] = {{1400, 40}, {1700, 40}, {2100, 50}, {0, 30}, {1900, 60}, {0, 1}};
 static const Note SND_EVOLVE[] = {{523, 110}, {659, 110}, {784, 110}, {1047, 220}, {0, 60}, {784, 90}, {1047, 300}, {0, 1}};
 static const Note SND_COIN[] = {{1976, 50}, {2637, 120}, {0, 1}};
+
+// The file that replaces each beep sequence (/sounds/<name>.wav).
+static const char *sndFileFor(const Note *seq) {
+  if (seq == SND_TAP) return "tap";
+  if (seq == SND_NOTIFY) return "notify";
+  if (seq == SND_OK) return "ok";
+  if (seq == SND_ERROR) return "error";
+  if (seq == SND_ALARM) return "alarm";
+  if (seq == SND_CHIRP) return "chirp";
+  if (seq == SND_EVOLVE) return "evolve";
+  if (seq == SND_COIN) return "coin";
+  return nullptr;
+}
+
+// A named game / interface sound with a beep fallback for when the card has no such file.
+static void sfx(const char *name, const Note *fallback, int fallbackLen, bool evenInDnd = false) {
+  if (cfg.volume == 0 || (cfg.dnd && !evenInDnd)) return;
+  if (audioFx(name, false)) return;
+  soundPlay(fallback, fallbackLen, 0, evenInDnd);
+}
+#define SFX(name, arr) sfx(name, arr, (int)(sizeof(arr) / sizeof(arr[0])))

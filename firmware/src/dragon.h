@@ -165,7 +165,7 @@ static void dgCheckAch() {
     dg.coins += 20;
     dgJournal(2, i);
     dgSay(String(DL("Huy hiệu mới: ", "New badge: ")) + (isVi() ? ACH[i].vi : ACH[i].en) + DL(" (+20 xu)", " (+20 coins)"));
-    soundPlay(SND(SND_COIN), 0, false);
+    SFX("achievement", SND_COIN);
   }
 }
 
@@ -470,12 +470,14 @@ static void dgBath() {
 static void dgToggleSleep() {
   if (dg.sleeping) {
     dg.sleeping = false;
+    SFX("chirp", SND_CHIRP);
     dgSay(DL("Rồng thức dậy.", "Your dragon woke up."));
   } else if (dg.energy > 90) {
     dgSay(DL("Rồng chưa buồn ngủ.", "Not sleepy yet."));
     return;
   } else {
     dg.sleeping = true;
+    SFX("sleep", SND_TAP);
   }
   dgSave();
 }
@@ -497,6 +499,7 @@ static void dgMedicine() {
   dg.energy = dg.energy < 30 ? 30 : dg.energy;
   dg.meds++;
   dgSay(DL("Rồng khỏe lại rồi!", "Your dragon feels better!"));
+  SFX("heal", SND_OK);
   dgSave();
 }
 // game 0 = gem catch, 1 = dragon flight (worth double coins)
@@ -836,7 +839,7 @@ static void dgPet(lv_point_t p) {
     dg.pets++;
   }
   dgHearts(2, p.x, p.y);
-  if (dPetCount == 1) soundPlay(SND(SND_CHIRP), 0, false);
+  if (dPetCount == 1) SFX("pet", SND_CHIRP);
 }
 static void dgBoxEvent(lv_event_t *e) {
   if (dg.stage == ST_EGG || dgBusy()) return;
@@ -871,7 +874,8 @@ static void dgShowStory(int idx, bool evolved) {
   if (!dScr || idx < 0 || idx >= ST_COUNT) return;
   if (evolved) {
     dgFxFlash();
-    soundPlay(SND(SND_EVOLVE), 0, false);
+    if (idx == ST_BABY) SFX("hatch", SND_EVOLVE);  // the egg hatches
+    else soundPlay(SND(SND_EVOLVE), 0, false);
   }
   lv_obj_t *ov = dgOpenOverlay();
   lv_obj_t *card = pxPanel(ov, 400, 236);
@@ -924,7 +928,7 @@ static void mgJewelTap(lv_event_t *e) {
   if (mg.over) return;
   mg.score++;
   setTextFmt(mg.lblScore, "%d", mg.score);
-  soundPlay(SND(SND_TAP), 0, false);
+  SFX("gem", SND_TAP);
   lv_obj_del_async((lv_obj_t *)lv_event_get_target(e));
   mg.jewel = nullptr;
 }
@@ -977,7 +981,8 @@ static void mgEnd() {
   snprintf(l1, sizeof(l1), isVi() ? "Bắt được %d ngọc  (+%d xu)" : "Caught %d gems  (+%d coins)", score, score);
   snprintf(l2, sizeof(l2), isVi() ? "Kỷ lục: %d" : "Best: %d", (int)dg.best);
   dgResultCard(mg.ov, l1, l2, mgClose);
-  soundPlay(SND(SND_OK), 0, false);
+  if (score > 0) SFX("win", SND_OK);
+  else SFX("gameover", SND_ERROR);
 }
 static void dgStartGems() {
   mg = MiniGame();
@@ -1027,7 +1032,7 @@ static void fbEnd() {
   snprintf(l1, sizeof(l1), isVi() ? "Bay qua %d cột mây  (+%d xu)" : "Passed %d pillars  (+%d coins)", fb.score, fb.score * 2);
   snprintf(l2, sizeof(l2), isVi() ? "Kỷ lục: %d" : "Best: %d", (int)dg.best2);
   dgResultCard(fb.ov, l1, l2, fbClose);
-  soundPlay(SND(SND_ERROR), 0, false);
+  SFX("gameover", SND_ERROR);
 }
 static void fbTick(lv_timer_t *) {
   if (!fb.ov || fb.over || !fb.started) return;
@@ -1058,7 +1063,7 @@ static void fbTick(lv_timer_t *) {
       fb.passed[i] = true;
       fb.score++;
       setTextFmt(fb.lbl, "%d", fb.score);
-      soundPlay(SND(SND_TAP), 0, false);
+      SFX("gem", SND_TAP);
     }
     int x0 = FB_PX + 14, x1 = FB_PX + pw - 14, y0 = (int)fb.y + 14, y1 = (int)fb.y + ph - 10;
     if (x1 > fb.cx[i] && x0 < fb.cx[i] + FB_W && (y0 < fb.gapY[i] - FB_GAP / 2 || y1 > fb.gapY[i] + FB_GAP / 2)) {
@@ -1086,7 +1091,9 @@ static void dgStartFlight() {
           fb.started = true;
           lv_obj_del(fb.hint);
           fb.hint = nullptr;
+          SFX("fire", SND_CHIRP);  // take-off roar
         }
+        SFX("flap", SND_TAP);
         fb.vy = -6.6f;
       },
       LV_EVENT_PRESSED, nullptr);
@@ -1151,7 +1158,7 @@ static void feedPick(lv_event_t *e) {
   dgFeed(kind);
   if (dg.fed != fedBefore) {
     dgFxFeed(kind);
-    soundPlay(SND(SND_CHIRP), 0, false);
+    SFX("eat", SND_CHIRP);
   }
 }
 static void dgOpenFeed() {
@@ -1297,7 +1304,10 @@ static void dgBtnCb(lv_event_t *e) {
     case 2: {
       uint32_t before = dg.bathed;
       dgBath();
-      if (dg.bathed != before) dgFxBath();
+      if (dg.bathed != before) {
+        dgFxBath();
+        SFX("bath", SND_OK);
+      }
       break;
     }
     case 3: dgToggleSleep(); break;

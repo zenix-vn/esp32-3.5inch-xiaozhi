@@ -10,3 +10,6 @@ backup/
 libs/xiaozhi-esp32/
 
 *.bin
+
+# generated sound files (python tools/gen_sounds.py)
+tools/sounds/

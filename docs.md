@@ -436,3 +436,22 @@ Ghi chú:
 
 - **Tài khoản QR** (tối đa 8): thêm, sửa, xoá trên trang web (mục **Thanh toán**, nút **Dùng** để chọn tài khoản hiển thị). Trên máy, chọn tài khoản ở **Cài đặt > Tài khoản QR thanh toán** (hàng đang dùng có dấu tích). Mã QR ở màn hình chính và app Thanh toán đổi ngay, không cần khởi động lại. Tài khoản QR cũ của máy tự thành tài khoản số 1. Mã nguồn: `config.h` (danh sách, lưu ở NVS `qrs`), `webconfig.h` (`/api/qr/save|select|delete`), `pages.h` (Cài đặt), `main.cpp` (`qrRebuild`).
 - **Vuốt vòng**: ở màn hình cuối (Ứng dụng) vuốt trái quay về Trang chủ; ở Trang chủ vuốt phải đến màn hình cuối. Vì tileview không cuộn tiếp ở hai đầu, cú vuốt đến dưới dạng cử chỉ (gesture). LVGL gửi cử chỉ tới tổ tiên đầu tiên **không** có cờ `GESTURE_BUBBLE`, nên tileview (và lưới Lịch) phải bỏ cờ này, và sau khi xử lý phải gọi `lv_indev_wait_release()` để cú nhả tay không bị tính là chạm vào icon nơi bắt đầu vuốt. Vuốt trái/phải trong app Lịch đổi tháng theo cách tương tự.
+
+---
+---
+
+# Âm thanh từ thẻ nhớ và app Ru ngủ
+
+- **Âm thanh hệ thống và game** nằm ở `/sounds/<tên>.wav` trên thẻ nhớ (WAV PCM 8 hoặc 16 bit, mono hoặc stereo, tần số bất kỳ; bộ tạo dùng 8 bit mono 16 kHz cho nhẹ). Có file thì máy phát file, thiếu file thì quay về tiếng bíp cũ, nên không có thẻ vẫn chạy.
+  - Giao diện: `tap` (chạm), `notify`, `ok`, `error`, `alarm` (lặp khi báo thức kêu), `chirp`, `evolve`, `coin`.
+  - Game rồng: `eat`, `bath`, `heal`, `sleep`, `hatch` (trứng nở), `pet` (vuốt ve), `fire` (rồng bay cất cánh), `flap`, `gem`, `gem_miss`, `gameover`, `win`, `achievement`.
+  - Tiếng nền ru ngủ (lặp liền mạch): `rain`, `stream`, `wind`, `storm`, `ocean`, `forest`, `fire_camp`, `lullaby` (nhạc hộp tự sáng tác), `whitenoise`.
+- **Tạo và tải file:** `python tools/gen_sounds.py` (tổng hợp từ đầu bằng numpy, không dùng mẫu có bản quyền, ra `tools/sounds/`, không commit) rồi `python tools/upload_sounds.py voi.local`. Muốn đổi âm thanh nào, chép file WAV cùng tên vào `/sounds` (trang web quản lý thẻ nhớ cũng làm được).
+- **App Ru ngủ** (id 11): 9 tiếng nền dạng thẻ, chạm để phát hoặc dừng, hẹn giờ tự tắt 15/30/60/90 phút hoặc "Mãi" (âm thanh nhỏ dần trong 6 giây). Tiếng nền vẫn phát khi thoát app; âm thanh giao diện được trộn chồng lên nên chạm màn hình không làm đứt tiếng mưa. Âm lượng chỉnh ở Trung tâm điều khiển.
+- **Cách phát** (`audio.h`): một task trộn 2 kênh (FX và nền) rồi gửi qua I2S ở chế độ DAC tích hợp ra GPIO26 (chân loa). Driver chỉ tồn tại khi có âm thanh (+1,5 giây) vì chân loa còn dùng cho tiếng bíp LEDC.
+- **Chẩn đoán:** `GET /api/state` có trường `audio` (số file, tiếng nền đang phát, giây còn lại); `POST /api/audio/play?name=rain&min=0` (hoặc `&fx=1` cho hiệu ứng) và `POST /api/audio/stop`.
+
+## Lỗi mạng đã sửa cùng đợt
+
+- Thời tiết và đồng bộ giờ "tải mãi": `HTTPClient::getString()` đọc dữ liệu chunked bằng vòng lặp không nhường CPU (tối đa 10 giây), làm watchdog reset máy. Thời tiết giờ dùng HTTP/1.0 và tự đọc từng đoạn, nhường CPU khi chưa có dữ liệu, hạn chót 8 giây (`weather.cpp: readBody`).
+- Mất IP (0.0.0.0): tắt chế độ ngủ của Wi-Fi (`WiFi.setSleep(false)`), tự kết nối lại nếu đã liên kết mà không có IP quá 20 giây, và `wifiConnected()` chỉ đúng khi đã có IP.

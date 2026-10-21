@@ -128,6 +128,9 @@ void wifiBegin() {
     startPortal();
   } else {
     WiFi.mode(WIFI_STA);
+    WiFi.persistent(false);
+    WiFi.setSleep(false);  // always powered: modem sleep made the access point drop the DHCP lease (IP 0.0.0.0) after a while
+    WiFi.setAutoReconnect(true);
     WiFi.begin(ssid.c_str(), pass.c_str());
     connectStart = millis();
   }
@@ -186,6 +189,19 @@ void wifiLoop() {
   if (millis() - statusAt < 250) return;
   statusAt = millis();
   if (WiFi.status() == WL_CONNECTED) {
+    static uint32_t noIpSince = 0;
+    if (WiFi.localIP() == IPAddress(0, 0, 0, 0)) {  // linked but no address: time and weather cannot work; join again
+      if (!noIpSince) noIpSince = millis();
+      if (millis() - noIpSince > 20000 && ssid.length()) {
+        noIpSince = 0;
+        Serial.println("WIFI no IP address for 20 s: reconnecting");
+        WiFi.disconnect();
+        WiFi.begin(ssid.c_str(), pass.c_str());
+        connectStart = millis();
+      }
+    } else {
+      noIpSince = 0;
+    }
     snprintf(statusBuf, sizeof(statusBuf), "%s  %s", WiFi.SSID().c_str(), WiFi.localIP().toString().c_str());
     if (!ntpStarted) startNtp();
   } else if (attempting) {
@@ -262,5 +278,5 @@ void wifiSetTimezone(int hours) {
 
 int wifiTimezone() { return tzHours; }
 const char *wifiStatus() { return statusBuf; }
-bool wifiConnected() { return WiFi.status() == WL_CONNECTED; }
+bool wifiConnected() { return WiFi.status() == WL_CONNECTED && WiFi.localIP() != IPAddress(0, 0, 0, 0); }  // linked AND has an address
 bool wifiPortalActive() { return portalOn; }

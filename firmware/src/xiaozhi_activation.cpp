@@ -193,7 +193,7 @@ void xiaozhiBegin() {
   }
   p.end();
   // 16 KB was generous for TLS + HTTP + JSON; 12 KB still leaves a margin ("XZ stack left" on the log)
-  xTaskCreatePinnedToCore(task, "xz_act", 12288, nullptr, 1, nullptr, 0);
+  xTaskCreatePinnedToCore(task, "xz_act", 12288, nullptr, 0, nullptr, 0);  // priority 0: the TLS handshake must not starve IDLE0
 }
 
 XzState xiaozhiState() { return state; }

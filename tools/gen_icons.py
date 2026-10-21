@@ -137,6 +137,14 @@ def glyph_clock(g, c):
     g.rect(60, 14, 72, 20, 3)
 
 
+def glyph_sleep(g, c):
+    clear = (0, 0, 0, 0)
+    g.ell(46, 52, 27, 27, hexc(0xFFE27A))  # crescent moon: a disc minus a shifted disc
+    g.ell(58, 44, 24, 24, clear)
+    for x, y, r in ((70, 30, 4.2), (80, 52, 3), (62, 66, 2.6)):  # stars
+        g.ell(x, y, r, r, WHITE)
+
+
 def glyph_qr(g, c):
     for x, y in ((20, 20), (58, 20), (20, 58)):
         g.rect(x, y, x + 22, y + 22, 4)
@@ -194,6 +202,7 @@ ICONS = [
     ('ic_about', 0x7BDCB5, 0x2A7F86, glyph_about),
     ('ic_clock', 0xFF8FA3, 0xD03A6A, glyph_clock),
     ('ic_qr', 0xFFD54A, 0xD98A12, glyph_qr),
+    ('ic_sleep', 0x6C7CFF, 0x2A2478, glyph_sleep),
     ('ic_calendar', 0xFFF6DC, 0xE3AC52, 'logo'),  # the Zin100 calendar logo (tools/assets/calendar_logo.png) on a cream-to-gold tile
     ('ic_2048', 0xFFB86B, 0xE0603A, glyph_2048),
     ('ic_caro', 0x6BE0C8, 0x2A78B8, glyph_caro),

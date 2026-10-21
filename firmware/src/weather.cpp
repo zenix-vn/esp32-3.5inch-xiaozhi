@@ -53,10 +53,38 @@ static void applyPending() {
   p.end();
 }
 
+// The reply body, read the safe way. HTTPClient::getString() on a chunked reply waits for data in a loop that never
+// yields (Stream::timedRead, up to the 10 s timeout): with a slow server that starved the idle task of core 0 and the
+// task watchdog reset the device, and the weather / time never loaded. This reads what is available, sleeps 10 ms
+// when nothing is, and gives up after 8 s. The request must be HTTP/1.0 (no chunked encoding).
+static String readBody(HTTPClient &http) {
+  String out;
+  WiFiClient *c = http.getStreamPtr();
+  int len = http.getSize();  // -1 when the server closes the connection to end the body
+  if (!c) return out;
+  out.reserve(len > 0 && len < 8192 ? len + 1 : 2048);
+  uint32_t deadline = millis() + 8000;
+  char b[256];
+  while (millis() < deadline && out.length() < 8192) {
+    int n = c->available();
+    if (n > 0) {
+      n = c->readBytes(b, n < (int)sizeof(b) ? n : (int)sizeof(b));
+      if (n > 0) out.concat(b, n);
+      if (len > 0 && (int)out.length() >= len) break;
+    } else if (!c->connected()) {
+      break;
+    } else {
+      vTaskDelay(pdMS_TO_TICKS(10));
+    }
+  }
+  return out;
+}
+
 static bool locate() {
   HTTPClient http;
   WiFiClient client;
   http.setTimeout(8000);
+  http.useHTTP10(true);
   if (!http.begin(client, "http://ip-api.com/json/?fields=status,city,lat,lon")) return false;
   int st = http.GET();
   if (st != 200) {
@@ -64,8 +92,9 @@ static bool locate() {
     return false;
   }
   JsonDocument d;
-  DeserializationError err = deserializeJson(d, http.getString());
+  String body = readBody(http);
   http.end();
+  DeserializationError err = deserializeJson(d, body);
   if (err || strcmp(d["status"] | "", "success") != 0) return false;
   lat = d["lat"];
   lon = d["lon"];
@@ -84,6 +113,7 @@ static bool fetch() {
   WiFiClient client;  // plain HTTP: no TLS, which needs ~40 KB of contiguous RAM
   HTTPClient http;
   http.setTimeout(10000);
+  http.useHTTP10(true);
   String url = String("http://api.open-meteo.com/v1/forecast?latitude=") + String(lat, 3) +
                "&longitude=" + String(lon, 3) +
                "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day"
@@ -97,15 +127,16 @@ static bool fetch() {
     http.end();
     return false;
   }
-  // Parse a String, not http.getStream(): ArduinoJson busy-waits on a slow socket, which starved core 0's idle
-  // task until the watchdog reset the device. The filter keeps only the data blocks (drops *_units, metadata).
+  // Parse a String read with readBody() (see above), not the stream: ArduinoJson busy-waits on a slow socket too.
+  // The filter keeps only the data blocks (drops *_units, metadata).
   JsonDocument filter;
   filter["current"] = true;
   filter["hourly"] = true;
   filter["daily"] = true;
   JsonDocument d;
-  DeserializationError err = deserializeJson(d, http.getString(), DeserializationOption::Filter(filter));
+  String body = readBody(http);
   http.end();
+  DeserializationError err = deserializeJson(d, body, DeserializationOption::Filter(filter));
   if (err || !d["current"]["temperature_2m"].is<float>()) return false;
   WeatherData w;
   w.valid = true;
@@ -185,7 +216,11 @@ static void task(void *) {
   }
 }
 
-void weatherBegin() { xTaskCreatePinnedToCore(task, "weather", 6144, nullptr, 1, nullptr, 0); }  // plain HTTP: small stack
+void weatherBegin() {
+  // plain HTTP: small stack. Priority 0 (= the idle task): a network stall or a long parse here must never starve
+  // IDLE0 and trip the task watchdog (it did, right after boot, when this ran at priority 1).
+  xTaskCreatePinnedToCore(task, "weather", 6144, nullptr, 0, nullptr, 0);
+}
 
 WeatherData weatherGet() {
   WeatherData w;

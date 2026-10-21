@@ -4,14 +4,14 @@
 #include <Arduino.h>
 #include <Preferences.h>
 
-static const int APP_COUNT = 11;
+static const int APP_COUNT = 12;
 static const int SETTINGS_APP = 6;  // index of the Settings app; it can never be hidden
 
 static const char *QR_DEFAULT_PAYLOAD =
     "00020101021138570010A000000727012700069704220113VQRQAHIZT41140208QRIBFTTA53037045802VN62150107NPS686908006304C8A9";
 
-// app ids: 0 assistant, 1 weather, 2 dragon, 3 photos, 4 wi-fi, 5 storage, 6 settings, 7 about, 8 clock, 9 payment, 10 calendar
-static const char *APPS_DEFAULT = "0,2,1,8,10,9,3,4,6,5,7";
+// app ids: 0 assistant, 1 weather, 2 dragon, 3 photos, 4 wi-fi, 5 storage, 6 settings, 7 about, 8 clock, 9 payment, 10 calendar, 11 sleep sounds
+static const char *APPS_DEFAULT = "0,2,1,8,10,11,9,3,4,6,5,7";
 
 struct AppCfg {
   uint8_t startTile = 0;    // 0 home, 1 payment QR, 2 apps
@@ -95,7 +95,8 @@ static void cfgLoad() {
   if (appsV < 2) {  // V1 list: id 1 was Music (now Weather); add the new apps
     apps = apps == "0,1,2,3,4,5,6,7" ? String(APPS_DEFAULT) : apps + ",8,9";
   }
-  if (appsV < 4 && !cfgAppsContain(apps, 10)) apps += ",10";  // V2.1: the Calendar app
+  if (appsV < 4 && !cfgAppsContain(apps, 10)) apps += ",10";  // the Calendar app
+  if (appsV < 5 && !cfgAppsContain(apps, 11)) apps += ",11";  // the Sleep sounds app
   cfg.apps = cfgCleanApps(apps);
   cfg.theme = p.getUChar("theme", 0) & 3;
   cfg.volume = constrain(p.getUChar("vol", 60), 0, 100);
@@ -143,7 +144,7 @@ static void cfgSave() {
   p.remove("vmk");  // settings of the removed Vietmap app
   p.remove("veh");
   p.remove("spw");
-  p.putUChar("appsV", 4);
+  p.putUChar("appsV", 5);
   p.end();
 }
 
