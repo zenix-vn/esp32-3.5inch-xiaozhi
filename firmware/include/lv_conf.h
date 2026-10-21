@@ -46,6 +46,9 @@ void lv_assert_fail(void);
 #define LV_FONT_MONTSERRAT_28 1
 #define LV_FONT_MONTSERRAT_48 1
 #define LV_FONT_DEFAULT &lv_font_montserrat_14
+/* An infinite roller repeats its options this many times (default 7). 60 minutes x 37 px x 7 pages is past
+   LVGL's 8191 px coordinate limit and draws nothing; 3 pages (6660 px) wraps 59 -> 00 -> 01 just as well. */
+#define LV_ROLLER_INF_PAGES 3
 #define LV_USE_ARC 1
 #define LV_USE_SPINNER 1
 #define LV_USE_LABEL 1

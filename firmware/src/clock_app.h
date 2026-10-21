@@ -332,10 +332,9 @@ static void ckEdDelete(lv_event_t *) {
 }
 
 static lv_obj_t *ckRoller(lv_obj_t *parent, const char *opts, int sel) {
-  // LV_ROLLER_MODE_NORMAL: infinite mode repeats the options 7 times, and 60 minutes x 7 rows of this font are
-  // taller than LVGL's coordinate limit (8191 px), so the minute roller used to draw nothing at all.
+  // infinite: drag past 59 and it carries on at 00, 01, ... (LV_ROLLER_INF_PAGES is 3 in lv_conf.h, see there)
   lv_obj_t *r = lv_roller_create(parent);
-  lv_roller_set_options(r, opts, LV_ROLLER_MODE_NORMAL);
+  lv_roller_set_options(r, opts, LV_ROLLER_MODE_INFINITE);
   lv_roller_set_visible_row_count(r, 3);
   lv_roller_set_selected(r, sel, LV_ANIM_OFF);
   lv_obj_set_width(r, 96);
