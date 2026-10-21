@@ -10,3 +10,6 @@ const char *tr(const char *en);
 void i18nLoad();            // reads the saved language (default Vietnamese)
 void i18nSave(uint8_t lang);
 bool isVi();
+
+// Inline Vietnamese / English text for strings that are not worth a translation-table entry.
+#define DL(vi, en) (isVi() ? (vi) : (en))

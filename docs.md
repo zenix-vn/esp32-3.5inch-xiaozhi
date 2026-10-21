@@ -413,3 +413,18 @@ Ghi chú:
 - Mùng 1 tháng 7 năm 2026 là 13/8 (trăng mới lúc 00:37 giờ Việt Nam, sát nửa đêm); thuật toán cho kết quả này.
 - Tháng âm 12: "Tất niên" là ngày cuối tháng (29 hoặc 30) theo độ dài tháng thực.
 - Ngày nghỉ lễ đỏ: 1/1, 30/4, 1/5, 2/9, mùng 1-3 Tết và Giỗ Tổ (10/3 âm). Không tính ngày nghỉ bù.
+
+---
+---
+
+# Thẻ nhớ, Ảnh và Hình nền (cập nhật)
+
+- **Ảnh** (khung ảnh) tìm file JPG trong `/photos`, `/photo`, `/pictures`, `/images`, `/DCIM` và thư mục gốc của thẻ nhớ. File không có đuôi nhưng đúng định dạng JPEG cũng được nhận. Chỉ hỗ trợ JPG kiểu baseline (không phải progressive).
+- **Bộ nhớ**: hiện dung lượng chính xác (KB / MB / GB), số ảnh tìm thấy và danh sách file, thư mục ở gốc thẻ.
+- **Cài đặt > Hình nền** (trên máy): chọn ảnh từ thẻ nhớ làm hình nền màn hình chính.
+  1. Lưới thẻ thumbnail (8 ảnh mỗi trang, mũi tên đổi trang), mỗi thẻ ghi tên và kích thước ảnh. Thumbnail 96x64, 8 bit, được nạp lần lượt từng ảnh.
+  2. Chạm một thẻ để **xem trước** toàn màn hình, đúng như sẽ lưu (đã cắt giữa 480x320 và làm tối nếu bật). Công tắc **"Làm tối ảnh để chữ dễ đọc"** (nhớ lựa chọn) vẽ lại ảnh ngay.
+  3. **Đặt hình nền** giải mã, ghi vào vùng flash hình nền (cùng định dạng ZWP1 như khi tải từ trang web) rồi về màn hình chính. **Huỷ** quay lại lưới thumbnail.
+  4. **Gỡ hình nền** nằm ngay dưới nút chọn.
+- Mã nguồn: `photos.h` (tìm ảnh), `wallpaper.h` (chọn, xem trước, ghi), `pages.h` (Bộ nhớ, Cài đặt).
+- Icon **Trợ lý** vẽ lại thành bốn thanh nhiều màu như sóng âm đang nói (`tools/gen_icons.py`).

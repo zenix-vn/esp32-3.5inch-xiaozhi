@@ -17,26 +17,45 @@ static bool phOut(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t *bmp) {
   return true;
 }
 
+// JPEG files of one directory (not recursive), appended to names[] as full paths.
+static bool phIsJpeg(File &f, const String &low) {
+  if (low.endsWith(".jpg") || low.endsWith(".jpeg")) return true;
+  if (low.indexOf('.') >= 0 || f.size() < 4 || f.size() > 8UL * 1024 * 1024) return false;
+  uint8_t m[2] = {0, 0};  // a name without an extension (some tools drop it): look at the JPEG signature
+  File t = SD.open(String("/") + f.name(), FILE_READ);
+  if (t) {
+    t.read(m, 2);
+    t.close();
+  }
+  return m[0] == 0xFF && m[1] == 0xD8;
+}
+static void phScanDir(const char *path, String *names, int &n, int max) {
+  if (!SD.exists(path)) return;  // avoids a log line per missing folder
+  File dir = SD.open(path);
+  if (!dir || !dir.isDirectory()) return;
+  for (File f = dir.openNextFile(); f && n < max; f = dir.openNextFile()) {
+    String nm = f.name();
+    int slash = nm.lastIndexOf('/');
+    if (slash >= 0) nm = nm.substring(slash + 1);
+    String low = nm;
+    low.toLowerCase();
+    String full = String(path) + (path[1] ? "/" : "") + nm;
+    if (!f.isDirectory() && !low.startsWith(".") && !low.startsWith("_") && phIsJpeg(f, low)) names[n++] = full;
+    f.close();
+  }
+  dir.close();
+}
+
 static void phScan() {
   delete[] phFiles;
   phFiles = nullptr;
   phCount = 0;
-  File dir = SD.open(PHOTO_DIR);
-  if (!dir || !dir.isDirectory()) return;
   String names[100];
   int n = 0;
-  for (File f = dir.openNextFile(); f && n < 100; f = dir.openNextFile()) {
-    String nm = f.name();
-    String low = nm;
-    low.toLowerCase();
-    if (!f.isDirectory() && (low.endsWith(".jpg") || low.endsWith(".jpeg")) && !low.startsWith(".")) {
-      int slash = nm.lastIndexOf('/');
-      names[n++] = String(PHOTO_DIR) + "/" + (slash >= 0 ? nm.substring(slash + 1) : nm);
-    }
-    f.close();
-  }
-  dir.close();
-  for (int i = 1; i < n; i++)  // sort by name
+  // the folder this app documents first, then the usual alternatives, then the card's root
+  static const char *const DIRS[] = {PHOTO_DIR, "/photo", "/pictures", "/images", "/DCIM", "/"};
+  for (const char *d : DIRS) phScanDir(d, names, n, 100);
+  for (int i = 1; i < n; i++)  // sort by path
     for (int j = i; j > 0 && names[j] < names[j - 1]; j--) {
       String t = names[j];
       names[j] = names[j - 1];
@@ -46,6 +65,17 @@ static void phScan() {
   phFiles = new String[n];
   for (int i = 0; i < n; i++) phFiles[i] = names[i];
   phCount = n;
+}
+
+// How many pictures the Photos app would show (used by the Storage page).
+static int photosCount() {
+  if (!sdOk) return 0;
+  phScan();
+  int n = phCount;
+  delete[] phFiles;
+  phFiles = nullptr;
+  phCount = 0;
+  return n;
 }
 
 static void phDraw() {
@@ -105,8 +135,8 @@ static void pagePhotos() {
     lv_obj_t *card = makeCard(c, 456, 150);
     lv_obj_t *t = makeLabel(card, sdOk ? DL("Chưa có ảnh", "No photos yet") : DL("Cần thẻ nhớ microSD", "A microSD card is required"), F_TITLE, C_WARN);
     lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 16);
-    lv_obj_t *h = makeLabel(card, DL("Chép ảnh JPG vào thư mục /photos trên thẻ nhớ (nên đúng cỡ 480x320, dạng baseline), rồi mở lại Ảnh.",
-                                     "Copy JPG pictures into the /photos folder of the card (ideally 480x320, baseline), then open Photos again."),
+    lv_obj_t *h = makeLabel(card, DL("Chép ảnh JPG vào thư mục /photos (hoặc /photo, hoặc ngay thư mục gốc) của thẻ nhớ, nên cỡ 480x320, dạng baseline, rồi mở lại Ảnh.",
+                                     "Copy JPG pictures into the /photos folder (or /photo, or the root) of the card, ideally 480x320 baseline, then open Photos again."),
                               F_BODY, C_MUTED);
     lv_obj_set_width(h, 420);
     lv_label_set_long_mode(h, LV_LABEL_LONG_WRAP);

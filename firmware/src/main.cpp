@@ -62,6 +62,7 @@ static lv_color_t *buf1, *buf2;  // draw buffers, allocated at boot (not .bss: k
 #define TFT_USE_DMA 1
 #endif
 static volatile uint32_t gFlushCount = 0;  // photos.h redraws its picture when LVGL paints over it
+static volatile uint32_t gFlushTop = 0;    // flushes that touched y < 268: wallpaper.h's preview picture area
 static bool tftBusOpen = false;            // a DMA strip may still be in flight; the display holds the SPI bus
 
 // Call before any other use of the shared SPI bus (touch, photos, screenshot): finishes the last DMA
@@ -78,6 +79,7 @@ static void tftIdle() {
 
 static void dispFlush(lv_disp_drv_t *drv, const lv_area_t *a, lv_color_t *c) {
   gFlushCount++;
+  if (a->y1 < 268) gFlushTop++;
   uint32_t w = a->x2 - a->x1 + 1, h = a->y2 - a->y1 + 1, n = w * h;
 #if TFT_USE_DMA
   // LVGL renders little-endian RGB565, the panel wants big-endian: swap in place, two pixels per word
@@ -480,6 +482,7 @@ void loop() {
   webTick();
   uint32_t idle = lv_timer_handler();  // ms until LVGL's next timer is due
   photosLoop();
+  wpPreviewLoop();
   sleepTick();
   idleReturnTick();
   soundTick();

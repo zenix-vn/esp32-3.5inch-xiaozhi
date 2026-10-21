@@ -9,7 +9,6 @@
 #include "decor_img.h"
 #include "scene_img.h"
 
-#define DL(vi, en) (isVi() ? (vi) : (en))
 
 enum { ST_EGG, ST_BABY, ST_L1, ST_L2, ST_L3, ST_ADULT, ST_KING, ST_EMPEROR, ST_DIVINE, ST_COUNT };
 

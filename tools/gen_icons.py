@@ -73,10 +73,13 @@ class G:
 
 
 def glyph_assistant(g, c):
-    g.rect(18, 22, 82, 66, 16)
-    g.poly([(30, 62), (26, 80), (46, 64)])
-    for i, x in enumerate((36, 50, 64)):
-        g.ell(x, 44, 5, 5, hexc(c))
+    # four rounded bars of different heights in blue / red / yellow / green: a voice "speaking" (like a sound wave)
+    bars = ((0x4285F4, 44), (0xEA4335, 52), (0xFBBC05, 70), (0x34A853, 40))
+    w, gap = 15, 6
+    x = (100 - (4 * w + 3 * gap)) / 2
+    for col, h in bars:
+        g.rect(x, 50 - h / 2, x + w, 50 + h / 2, w / 2, hexc(col))
+        x += w + gap
 
 
 def glyph_weather(g, c):
@@ -193,7 +196,7 @@ def dragon_icon(c1, c2):
 
 ICONS = [
     # name, top colour, bottom colour, glyph
-    ('ic_assistant', 0x38E1FF, 0x2B6BFF, glyph_assistant),
+    ('ic_assistant', 0xFFFFFF, 0xD3DAF0, glyph_assistant),  # light tile so the coloured bars stand out
     ('ic_weather', 0x5AB0FF, 0x2F5FD0, glyph_weather),
     ('ic_dragon', 0xB38BFF, 0x5B2BD6, None),
     ('ic_photos', 0xFFB84A, 0xE8602A, glyph_photos),

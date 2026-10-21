@@ -5,6 +5,11 @@
 #include <nvs_flash.h>
 
 static const char *webHost();  // webconfig.h
+static int photosCount();      // photos.h
+static void pageWallpaper();   // wallpaper.h
+static void wallpaperOff();    // wallpaper.h
+static void pageSettings();
+static void uiToast(const char *text, lv_color_t col);  // statusbar.h (its definition adds the default colour)
 static uint8_t sleepMin = 0;
 static bool pageReplace = false;  // set while opening a page from another page: the old one is deleted  // screen-off timeout in minutes, 0 = never
 
@@ -578,6 +583,21 @@ static void pageSettings() {
       },
       LV_EVENT_VALUE_CHANGED, nullptr);
 
+  // wallpaper of the main screen: pick a picture from the memory card, or remove it
+  sectionLabel(c, DL("HÌNH NỀN", "WALLPAPER"));
+  actionBtn(c, DL("Chọn hình nền từ thẻ nhớ", "Choose a wallpaper from the card"), C_ACCENT, [](lv_event_t *) {
+    pageReplace = true;  // the Settings page is replaced by the picker
+    pageWallpaper();
+    pageReplace = false;
+  });
+  if (cfg.wallOn)
+    actionBtn(c, DL("Gỡ hình nền", "Remove the wallpaper"), C_DANGER, [](lv_event_t *) {
+      wallpaperOff();
+      cfg.wallOn = false;
+      cfgSave();
+      uiToast(DL("Đã gỡ hình nền", "Wallpaper removed"), C_ACCENT);
+    });
+
   sectionLabel(c, "GENERAL");
   lv_obj_t *tz = makeCard(c, 456, 52);
   lv_obj_t *tl = makeLabel(tz, "Time zone", F_BODY, C_MUTED);
@@ -619,18 +639,26 @@ static void pageSettings() {
 // =====================================================================================
 // Storage
 // =====================================================================================
+static void fmtBytes(uint64_t b, char *out, size_t n) {
+  if (b >= 1048576ULL * 1024) snprintf(out, n, "%.2f GB", b / 1073741824.0);
+  else if (b >= 1048576ULL) snprintf(out, n, "%.1f MB", b / 1048576.0);
+  else if (b >= 1024) snprintf(out, n, "%u KB", (unsigned)(b / 1024));
+  else snprintf(out, n, "%u B", (unsigned)b);
+}
+
 static void pageStorage() {
   lv_obj_t *c;
   lv_obj_t *s = pageBegin("Storage", &c);
   if (!sdOk) {
     infoRow(c, "microSD", "No card detected", C_WARN);
   } else {
-    uint64_t total = SD.cardSize() / 1048576ULL, used = SD.usedBytes() / 1048576ULL;
+    uint64_t total = SD.cardSize(), used = SD.usedBytes();
     int pct = total ? (int)(used * 100 / total) : 0;
+    if (pct == 0 && used > 0) pct = 1;
     lv_obj_t *card = makeCard(c, 456, 74);
     lv_obj_t *t = makeLabel(card, "microSD", F_BODY, C_MUTED);
     lv_obj_align(t, LV_ALIGN_TOP_LEFT, 16, 10);
-    char buf[40];
+    char buf[48];
     snprintf(buf, sizeof(buf), tr("%d%% used"), pct);
     lv_obj_t *p = makeLabel(card, buf, F_BODY, C_TEXT);
     lv_obj_align(p, LV_ALIGN_TOP_RIGHT, -16, 10);
@@ -640,12 +668,35 @@ static void pageStorage() {
     lv_bar_set_value(bar, pct, LV_ANIM_OFF);
     lv_obj_set_style_bg_color(bar, C_BORDER, LV_PART_MAIN);
     lv_obj_set_style_bg_color(bar, C_ACCENT, LV_PART_INDICATOR);
-    snprintf(buf, sizeof(buf), "%llu MB", (unsigned long long)total);
+    fmtBytes(total, buf, sizeof(buf));
     infoRow(c, "Capacity", buf);
-    snprintf(buf, sizeof(buf), "%llu MB", (unsigned long long)used);
+    fmtBytes(used, buf, sizeof(buf));
     infoRow(c, "Used", buf);
-    snprintf(buf, sizeof(buf), "%llu MB", (unsigned long long)(total - used));
+    fmtBytes(total > used ? total - used : 0, buf, sizeof(buf));
     infoRow(c, "Free", buf, C_OK);
+    snprintf(buf, sizeof(buf), "%d", photosCount());
+    infoRow(c, DL("Ảnh tìm thấy", "Photos found"), buf, C_ACCENT);
+
+    // what is on the card (top level)
+    sectionLabel(c, DL("NỘI DUNG THẺ", "CARD CONTENTS"));
+    File root = SD.open("/");
+    int shown = 0;
+    for (File f = root.openNextFile(); f && shown < 40; f = root.openNextFile(), shown++) {
+      String nm = f.name();
+      int sl = nm.lastIndexOf('/');
+      if (sl >= 0) nm = nm.substring(sl + 1);
+      bool dir = f.isDirectory();
+      if (dir) strlcpy(buf, DL("Thư mục", "Folder"), sizeof(buf));
+      else fmtBytes(f.size(), buf, sizeof(buf));
+      f.close();
+      lv_obj_t *r = infoRow(c, nm.c_str(), buf, dir ? C_ACCENT : lv_color_hex(0xF2F5FF));
+      lv_obj_t *k = lv_obj_get_child(r, 0), *v = lv_obj_get_child(r, 1);  // long names must not run under the size
+      lv_obj_set_size(k, 320, 20);  // fixed height: cut long names with "..."
+      lv_label_set_long_mode(k, LV_LABEL_LONG_DOT);
+      lv_obj_set_width(v, 100);
+    }
+    root.close();
+    if (!shown) infoRow(c, DL("Thẻ trống", "The card is empty"), "", C_MUTED);
   }
   pageShow(s);
 }
