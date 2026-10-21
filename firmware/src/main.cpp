@@ -20,7 +20,7 @@
 #include "weather.h"
 #include "icons_img.h"
 
-#define FW_VERSION "2.1.0"
+#define FW_VERSION "1.0.0"
 static const int PIN_BL = 27;
 
 TFT_eSPI tft;

@@ -3,6 +3,7 @@
 // Included by main.cpp after its design tokens and helpers (makeLabel, makeCard, mainScr, ...).
 #include <esp_system.h>
 #include <nvs_flash.h>
+#include "zenix_logo.h"
 
 static const char *webHost();  // webconfig.h
 static int photosCount();      // photos.h
@@ -784,31 +785,16 @@ static void pageAbout() {
   lv_obj_t *s = pageBegin("About", &c);
   char buf[72];
 
-  // identity card with a tiny mascot
+  // identity card: the Zenix logo, the name and the firmware version
   lv_obj_t *id = makeCard(c, 456, 84);
-  lv_obj_t *face = lv_obj_create(id);
-  lv_obj_remove_style_all(face);
-  lv_obj_set_size(face, 56, 56);
-  lv_obj_align(face, LV_ALIGN_LEFT_MID, 16, 0);
-  lv_obj_set_style_radius(face, LV_RADIUS_CIRCLE, 0);
-  lv_obj_set_style_border_width(face, 2, 0);
-  lv_obj_set_style_border_color(face, C_ACCENT2, 0);
-  lv_obj_set_style_bg_opa(face, LV_OPA_10, 0);
-  lv_obj_set_style_bg_color(face, C_ACCENT2, 0);
-  for (int i = 0; i < 2; i++) {
-    lv_obj_t *e = lv_obj_create(face);
-    lv_obj_remove_style_all(e);
-    lv_obj_set_size(e, 9, 18);
-    lv_obj_set_style_radius(e, 5, 0);
-    lv_obj_set_style_bg_opa(e, LV_OPA_COVER, 0);
-    lv_obj_set_style_bg_color(e, C_ACCENT, 0);
-    lv_obj_align(e, LV_ALIGN_CENTER, i ? 9 : -9, 0);
-  }
-  lv_obj_t *nm = makeLabel(id, "Zin100", F_HEADING, C_TEXT);
-  lv_obj_align(nm, LV_ALIGN_TOP_LEFT, 88, 12);
+  lv_obj_t *logo = lv_img_create(id);
+  lv_img_set_src(logo, &zenix_logo);
+  lv_obj_align(logo, LV_ALIGN_LEFT_MID, 16, 0);
+  lv_obj_t *nm = makeLabel(id, "Zenix", F_HEADING, C_TEXT);
+  lv_obj_align(nm, LV_ALIGN_TOP_LEFT, 104, 12);
   snprintf(buf, sizeof(buf), tr("Firmware %s  -  built %s"), FW_VERSION, __DATE__);
   lv_obj_t *fw = makeLabel(id, buf, F_CAPTION, C_MUTED);
-  lv_obj_align(fw, LV_ALIGN_TOP_LEFT, 88, 52);
+  lv_obj_align(fw, LV_ALIGN_TOP_LEFT, 104, 52);
 
   sectionLabel(c, "HARDWARE");
   infoRow(c, "Board", "ESP32-2432S035");
