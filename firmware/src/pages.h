@@ -9,6 +9,7 @@ static int photosCount();      // photos.h
 static void pageWallpaper();   // wallpaper.h
 static void wallpaperOff();    // wallpaper.h
 static void pageSettings();
+static void qrRebuild();  // main.cpp
 static void uiToast(const char *text, lv_color_t col);  // statusbar.h (its definition adds the default colour)
 static uint8_t sleepMin = 0;
 static bool pageReplace = false;  // set while opening a page from another page: the old one is deleted  // screen-off timeout in minutes, 0 = never
@@ -494,6 +495,19 @@ static void tzStep(lv_event_t *e) {
   wifiSetTimezone(tzCur);
 }
 
+static lv_obj_t *qrRows[QR_MAX];
+static void qrRowsRefresh() {  // the selected account: filled and ticked
+  for (int i = 0; i < qrCount; i++) {
+    bool on = i == qrSel;
+    lv_obj_set_style_bg_opa(qrRows[i], on ? LV_OPA_COVER : LV_OPA_10, 0);
+    lv_obj_set_style_border_opa(qrRows[i], on ? LV_OPA_COVER : LV_OPA_40, 0);
+    lv_obj_t *l = lv_obj_get_child(qrRows[i], 0);
+    lv_obj_set_style_text_color(l, on ? lv_color_hex(0x04101A) : C_ACCENT, 0);
+    String t = (on ? String(LV_SYMBOL_OK "  ") : String("")) + qrLabel(i);
+    lv_label_set_text(l, t.c_str());
+  }
+}
+
 static void pageSettings() {
   lv_obj_t *c;
   lv_obj_t *s = pageBegin("Settings", &c);
@@ -582,6 +596,42 @@ static void pageSettings() {
         cfgSave();
       },
       LV_EVENT_VALUE_CHANGED, nullptr);
+
+  // payment accounts: choose which one the QR tile and the Payment app show (accounts are added on the web page)
+  if (cfg.qrOn) {
+    sectionLabel(c, DL("TÀI KHOẢN QR THANH TOÁN", "PAYMENT QR ACCOUNT"));
+    for (int i = 0; i < qrCount; i++) {
+      lv_obj_t *b = lv_btn_create(c);
+      lv_obj_set_size(b, 456, 44);
+      lv_obj_set_style_radius(b, 14, 0);
+      lv_obj_set_style_border_width(b, 1, 0);
+      lv_obj_set_style_shadow_width(b, 0, 0);
+      lv_obj_set_style_bg_color(b, C_ACCENT, 0);
+      lv_obj_set_style_border_color(b, C_ACCENT, 0);
+      lv_obj_set_style_bg_opa(b, LV_OPA_40, LV_STATE_PRESSED);
+      lv_obj_t *l = makeLabel(b, "", F_BODY, C_ACCENT);
+      lv_obj_set_size(l, 420, 20);
+      lv_label_set_long_mode(l, LV_LABEL_LONG_DOT);
+      lv_obj_center(l);
+      qrRows[i] = b;
+      lv_obj_add_event_cb(b, [](lv_event_t *e) {
+        int i = (int)(intptr_t)lv_event_get_user_data(e);
+        if (i == qrSel || i >= qrCount) return;
+        qrSel = i;
+        qrApply();
+        qrSave();
+        cfgSave();
+        qrRebuild();
+        qrRowsRefresh();
+        uiToast(DL("Đã chọn tài khoản QR", "QR account selected"), C_OK);
+      }, LV_EVENT_CLICKED, (void *)(intptr_t)i);
+    }
+    qrRowsRefresh();
+    if (qrCount < 2) {
+      lv_obj_t *h = makeLabel(c, "", F_CAPTION, C_MUTED);
+      lv_label_set_text(h, DL("Thêm tài khoản khác trong trang web của thiết bị (mục Thanh toán).", "Add more accounts on the device web page (Payment)."));
+    }
+  }
 
   // wallpaper of the main screen: pick a picture from the memory card, or remove it
   sectionLabel(c, DL("HÌNH NỀN", "WALLPAPER"));

@@ -184,7 +184,7 @@ def dragon_icon(c1, c2):
 
 ICONS = [
     # name, top colour, bottom colour, glyph
-    ('ic_assistant', 0xFFFFFF, 0xD3DAF0, glyph_assistant),  # light tile so the coloured bars stand out
+    ('ic_assistant', 0xFFFFFF, 0xA3B4F0, glyph_assistant),  # light gradient tile so the coloured bars stand out
     ('ic_weather', 0x5AB0FF, 0x2F5FD0, glyph_weather),
     ('ic_dragon', 0xB38BFF, 0x5B2BD6, None),
     ('ic_photos', 0xFFB84A, 0xE8602A, glyph_photos),
@@ -194,7 +194,7 @@ ICONS = [
     ('ic_about', 0x7BDCB5, 0x2A7F86, glyph_about),
     ('ic_clock', 0xFF8FA3, 0xD03A6A, glyph_clock),
     ('ic_qr', 0xFFD54A, 0xD98A12, glyph_qr),
-    ('ic_calendar', 0xFFFFFF, 0xF0E2C8, 'logo'),  # the Zin100 calendar logo (tools/assets/calendar_logo.png) on a light tile
+    ('ic_calendar', 0xFFF6DC, 0xE3AC52, 'logo'),  # the Zin100 calendar logo (tools/assets/calendar_logo.png) on a cream-to-gold tile
     ('ic_2048', 0xFFB86B, 0xE0603A, glyph_2048),
     ('ic_caro', 0x6BE0C8, 0x2A78B8, glyph_caro),
 ]

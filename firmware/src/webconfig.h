@@ -208,12 +208,14 @@ canvas#wpPrev{display:block;width:100%;aspect-ratio:3/2;border-radius:12px;backg
 </div>
 
 <div class=panel id=p-qr><h1 class=pt data-t=nQr></h1>
-<section class=card><div class=hd><h2 data-t=qrTitle></h2><p data-t=qrHint></p></div><div class=bd>
+<section class=card><div class=hd><h2 data-t=qrList></h2><p data-t=qrListHint></p></div><div class=bd><div class=lst id=qrLst></div>
+<div style="margin-top:12px"><button class="btn sec" id=qrNew data-t=qrAdd></button></div></div></section>
+<section class=card><div class=hd><h2 id=qrEdTitle></h2><p data-t=qrHint></p></div><div class=bd>
 <div class=fld><label for=qrT data-t=qrT></label><input id=qrT maxlength=30 data-ph=qrTPh></div>
 <div class=fld><label for=qrB data-t=qrB></label><input id=qrB maxlength=38></div>
 <div class=two><div class=fld><label for=qrN data-t=qrN></label><input id=qrN maxlength=38></div><div class=fld><label for=qrA data-t=qrA></label><input id=qrA maxlength=22 inputmode=numeric></div></div>
 <div class=fld><label for=qrP><span data-t=qrP></span><output id=qrLen></output></label><textarea id=qrP maxlength=500 spellcheck=false placeholder="000201..."></textarea></div>
-</div><div class=ft><span class=rn data-t=restartNote></span><button class="btn pri" id=saveQr data-t=save></button></div></section>
+</div><div class=ft><button class="btn pri" id=saveQr data-t=save></button></div></section>
 </div>
 
 <div class=panel id=p-apps><h1 class=pt data-t=appsTitle></h1>
@@ -242,7 +244,7 @@ const $=id=>document.getElementById(id);
 const D={vi:{status:'Trạng thái',lang:'Ngôn ngữ',restartNote:'Thiết bị sẽ khởi động lại',save:'Lưu',startTitle:'Màn hình chính',startLbl:'Màn hình khi bật máy',tHome:'Trang chủ',tQr:'Mã QR thanh toán',tApps:'Ứng dụng',idleLbl:'Tự quay về màn hình chính sau',never:'Không bao giờ',qrOn:'Hiện trang QR thanh toán',
 clockTitle:'Đồng hồ & chào hỏi',timeFmt:'Định dạng giờ',h24:'24 giờ',h12:'12 giờ',dateFmt:'Hiển thị ngày',dLong:'Đầy đủ (Thứ Hai, 19 tháng 10)',dNum:'Số (19/10/2026)',dHide:'Ẩn',greetOn:'Hiện lời chào',nameLbl:'Tên trong lời chào (không bắt buộc)',
 wxTitle:'Thời tiết',wxNow:'Vị trí hiện tại',wxSearch:'Đổi thành phố',wxPh:'Ví dụ: Đà Nẵng',search:'Tìm',wxAuto:'Tự xác định vị trí (theo IP)',unit:'Đơn vị nhiệt độ',auto:'Tự động',manual:'Đặt thủ công',noRes:'Không tìm thấy',
-qrTitle:'QR thanh toán',qrHint:'Dán chuỗi VietQR/EMV (bắt đầu bằng 000201...) lấy từ ứng dụng ngân hàng.',qrT:'Tiêu đề',qrTPh:'Quét để thanh toán',qrB:'Dòng ngân hàng',qrN:'Tên tài khoản',qrA:'Số tài khoản',qrP:'Nội dung mã QR',
+qrTitle:'QR thanh toán',qrHint:'Dán chuỗi VietQR/EMV (bắt đầu bằng 000201...) lấy từ ứng dụng ngân hàng.',qrT:'Tiêu đề',qrTPh:'Quét để thanh toán',qrB:'Dòng ngân hàng',qrN:'Tên tài khoản',qrA:'Số tài khoản',qrP:'Nội dung mã QR',qrList:'Tài khoản nhận tiền',qrListHint:'Thêm nhiều tài khoản; tài khoản đang dùng hiển thị trên màn hình chính. Cũng chọn được trong Cài đặt trên thiết bị.',qrUse:'Dùng',qrInUse:'đang dùng',qrEdit:'Sửa',qrAdd:'Thêm tài khoản',qrEdNew:'Tài khoản mới',qrEdEdit:'Sửa tài khoản',qrDelAsk:'Xoá tài khoản này?',qrMax:'Tối đa 8 tài khoản',
 appsTitle:'Ứng dụng',appsHint:'Bật ứng dụng muốn hiển thị, dùng mũi tên để đổi thứ tự.',lock:'Luôn hiện',
 hostLbl:'Tên thiết bị',pwLbl:'Mật khẩu trang web',pwHint:'Tên đăng nhập là admin. Để trống rồi lưu để bỏ mật khẩu.',
 wifi:'Wi-Fi',ip:'Địa chỉ IP',fw:'Phần mềm',sd:'Thẻ nhớ',heap:'RAM trống',up:'Thời gian chạy',sdOk:'Có thẻ',sdNo:'Không có thẻ',sigS:'Mạnh',sigM:'Khá',sigW:'Yếu',
@@ -251,7 +253,7 @@ lookTitle:'Giao diện',phLbl:'Khung ảnh: thời gian mỗi ảnh',themeLbl:'C
 en:{status:'Status',lang:'Language',restartNote:'The device will restart',save:'Save',startTitle:'Main screen',startLbl:'Screen shown at power-on',tHome:'Home',tQr:'Payment QR',tApps:'Apps',idleLbl:'Return to the main screen after',never:'Never',qrOn:'Show the payment QR page',
 clockTitle:'Clock & greeting',timeFmt:'Time format',h24:'24-hour',h12:'12-hour',dateFmt:'Date display',dLong:'Long (Monday, 19 October)',dNum:'Numeric (19/10/2026)',dHide:'Hidden',greetOn:'Show greeting',nameLbl:'Name in the greeting (optional)',
 wxTitle:'Weather',wxNow:'Current location',wxSearch:'Change city',wxPh:'e.g. Da Nang',search:'Search',wxAuto:'Detect location automatically (by IP)',unit:'Temperature unit',auto:'Automatic',manual:'Set manually',noRes:'No results',
-qrTitle:'Payment QR',qrHint:'Paste the VietQR/EMV string (starts with 000201...) from your banking app.',qrT:'Title',qrTPh:'Scan to pay',qrB:'Bank line',qrN:'Account name',qrA:'Account number',qrP:'QR content',
+qrTitle:'Payment QR',qrHint:'Paste the VietQR/EMV string (starts with 000201...) from your banking app.',qrT:'Title',qrTPh:'Scan to pay',qrB:'Bank line',qrN:'Account name',qrA:'Account number',qrP:'QR content',qrList:'Receiving accounts',qrListHint:'Add several accounts; the one in use is shown on the main screen. It can also be chosen in Settings on the device.',qrUse:'Use',qrInUse:'in use',qrEdit:'Edit',qrAdd:'Add an account',qrEdNew:'New account',qrEdEdit:'Edit account',qrDelAsk:'Delete this account?',qrMax:'At most 8 accounts',
 appsTitle:'Apps',appsHint:'Switch on the apps to show and use the arrows to reorder.',lock:'Always shown',
 hostLbl:'Device name',pwLbl:'Web page password',pwHint:'The user name is admin. Save it empty to remove the password.',
 wifi:'Wi-Fi',ip:'IP address',fw:'Firmware',sd:'microSD',heap:'Free RAM',up:'Uptime',sdOk:'Detected',sdNo:'No card',sigS:'Strong',sigM:'Fair',sigW:'Weak',
@@ -298,7 +300,7 @@ async function load(){S=await (await fetch('/api/state')).json();applyLang(S.lan
  $('lang').value=S.lang;$('start').value=S.start;$('idle').value=S.idle;$('qrOn').checked=S.qrOn;
  $('c24').value=S.c24?1:0;$('datef').value=S.datef;$('greet').checked=S.greet;$('name').value=S.name;
  $('wxCity').textContent=S.wx.city||'—';$('wxNow').textContent=(S.wx.manual?T.manual:T.auto)+' · '+S.wx.lat.toFixed(2)+', '+S.wx.lon.toFixed(2);$('tempF').value=S.tempF?1:0;
- $('qrT').value=S.qrT;$('qrB').value=S.qrB;$('qrN').value=S.qrN;$('qrA').value=S.qrA;$('qrP').value=S.qrP;qrLen();
+ if(qrEd>=S.qrList.length)qrEd=S.qrSel;drawQr();qrFill(qrEd);
  $('host').value=S.host;
  $('wpState').textContent=S.wall?T.wpHas:T.wpNone;
  $('theme').value=S.theme;$('phS').value=S.phS;$('fx').checked=S.fx;$('lunar').checked=S.lunar;$('quote').checked=S.quote;$('idleM').value=S.idleM;$('vol').value=S.vol;$('volV').textContent=S.vol+'%';
@@ -309,6 +311,17 @@ async function load(){S=await (await fetch('/api/state')).json();applyLang(S.lan
  order=S.apps.map(a=>({id:a.id,name:a.name,on:a.on,lock:a.lock}));drawApps();segs();wpDimV()}
 function fillHours(id,v){const s=$(id);s.innerHTML=(id=='ambS'?'<option value=-1>'+T.schedOff:'')+Array.from({length:24},(_,h)=>'<option value='+h+'>'+h+':00').join('');s.value=v}
 function qrLen(){$('qrLen').textContent=$('qrP').value.trim().length+'/500'}
+let qrEd=0;  // account being edited: -1 = a new one
+function drawQr(){const L=S.qrList;$('qrLst').innerHTML=L.map((a,i)=>'<div class=it><span class=n>'+esc(a.n||a.t||'#'+(i+1))+'<small>'+esc(a.a)+(i==S.qrSel?' · '+T.qrInUse:'')+'</small></span>'+
+ (i==S.qrSel?'':'<button class="btn sec" data-use='+i+'>'+T.qrUse+'</button>')+'<button class="btn sec" data-ed='+i+'>'+T.qrEdit+'</button>'+
+ (L.length>1?'<button class="btn sec ib" data-rm='+i+' aria-label=delete>'+ic('del')+'</button>':'')+'</div>').join('');
+ $('qrNew').disabled=L.length>=8;
+ $('qrLst').querySelectorAll('[data-use]').forEach(b=>b.onclick=async()=>{if(await post('/api/qr/select',{idx:b.dataset.use})){toast(T.saved);load()}});
+ $('qrLst').querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{qrEd=+b.dataset.ed;qrFill(qrEd);$('qrEdTitle').scrollIntoView({behavior:'smooth',block:'center'})});
+ $('qrLst').querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{if(confirm(T.qrDelAsk)&&await post('/api/qr/delete',{idx:b.dataset.rm})){qrEd=0;toast(T.saved);load()}})}
+function qrFill(i){const a=i<0?{t:'',b:'',n:'',a:'',p:''}:S.qrList[i];$('qrEdTitle').textContent=i<0?T.qrEdNew:T.qrEdEdit;
+ $('qrT').value=a.t;$('qrB').value=a.b;$('qrN').value=a.n;$('qrA').value=a.a;$('qrP').value=a.p;qrLen()}
+$('qrNew').onclick=()=>{qrEd=-1;qrFill(-1);$('qrT').focus()}
 $('qrP').oninput=qrLen;$('vol').oninput=()=>$('volV').textContent=$('vol').value+'%';
 $('saveLook').onclick=()=>saveCfg({phS:$('phS').value,theme:$('theme').value,fx:$('fx').checked?1:0,lunar:$('lunar').checked?1:0,quote:$('quote').checked?1:0});
 $('saveAmb').onclick=()=>saveCfg({idleM:$('idleM').value,ambS:$('ambS').value,ambE:$('ambE').value,vol:$('vol').value});
@@ -316,7 +329,7 @@ $('saveLang').onclick=()=>saveCfg({lang:$('lang').value});
 $('saveStart').onclick=()=>saveCfg({start:$('start').value,idle:$('idle').value,qrOn:$('qrOn').checked?1:0});
 $('saveClock').onclick=()=>saveCfg({c24:$('c24').value,datef:$('datef').value,greet:$('greet').checked?1:0,name:$('name').value});
 $('saveUnit').onclick=()=>saveCfg({tempF:$('tempF').value});
-$('saveQr').onclick=()=>saveCfg({qrT:$('qrT').value,qrB:$('qrB').value,qrN:$('qrN').value,qrA:$('qrA').value,qrP:$('qrP').value.trim()});
+$('saveQr').onclick=()=>busy($('saveQr'),async()=>{const r=await post('/api/qr/save',{idx:qrEd,t:$('qrT').value,b:$('qrB').value,n:$('qrN').value,a:$('qrA').value,p:$('qrP').value.trim()});if(r){qrEd=r.idx;toast(T.saved);load()}});
 $('saveApps').onclick=()=>saveCfg({apps:order.filter(a=>a.on||a.lock).map(a=>a.id).join(',')});
 $('wxFind').onclick=()=>{const q=$('wxQ').value.trim();if(!q)return $('wxQ').focus();busy($('wxFind'),async()=>{
  try{const r=await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=6&name='+encodeURIComponent(q)+'&language='+(S.lang==1?'en':'vi'))).json();
@@ -477,11 +490,16 @@ static void webSendState() {
   d["ambS"] = cfg.ambStart;
   d["ambE"] = cfg.ambEnd;
   d["vol"] = cfg.volume;
-  d["qrT"] = cfg.qrTitle;
-  d["qrB"] = cfg.qrBank;
-  d["qrN"] = cfg.qrName;
-  d["qrA"] = cfg.qrAcct;
-  d["qrP"] = cfg.qrPayload;
+  d["qrSel"] = qrSel;
+  JsonArray ql = d["qrList"].to<JsonArray>();
+  for (int i = 0; i < qrCount; i++) {
+    JsonObject o = ql.add<JsonObject>();
+    o["t"] = qrAccs[i].title;
+    o["b"] = qrAccs[i].bank;
+    o["n"] = qrAccs[i].name;
+    o["a"] = qrAccs[i].acct;
+    o["p"] = qrAccs[i].payload;
+  }
   JsonObject dr = d["dragon"].to<JsonObject>();
   dr["ok"] = dgOk;
   if (dgOk) {
@@ -599,11 +617,6 @@ static bool webApplyCfg() {
     if (v != dst) restart = true;
     dst = v;
   };
-  text("qrT", cfg.qrTitle, 30);
-  text("qrB", cfg.qrBank, 38);
-  text("qrN", cfg.qrName, 38);
-  text("qrA", cfg.qrAcct, 22);
-  text("qrP", cfg.qrPayload, 500);
   if (has("apps")) {
     String v = cfgCleanApps(web.arg("apps"));
     if (v != cfg.apps) restart = true;
@@ -634,6 +647,54 @@ static void webBegin() {
     bool restart = webApplyCfg();
     web.send(200, "application/json", restart ? "{\"restart\":true}" : "{\"restart\":false}");
     if (restart) webRestartAt = millis() + 800;
+  });
+  // ---- payment QR accounts ----
+  web.on("/api/qr/save", HTTP_POST, []() {
+    if (!webAuthOk()) return;
+    auto field = [&](const char *k, size_t maxLen) {
+      String v = web.arg(k);
+      v.trim();
+      return v.length() > maxLen ? v.substring(0, maxLen) : v;
+    };
+    int idx = web.arg("idx").toInt();
+    if (idx < 0) {
+      if (qrCount >= QR_MAX) return web.send(400, "text/plain", "at most 8 accounts");
+      idx = qrCount++;
+    }
+    if (idx >= qrCount) return web.send(400, "text/plain", "bad account");
+    qrAccs[idx] = {field("t", 30), field("b", 38), field("n", 38), field("a", 22), field("p", 500)};
+    qrSave();
+    if (idx == qrSel) {
+      qrApply();
+      cfgSave();
+      qrRebuild();
+    }
+    web.send(200, "application/json", String("{\"idx\":") + idx + "}");
+  });
+  web.on("/api/qr/select", HTTP_POST, []() {
+    if (!webAuthOk()) return;
+    int idx = web.arg("idx").toInt();
+    if (idx < 0 || idx >= qrCount) return web.send(400, "text/plain", "bad account");
+    qrSel = idx;
+    qrApply();
+    qrSave();
+    cfgSave();
+    qrRebuild();
+    web.send(200, "application/json", "{}");
+  });
+  web.on("/api/qr/delete", HTTP_POST, []() {
+    if (!webAuthOk()) return;
+    int idx = web.arg("idx").toInt();
+    if (idx < 0 || idx >= qrCount || qrCount < 2) return web.send(400, "text/plain", "keep at least one account");
+    for (int i = idx; i < qrCount - 1; i++) qrAccs[i] = qrAccs[i + 1];
+    qrAccs[--qrCount] = QrAccount();
+    if (qrSel == idx) qrSel = 0;
+    else if (qrSel > idx) qrSel--;
+    qrApply();
+    qrSave();
+    cfgSave();
+    qrRebuild();
+    web.send(200, "application/json", "{}");
   });
   web.on("/api/weather", HTTP_POST, []() {
     if (!webAuthOk()) return;

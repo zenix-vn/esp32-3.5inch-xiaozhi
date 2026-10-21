@@ -428,3 +428,11 @@ Ghi chú:
   4. **Gỡ hình nền** nằm ngay dưới nút chọn.
 - Mã nguồn: `photos.h` (tìm ảnh), `wallpaper.h` (chọn, xem trước, ghi), `pages.h` (Bộ nhớ, Cài đặt).
 - Icon **Trợ lý** vẽ lại thành bốn thanh nhiều màu như sóng âm đang nói (`tools/gen_icons.py`).
+
+---
+---
+
+# Nhiều tài khoản QR thanh toán và vuốt vòng giữa các màn hình
+
+- **Tài khoản QR** (tối đa 8): thêm, sửa, xoá trên trang web (mục **Thanh toán**, nút **Dùng** để chọn tài khoản hiển thị). Trên máy, chọn tài khoản ở **Cài đặt > Tài khoản QR thanh toán** (hàng đang dùng có dấu tích). Mã QR ở màn hình chính và app Thanh toán đổi ngay, không cần khởi động lại. Tài khoản QR cũ của máy tự thành tài khoản số 1. Mã nguồn: `config.h` (danh sách, lưu ở NVS `qrs`), `webconfig.h` (`/api/qr/save|select|delete`), `pages.h` (Cài đặt), `main.cpp` (`qrRebuild`).
+- **Vuốt vòng**: ở màn hình cuối (Ứng dụng) vuốt trái quay về Trang chủ; ở Trang chủ vuốt phải đến màn hình cuối. Vì tileview không cuộn tiếp ở hai đầu, cú vuốt đến dưới dạng cử chỉ (gesture). LVGL gửi cử chỉ tới tổ tiên đầu tiên **không** có cờ `GESTURE_BUBBLE`, nên tileview (và lưới Lịch) phải bỏ cờ này, và sau khi xử lý phải gọi `lv_indev_wait_release()` để cú nhả tay không bị tính là chạm vào icon nơi bắt đầu vuốt. Vuốt trái/phải trong app Lịch đổi tháng theo cách tương tự.

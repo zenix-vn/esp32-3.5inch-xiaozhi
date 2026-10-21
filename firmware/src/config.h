@@ -146,3 +146,78 @@ static void cfgSave() {
   p.putUChar("appsV", 4);
   p.end();
 }
+
+// ---------- payment QR accounts ----------
+// A list of accounts (managed on the web page, chosen in Settings). The selected one is copied into cfg.qr*,
+// which the main-screen QR tile and the Payment app read. Stored in NVS namespace "qrs".
+struct QrAccount {
+  String title, bank, name, acct, payload;
+};
+static const int QR_MAX = 8;
+static QrAccount qrAccs[QR_MAX];
+static int qrCount = 0, qrSel = 0;
+
+static void qrApply() {
+  if (qrSel >= qrCount) qrSel = 0;
+  const QrAccount &a = qrAccs[qrSel];
+  cfg.qrTitle = a.title;
+  cfg.qrBank = a.bank;
+  cfg.qrName = a.name;
+  cfg.qrAcct = a.acct;
+  cfg.qrPayload = a.payload;
+}
+
+static void qrSave() {
+  Preferences p;
+  p.begin("qrs", false);
+  p.putUChar("n", qrCount);
+  p.putUChar("sel", qrSel);
+  for (int i = 0; i < QR_MAX; i++) {
+    char k[4][4] = {"t0", "b0", "n0", "a0"}, kp[4] = "p0";
+    for (auto &x : k) x[1] = '0' + i;
+    kp[1] = '0' + i;
+    if (i < qrCount) {
+      p.putString(k[0], qrAccs[i].title);
+      p.putString(k[1], qrAccs[i].bank);
+      p.putString(k[2], qrAccs[i].name);
+      p.putString(k[3], qrAccs[i].acct);
+      p.putString(kp, qrAccs[i].payload);
+    } else {
+      for (auto &x : k) p.remove(x);
+      p.remove(kp);
+    }
+  }
+  p.end();
+}
+
+// Call after cfgLoad(): the first time, the single account of the earlier firmware becomes account 1.
+static void qrLoad() {
+  Preferences p;
+  p.begin("qrs", false);
+  int n = p.getUChar("n", 0);
+  if (n < 1 || n > QR_MAX) {
+    p.end();
+    qrCount = 1;
+    qrSel = 0;
+    qrAccs[0] = {cfg.qrTitle, cfg.qrBank, cfg.qrName, cfg.qrAcct, cfg.qrPayload};
+    qrSave();
+    return;
+  }
+  qrCount = n;
+  qrSel = p.getUChar("sel", 0);
+  for (int i = 0; i < n; i++) {
+    char t[4] = "t0", b[4] = "b0", nm[4] = "n0", a[4] = "a0", pl[4] = "p0";
+    t[1] = b[1] = nm[1] = a[1] = pl[1] = '0' + i;
+    qrAccs[i] = {p.getString(t, ""), p.getString(b, ""), p.getString(nm, ""), p.getString(a, ""), p.getString(pl, "")};
+  }
+  p.end();
+  qrApply();
+}
+
+// "NAME  -  1234567890" for lists
+static String qrLabel(int i) {
+  const QrAccount &a = qrAccs[i];
+  String n = a.name.length() ? a.name : a.title;
+  if (!n.length()) n = String("#") + (i + 1);
+  return a.acct.length() ? n + "  -  " + a.acct : n;
+}

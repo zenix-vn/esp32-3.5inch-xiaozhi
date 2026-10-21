@@ -235,6 +235,13 @@ static void buildQr(lv_obj_t *tile) {
   lv_obj_align(h, LV_ALIGN_TOP_LEFT, 290, 238);
 }
 
+// The selected payment account changed (web page or Settings): rebuild the QR tile in place.
+static void qrRebuild() {
+  if (!qrTile) return;
+  lv_obj_clean(qrTile);
+  buildQr(qrTile);
+}
+
 #include "wallpaper.h"
 #include "webconfig.h"
 
@@ -338,6 +345,21 @@ static int activeTileIndex() {
   return 0;
 }
 static void tvEvent(lv_event_t *) { updateDots(activeTileIndex()); }
+// Endless swiping: past the last screen comes the first one, and before the first comes the last. The tileview does
+// not scroll there, so the swipe arrives as a gesture.
+static void tvGesture(lv_event_t *) {
+  if (tileCount < 2) return;
+  lv_indev_t *in = lv_indev_get_act();
+  if (!in) return;
+  lv_dir_t d = lv_indev_get_gesture_dir(in);
+  int a = activeTileIndex(), to = -1;
+  if (d == LV_DIR_LEFT && a == tileCount - 1) to = 0;
+  else if (d == LV_DIR_RIGHT && a == 0) to = tileCount - 1;
+  if (to < 0) return;
+  lv_indev_wait_release(in);  // LVGL would still send a click to the icon / widget where the swipe began
+  lv_obj_set_tile(tv, tileAt[to], LV_ANIM_ON);
+  updateDots(to);
+}
 
 static void buildUI() {
   mainScr = lv_scr_act();
@@ -358,6 +380,8 @@ static void buildUI() {
   if (qrTile) buildQr(qrTile);
   buildLauncher(appsTile);
   lv_obj_add_event_cb(tv, tvEvent, LV_EVENT_VALUE_CHANGED, nullptr);
+  lv_obj_clear_flag(tv, LV_OBJ_FLAG_GESTURE_BUBBLE);  // LVGL delivers a swipe to the first ancestor WITHOUT this flag: make that the tileview
+  lv_obj_add_event_cb(tv, tvGesture, LV_EVENT_GESTURE, nullptr);
 
   lv_obj_t *dotRow = lv_obj_create(mainScr);
   lv_obj_remove_style_all(dotRow);
@@ -386,6 +410,7 @@ void setup() {
   Serial.begin(115200);
   i18nLoad();
   cfgLoad();
+  qrLoad();
   clockBegin();  // alarms ring whether or not the Clock app is ever opened
   tft.init();
   tft.setRotation(1);

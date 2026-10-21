@@ -481,6 +481,7 @@ static void pageCalendar() {
   lv_obj_add_event_cb(calGrid, calDraw, LV_EVENT_DRAW_MAIN, nullptr);
   lv_obj_add_event_cb(calGrid, [](lv_event_t *) { lv_indev_get_point(lv_indev_get_act(), &calPress); }, LV_EVENT_PRESSED, nullptr);
   lv_obj_add_event_cb(calGrid, calGridClick, LV_EVENT_SHORT_CLICKED, nullptr);
+  lv_obj_clear_flag(calGrid, LV_OBJ_FLAG_GESTURE_BUBBLE);  // swipes must end here, not on the screen
   lv_obj_add_event_cb(calGrid, calGridGesture, LV_EVENT_GESTURE, nullptr);
 
   // the selected day: a quiet panel with the date, the lunar date and one line of Can Chi
