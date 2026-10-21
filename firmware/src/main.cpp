@@ -176,6 +176,7 @@ static lv_obj_t *shape(lv_obj_t *p, int x, int y, int w, int h, uint32_t col, in
 static bool screenOff = false;  // backlight off until the next touch (see screenSleepNow)
 
 #include "audio.h"
+#include "mic.h"
 #include "pages.h"
 
 #include "dragon.h"
@@ -185,6 +186,7 @@ static bool screenOff = false;  // backlight off until the next touch (see scree
 #include "clock_app.h"
 #include "calendar_app.h"
 #include "sleep_app.h"
+#include "games.h"
 #include "photos.h"
 #include "qr_page.h"
 #include "ambient.h"
@@ -270,6 +272,7 @@ static const App apps[] = {
     {&ic_qr, "Payment", pageQr},
     {&ic_calendar, "Calendar", pageCalendar},
     {&ic_sleep, "Sleep sounds", pageSleep},
+    {&ic_games, "Games", pageGames},
 };
 static_assert(sizeof(apps) / sizeof(apps[0]) == APP_COUNT, "APP_COUNT must match apps[]");
 static const char *appName(int i) { return apps[i].name; }
@@ -414,6 +417,7 @@ void setup() {
   Serial.begin(115200);
   i18nLoad();
   cfgLoad();
+  micPrefLoad();
   qrLoad();
   clockBegin();  // alarms ring whether or not the Clock app is ever opened
   tft.init();

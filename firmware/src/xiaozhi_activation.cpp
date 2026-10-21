@@ -110,13 +110,35 @@ static int post(const String &url, const String &body, String &resp) {
 
 static void setMsg(const char *m) { strlcpy(message, m, sizeof(message)); }
 
+static void markActivated() {
+  Preferences q;
+  q.begin("xiaozhi", false);
+  q.putBool("act", true);
+  q.end();
+}
+
 static void task(void *) {
+  {  // Already activated on an earlier boot: no TLS handshake at start-up. It needs ~60 KB of RAM for a moment, right when
+     // the interface, mDNS and the weather request are starting too; with the heap this tight that crashed the device
+     // (LVGL could not allocate, or lwIP's ARP table asserted). Check again half an hour later instead.
+    Preferences q;
+    q.begin("xiaozhi", true);
+    bool act = q.getBool("act", false);
+    q.end();
+    if (act) {
+      state = XZ_ACTIVATED;
+      setMsg("Activated");
+      vTaskDelay(pdMS_TO_TICKS(30UL * 60 * 1000));
+    }
+  }
   for (;;) {
     while (!wifiConnected()) {
       state = XZ_WAIT_WIFI;
       setMsg("Waiting for Wi-Fi");
       vTaskDelay(pdMS_TO_TICKS(1000));
     }
+    vTaskDelay(pdMS_TO_TICKS(15000));  // let the boot-time network work (mDNS, time, weather) finish first
+    while (ESP.getMaxAllocHeap() < 70000) vTaskDelay(pdMS_TO_TICKS(60000));  // wait until the handshake fits
     state = XZ_REQUESTING;
     setMsg("Contacting Xiaozhi...");
     String resp;
@@ -151,6 +173,7 @@ static void task(void *) {
     if (!c) {  // no activation block: already bound to an account
       state = XZ_ACTIVATED;
       setMsg("Activated");
+      markActivated();
       Serial.println("XZ activated");
       vTaskDelete(nullptr);
     }
@@ -176,6 +199,7 @@ static void task(void *) {
     if (done) {
       state = XZ_ACTIVATED;
       setMsg("Activated");
+      markActivated();
       Serial.println("XZ activated");
       vTaskDelete(nullptr);
     }

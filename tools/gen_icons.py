@@ -145,6 +145,18 @@ def glyph_sleep(g, c):
         g.ell(x, y, r, r, WHITE)
 
 
+def glyph_games(g, c):
+    g.rect(14, 32, 86, 72, 20)  # controller body
+    g.ell(26, 70, 10, 10)
+    g.ell(74, 70, 10, 10)
+    g.rect(29, 44, 41, 56, 2, hexc(c))  # d-pad cross
+    g.rect(24, 49, 46, 55, 2, hexc(c))
+    g.rect(31.5, 41, 38.5, 59, 2, hexc(c))
+    for x, y, col in ((66, 46, 0xFFC93C), (76, 52, 0x4FC3F7), (66, 58, 0xFF6B8A)):  # buttons
+        g.ell(x, y, 4.6, 4.6, hexc(col))
+    g.rect(44, 36, 56, 41, 2, hexc(c))  # a notch on top
+
+
 def glyph_qr(g, c):
     for x, y in ((20, 20), (58, 20), (20, 58)):
         g.rect(x, y, x + 22, y + 22, 4)
@@ -203,6 +215,7 @@ ICONS = [
     ('ic_clock', 0xFF8FA3, 0xD03A6A, glyph_clock),
     ('ic_qr', 0xFFD54A, 0xD98A12, glyph_qr),
     ('ic_sleep', 0x6C7CFF, 0x2A2478, glyph_sleep),
+    ('ic_games', 0xC77BFF, 0x7A2BD6, glyph_games),
     ('ic_calendar', 0xFFF6DC, 0xE3AC52, 'logo'),  # the Zin100 calendar logo (tools/assets/calendar_logo.png) on a cream-to-gold tile
     ('ic_2048', 0xFFB86B, 0xE0603A, glyph_2048),
     ('ic_caro', 0x6BE0C8, 0x2A78B8, glyph_caro),

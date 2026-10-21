@@ -218,6 +218,74 @@ static void pageSettingsSound() {
   pageShow(s);
 }
 
+// ---------- microphone test ----------
+static lv_obj_t *mtBar, *mtState, *mtPins;
+static int mtPeak = 0, mtSilent = 0;
+
+static void mtShowPins() {
+  setTextFmt(mtPins, "SCK = IO%d   WS = IO%d   SD = IO%d", micSwap ? MIC_PIN_A : MIC_PIN_B, micSwap ? MIC_PIN_B : MIC_PIN_A, MIC_PIN_SD);
+}
+
+static void mtTick(lv_timer_t *) {
+  bool flat = false;
+  int lv = micLevel(&flat);
+  if (lv < 0) {
+    if (++mtSilent > 6) setText(mtState, DL("Không nhận được dữ liệu từ mic", "No data from the mic"));
+    return;
+  }
+  if (flat) {
+    if (++mtSilent > 6) setText(mtState, DL("Chân SD đứng yên: kiểm tra dây, thử Đổi SCK/WS", "SD line is stuck: check the wiring, try Swap SCK/WS"));
+    lv_bar_set_value(mtBar, 0, LV_ANIM_OFF);
+    return;
+  }
+  mtSilent = 0;
+  mtPeak = max(lv, mtPeak * 9 / 10);
+  int v = lv > 0 ? (int)(log10f((float)lv + 1.0f) * 1000.0f / 4.5f) : 0;  // log scale, 0..~1000
+  lv_bar_set_value(mtBar, constrain(v, 0, 1000), LV_ANIM_OFF);
+  setText(mtState, lv > 400 ? DL("Mic hoạt động: đang nghe thấy âm thanh", "Mic works: sound detected")
+                            : DL("Mic có tín hiệu. Hãy nói hoặc vỗ tay thử", "Mic is live. Try speaking or clapping"));
+}
+
+static void pageSettingsMic() {
+  lv_obj_t *c;
+  lv_obj_t *s = stPage(DL("Micro", "Microphone"), &c);
+  mtPeak = mtSilent = 0;
+  lv_obj_add_event_cb(s, [](lv_event_t *) { micStop(); }, LV_EVENT_DELETE, nullptr);
+  lv_obj_t *card = makeCard(c, 456, 112);
+  mtBar = lv_bar_create(card);
+  lv_obj_set_size(mtBar, 420, 18);
+  lv_obj_align(mtBar, LV_ALIGN_TOP_MID, 0, 16);
+  lv_bar_set_range(mtBar, 0, 1000);
+  lv_obj_set_style_bg_color(mtBar, C_BORDER, LV_PART_MAIN);
+  lv_obj_set_style_bg_color(mtBar, C_ACCENT, LV_PART_INDICATOR);
+  mtState = makeLabel(card, "", F_BODY, C_TEXT);
+  lv_obj_set_width(mtState, 420);
+  lv_label_set_long_mode(mtState, LV_LABEL_LONG_WRAP);
+  lv_obj_align(mtState, LV_ALIGN_TOP_LEFT, 18, 46);
+  mtPins = makeLabel(card, "", F_CAPTION, C_MUTED);
+  lv_obj_align(mtPins, LV_ALIGN_BOTTOM_LEFT, 18, -10);
+  mtShowPins();
+  if (micStart()) setText(mtState, DL("Đang nghe...", "Listening..."));
+  else setText(mtState, DL("Không khởi động được I2S cho mic", "Could not start I2S for the mic"));
+
+  lv_obj_t *g = stGroup(c);
+  stRow(g, LV_SYMBOL_SHUFFLE, 0x35B0A8, DL("Đổi SCK/WS (IO21 <-> IO22)", "Swap SCK/WS (IO21 <-> IO22)"), "", C_MUTED, [](lv_event_t *) {
+    micStop();
+    micSwap = !micSwap;
+    micPrefSave();
+    mtSilent = 0;
+    mtShowPins();
+    micStart();
+  }, false);
+  lv_obj_t *h = makeLabel(c, "", F_CAPTION, C_MUTED);
+  lv_obj_set_width(h, 440);
+  lv_label_set_long_mode(h, LV_LABEL_LONG_WRAP);
+  lv_label_set_text(h, DL("Mic I2S (INMP441...): IO35 = SD (dữ liệu), IO21/IO22 = SCK và WS. Nói vào mic: thanh phải nhảy. Nếu thanh đứng yên hoặc báo lỗi, bấm Đổi SCK/WS; chân L/R của mic nối GND.",
+                          "I2S mic (INMP441...): IO35 = SD (data), IO21/IO22 = SCK and WS. Speak into it: the bar should move. If it stays flat or reports an error, press Swap SCK/WS; the mic's L/R pin goes to GND."));
+  pageTimer(s, mtTick, 60);
+  pageShow(s);
+}
+
 // ---------- QR account ----------
 static lv_obj_t *stQrRows[QR_MAX];
 static void stQrRefresh() {
@@ -308,6 +376,7 @@ static void pageSettings() {
   stRow(g, LV_SYMBOL_EYE_OPEN, 0xF2A33A, DL("Màn hình", "Display"), b, C_MUTED, [](lv_event_t *) { stOpen(pageSettingsDisplay); });
   snprintf(b, sizeof(b), cfg.dnd ? DL("Im lặng", "Silent") : "%d%%", cfg.volume);
   stRow(g, LV_SYMBOL_VOLUME_MAX, 0x7B6BFF, DL("Âm thanh", "Sound"), b, C_MUTED, [](lv_event_t *) { stOpen(pageSettingsSound); });
+  stRow(g, LV_SYMBOL_AUDIO, 0xD9559A, DL("Micro", "Microphone"), "", C_MUTED, [](lv_event_t *) { stOpen(pageSettingsMic); });
   if (cfg.qrOn) stRow(g, "QR", 0x2FB67C, DL("Tài khoản QR", "Payment account"), qrCount ? (cfg.qrName.length() ? cfg.qrName.c_str() : cfg.qrAcct.c_str()) : "", C_MUTED,
                       [](lv_event_t *) { stOpen(pageSettingsQr); });
   if (sdOk) {
