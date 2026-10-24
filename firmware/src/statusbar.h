@@ -2,7 +2,9 @@
 // V2 shell: status bar on every screen (top layer), toasts, and the pull-down control center.
 // Included by main.cpp after dragon.h (reads the dragon's needs for the alert chip).
 
-static lv_obj_t *sbBar, *sbTime, *sbDragon, *sbAi, *sbWifi[4];
+static lv_obj_t *sbBar, *sbTime, *sbDragon, *sbAi, *sbWifi[4], *sbWifiBox;
+static lv_obj_t *sbBat, *sbBatFill, *sbBatPct;
+static lv_obj_t *chgOv = nullptr;
 static lv_obj_t *ccOv = nullptr, *ccPanel = nullptr, *ccDndBtn = nullptr;
 static lv_obj_t *toastObj = nullptr;
 static bool sbVisible = true;
@@ -202,6 +204,155 @@ static void ccOpen() {
   lv_anim_start(&a);
 }
 
+// ---------- battery ----------
+static lv_color_t batColor() {
+  if (batUsb) return C_OK;
+  return batPct >= 0 && batPct <= 15 ? C_DANGER : C_TEXT;
+}
+
+// Battery outline with a fill bar; the caller sizes the fill.
+static lv_obj_t *batIcon(lv_obj_t *parent, int w, int h, int border, lv_obj_t **fill) {
+  lv_obj_t *box = lv_obj_create(parent);
+  lv_obj_remove_style_all(box);
+  lv_obj_set_size(box, w + border + 2, h);
+  lv_obj_clear_flag(box, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_t *body = lv_obj_create(box);
+  lv_obj_remove_style_all(body);
+  lv_obj_set_size(body, w, h);
+  lv_obj_set_style_border_width(body, border, 0);
+  lv_obj_set_style_border_color(body, C_TEXT, 0);
+  lv_obj_set_style_border_opa(body, LV_OPA_80, 0);
+  lv_obj_set_style_radius(body, border + 1, 0);
+  lv_obj_set_style_pad_all(body, border + 1, 0);
+  lv_obj_clear_flag(body, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+  shape(box, w, h / 2 - h / 6, border + 2, h / 3 + 1, 0xFFFFFF, 1, LV_OPA_80);  // terminal nub
+  *fill = lv_obj_create(body);
+  lv_obj_remove_style_all(*fill);
+  lv_obj_set_height(*fill, lv_pct(100));
+  lv_obj_set_style_bg_opa(*fill, LV_OPA_COVER, 0);
+  lv_obj_set_style_radius(*fill, border > 2 ? 3 : 1, 0);
+  lv_obj_clear_flag(*fill, LV_OBJ_FLAG_CLICKABLE);
+  return box;
+}
+
+static void batFillSet(lv_obj_t *fill, int inner, int pct) {
+  int w = inner * (pct < 0 ? 0 : pct > 100 ? 100 : pct) / 100;
+  lv_obj_set_width(fill, w < 2 && pct > 0 ? 2 : w);
+  lv_obj_set_style_bg_color(fill, batColor(), 0);
+}
+
+// Charger plugged in: a card in the middle of the screen for a few seconds (tap to close).
+static void chgClose() {
+  if (chgOv) lv_obj_del(chgOv);
+  chgOv = nullptr;
+}
+static void chgShow() {
+  chgClose();
+  if (screenOff) {  // wake up, like an alarm does
+    screenOff = false;
+    gTouchSwallow = false;
+    ledcWrite(0, blLevel);
+  }
+  lv_disp_trig_activity(nullptr);
+  chgOv = lv_obj_create(lv_layer_top());
+  lv_obj_remove_style_all(chgOv);
+  lv_obj_set_size(chgOv, 480, 320);
+  lv_obj_set_style_bg_color(chgOv, lv_color_hex(0x000000), 0);
+  lv_obj_set_style_bg_opa(chgOv, LV_OPA_60, 0);
+  lv_obj_add_flag(chgOv, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_event_cb(chgOv, [](lv_event_t *) { chgClose(); }, LV_EVENT_CLICKED, nullptr);
+
+  lv_obj_t *card = makeCard(chgOv, 280, 190);
+  lv_obj_center(card);
+  lv_obj_set_style_radius(card, 22, 0);
+  lv_obj_set_style_border_color(card, C_OK, 0);
+  lv_obj_set_style_border_width(card, 2, 0);
+  lv_obj_clear_flag(card, LV_OBJ_FLAG_CLICKABLE);
+
+  lv_obj_t *fill;
+  lv_obj_t *icon = batIcon(card, 96, 44, 4, &fill);
+  lv_obj_align(icon, LV_ALIGN_TOP_MID, 0, 18);
+  lv_obj_t *bolt = makeLabel(icon, LV_SYMBOL_CHARGE, F_TITLE, C_TEXT);
+  lv_obj_set_pos(bolt, 40, 10);
+  batFillSet(fill, 86, batPct);
+  // fill sweeps from the current level to full, over and over, while the card is up
+  lv_anim_t a;
+  lv_anim_init(&a);
+  lv_anim_set_var(&a, fill);
+  lv_anim_set_exec_cb(&a, [](void *o, int32_t v) { lv_obj_set_width((lv_obj_t *)o, v); });
+  lv_anim_set_values(&a, 86 * (batPct < 0 ? 0 : batPct) / 100, 86);
+  lv_anim_set_time(&a, 1200);
+  lv_anim_set_repeat_count(&a, LV_ANIM_REPEAT_INFINITE);
+  lv_anim_set_repeat_delay(&a, 300);
+  lv_anim_start(&a);
+
+  lv_obj_t *t = makeLabel(card, DL("Đã cắm sạc", "Charger connected"), F_TITLE, C_TEXT);
+  lv_obj_align(t, LV_ALIGN_TOP_MID, 0, 80);
+  lv_obj_t *s = makeLabel(card, "", F_BODY, C_OK);
+  if (batPct >= 0) setTextFmt(s, "%s  %d%%", DL("Pin đang sạc", "Battery charging"), batPct);
+  else setText(s, DL("Pin đang sạc", "Battery charging"));
+  lv_obj_align(s, LV_ALIGN_TOP_MID, 0, 112);
+  lv_obj_t *h = makeLabel(card, DL("Chạm để đóng", "Tap to close"), F_CAPTION, C_MUTED);
+  lv_obj_align(h, LV_ALIGN_BOTTOM_MID, 0, -12);
+
+  lv_obj_t *mine = chgOv;
+  lv_timer_t *tm = lv_timer_create(
+      [](lv_timer_t *t) {
+        if (chgOv && chgOv == (lv_obj_t *)t->user_data) chgClose();
+      },
+      5000, mine);
+  lv_timer_set_repeat_count(tm, 1);
+}
+
+static void batRefresh() {
+  BatEvent ev = batTick();
+  char buf[48];
+  if (ev == BAT_EV_PLUG) {
+    chgShow();
+    soundPlay(SND(SND_NOTIFY), 0, false);
+  } else if (ev == BAT_EV_UNPLUG) {
+    chgClose();
+    if (batPct >= 0) snprintf(buf, sizeof(buf), "%s  %d%%", DL("Đã rút sạc", "Charger disconnected"), batPct);
+    else snprintf(buf, sizeof(buf), "%s", DL("Đã rút sạc", "Charger disconnected"));
+    uiToast(buf, C_MUTED);
+  } else if (ev == BAT_EV_FULL) {
+    uiToast(DL("Pin đã sạc đầy", "Battery fully charged"), C_OK);
+  }
+
+  if (!batPresent || batPct < 0) {
+    lv_obj_add_flag(sbBat, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(sbBatPct, LV_OBJ_FLAG_HIDDEN);
+    return;
+  }
+  lv_obj_clear_flag(sbBat, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_clear_flag(sbBatPct, LV_OBJ_FLAG_HIDDEN);
+  // charging: the fill climbs from the level to full in 4 steps, one per second
+  static int step = 0;
+  int shown = batPct;
+  if (batUsb && !batFull) {
+    step = (step + 1) % 5;
+    shown = batPct + (100 - batPct) * step / 4;
+  }
+  batFillSet(sbBatFill, 18, shown);
+  if (batUsb) setTextFmt(sbBatPct, LV_SYMBOL_CHARGE " %d%%", batPct);
+  else setTextFmt(sbBatPct, "%d%%", batPct);
+  lv_obj_set_style_text_color(sbBatPct, batColor(), 0);
+}
+
+// Right side, right to left: battery, %, Wi-Fi, AI, dragon alert. Labels change width, so re-chain each time.
+static void statusbarLayout() {
+  lv_obj_update_layout(sbBar);
+  if (lv_obj_has_flag(sbBat, LV_OBJ_FLAG_HIDDEN)) {
+    lv_obj_align(sbWifiBox, LV_ALIGN_RIGHT_MID, -10, 0);
+  } else {
+    lv_obj_align(sbBat, LV_ALIGN_RIGHT_MID, -8, 0);
+    lv_obj_align_to(sbBatPct, sbBat, LV_ALIGN_OUT_LEFT_MID, -4, 0);
+    lv_obj_align_to(sbWifiBox, sbBatPct, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+  }
+  lv_obj_align_to(sbAi, sbWifiBox, LV_ALIGN_OUT_LEFT_MID, -8, 0);
+  lv_obj_align_to(sbDragon, sbAi, LV_ALIGN_OUT_LEFT_MID, -14, 0);
+}
+
 // ---------- status bar ----------
 static void statusbarShow(bool on) {
   sbVisible = on;
@@ -234,6 +385,8 @@ static void statusbarRefresh(lv_timer_t * = nullptr) {
   int rssi = on ? WiFi.RSSI() : -100;
   int level = !on ? 0 : rssi > -55 ? 4 : rssi > -65 ? 3 : rssi > -75 ? 2 : 1;
   for (int i = 0; i < 4; i++) lv_obj_set_style_bg_color(sbWifi[i], i < level ? C_TEXT : (on ? C_BORDER : C_DANGER), 0);
+  batRefresh();
+  statusbarLayout();
 }
 
 static void statusbarBegin() {
@@ -259,19 +412,18 @@ static void statusbarBegin() {
   lv_obj_t *grab = shape(sbBar, 224, SB_H - 5, 32, 3, 0xFFFFFF, 2, LV_OPA_40);  // pull handle
   (void)grab;
 
-  lv_obj_t *bars = lv_obj_create(sbBar);
-  lv_obj_remove_style_all(bars);
-  lv_obj_set_size(bars, 22, 14);
-  lv_obj_align(bars, LV_ALIGN_RIGHT_MID, -10, 0);
-  for (int i = 0; i < 4; i++) sbWifi[i] = shape(bars, i * 5 + 2, 13 - (4 + i * 3), 3, 4 + i * 3, 0xFFFFFF, 1);
+  sbWifiBox = lv_obj_create(sbBar);
+  lv_obj_remove_style_all(sbWifiBox);
+  lv_obj_set_size(sbWifiBox, 22, 14);
+  for (int i = 0; i < 4; i++) sbWifi[i] = shape(sbWifiBox, i * 5 + 2, 13 - (4 + i * 3), 3, 4 + i * 3, 0xFFFFFF, 1);
+  sbBat = batIcon(sbBar, 22, 11, 1, &sbBatFill);
+  sbBatPct = makeLabel(sbBar, "", F_CAPTION, C_TEXT);
   sbAi = makeLabel(sbBar, "AI", F_CAPTION, C_MUTED);
-  lv_obj_align(sbAi, LV_ALIGN_RIGHT_MID, -40, 0);
   sbDragon = makeLabel(sbBar, "", F_CAPTION, C_WARN);
-  lv_obj_align_to(sbDragon, sbAi, LV_ALIGN_OUT_LEFT_MID, -14, 0);
   lv_obj_set_style_text_align(sbDragon, LV_TEXT_ALIGN_RIGHT, 0);
   lv_obj_set_width(sbDragon, 140);
-  lv_obj_align(sbDragon, LV_ALIGN_RIGHT_MID, -80, 0);
 
+  batBegin();
   lv_timer_create(statusbarRefresh, 1000, nullptr);
   statusbarRefresh();
 }

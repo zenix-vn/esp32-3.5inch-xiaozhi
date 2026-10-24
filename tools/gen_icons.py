@@ -157,6 +157,16 @@ def glyph_games(g, c):
     g.rect(44, 36, 56, 41, 2, hexc(c))  # a notch on top
 
 
+def glyph_radio(g, c):
+    g.rect(14, 38, 86, 82, 12)  # body
+    g.line([(30, 38), (70, 18)], 5)  # antenna
+    g.ell(36, 60, 13, 13, hexc(c))  # speaker
+    g.ell(36, 60, 6, 6)
+    for y in (49, 57, 65):  # station dial
+        g.rect(56, y, 76, y + 3.5, 1.5, hexc(c))
+    g.ell(72, 73, 4, 4, hexc(0xFFC93C))
+
+
 def glyph_qr(g, c):
     for x, y in ((20, 20), (58, 20), (20, 58)):
         g.rect(x, y, x + 22, y + 22, 4)
@@ -219,6 +229,7 @@ ICONS = [
     ('ic_calendar', 0xFFF6DC, 0xE3AC52, 'logo'),  # the Zin100 calendar logo (tools/assets/calendar_logo.png) on a cream-to-gold tile
     ('ic_2048', 0xFFB86B, 0xE0603A, glyph_2048),
     ('ic_caro', 0x6BE0C8, 0x2A78B8, glyph_caro),
+    ('ic_radio', 0xFF9E6B, 0xD63A4A, glyph_radio),
 ]
 
 

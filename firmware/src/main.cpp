@@ -35,6 +35,7 @@ extern "C" void lv_assert_fail(void) {
 static SPIClass sdSPI(VSPI);  // TF slot: CS5 SCK18 MISO19 MOSI23 (VSPI's native pins; HSPI drives the display)
 static bool sdOk = false;
 static lv_color_t *buf1, *buf2;  // draw buffers, allocated at boot (not .bss: keeps the big RAM region free for TLS)
+static lv_disp_draw_buf_t drawBuf;
 
 // ---------- design tokens ----------
 #define C_BG_TOP   lv_color_hex(0x070B1A)
@@ -94,6 +95,7 @@ static void dispFlush(lv_disp_drv_t *drv, const lv_area_t *a, lv_color_t *c) {
   }
   tft.setAddrWindow(a->x1, a->y1, w, h);
   tft.pushPixelsDMA((uint16_t *)&c->full, n);
+  if (!buf2) tft.dmaWait();  // one buffer (radio playing): LVGL must not draw into it while it is being sent
 #else
   tft.startWrite();
   tft.setAddrWindow(a->x1, a->y1, w, h);
@@ -180,6 +182,7 @@ static bool screenOff = false;  // backlight off until the next touch (see scree
 #include "pages.h"
 
 #include "dragon.h"
+#include "battery.h"
 #include "statusbar.h"
 #include "home.h"
 #include "weather_page.h"
@@ -187,6 +190,7 @@ static bool screenOff = false;  // backlight off until the next touch (see scree
 #include "calendar_app.h"
 #include "sleep_app.h"
 #include "games.h"
+#include "radio.h"
 #include "photos.h"
 #include "qr_page.h"
 #include "ambient.h"
@@ -273,6 +277,7 @@ static const App apps[] = {
     {&ic_calendar, "Calendar", pageCalendar},
     {&ic_sleep, "Sleep sounds", pageSleep},
     {&ic_games, "Games", pageGames},
+    {&ic_radio, "Radio", pageRadio},
 };
 static_assert(sizeof(apps) / sizeof(apps[0]) == APP_COUNT, "APP_COUNT must match apps[]");
 static const char *appName(int i) { return apps[i].name; }
@@ -435,17 +440,16 @@ void setup() {
   }
 
   lv_init();
-  static lv_disp_draw_buf_t db;
   // smallest-first so the draw buffers land in the small RAM regions and the large one stays free for TLS
   buf1 = (lv_color_t *)heap_caps_malloc(480 * 8 * sizeof(lv_color_t), MALLOC_CAP_DMA | MALLOC_CAP_8BIT);
   buf2 = (lv_color_t *)heap_caps_malloc(480 * 8 * sizeof(lv_color_t), MALLOC_CAP_DMA | MALLOC_CAP_8BIT);
-  lv_disp_draw_buf_init(&db, buf1, buf2, 480 * 8);
+  lv_disp_draw_buf_init(&drawBuf, buf1, buf2, 480 * 8);
   static lv_disp_drv_t dd;
   lv_disp_drv_init(&dd);
   dd.hor_res = 480;
   dd.ver_res = 320;
   dd.flush_cb = dispFlush;
-  dd.draw_buf = &db;
+  dd.draw_buf = &drawBuf;
   lv_disp_t *disp = lv_disp_drv_register(&dd);
   lv_disp_set_theme(disp, lv_theme_default_init(disp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), true, &vi_font_14));
 
@@ -458,7 +462,10 @@ void setup() {
   lv_indev_drv_register(&id);
 
   sdSPI.begin(18, 19, 23, 5);
-  sdOk = SD.begin(5, sdSPI, 10000000);  // 10 MHz: long writes (web uploads) stay reliable on this board
+  // 10 MHz: long writes (web uploads) stay reliable on this board. 3 open files at most: FATFS keeps a 4 KB cache
+  // per file slot for good, and the default 5 slots cost 8 KB more than the 3 used at once (two sounds + a save),
+  // heap the radio's TLS session needs.
+  sdOk = SD.begin(5, sdSPI, 10000000, "/sd", 3);
 
   pinMode(0, INPUT_PULLUP);  // hold BOOT while powering up to redo touch calibration
   if (digitalRead(0) == LOW || !touchLoadCal()) touchCalibrate();
@@ -510,7 +517,56 @@ static void idleReturnTick() {
   }
 }
 
+// LVGL's allocator (include/lv_mem_hook.h). LVGL runs in loop(), so this may block it while the radio task winds down.
+static volatile bool radioYielded = false;  // loop() tells the user afterwards (no LVGL calls in here)
+static bool radioYieldHeap() {
+  if (!radioTaskH || xTaskGetCurrentTaskHandle() == radioTaskH) return false;
+  Serial.printf("RADIO stopped: the screen needs heap (free %u)\n", (unsigned)heap_caps_get_free_size(MALLOC_CAP_8BIT));
+  radioStop();
+  for (int i = 0; i < 300 && radioTaskH; i++) delay(10);
+  delay(20);  // the idle task frees the radio task's stack
+  radioYielded = true;
+  return true;
+}
+extern "C" void *lvMemAlloc(size_t size) {
+  void *p = malloc(size);
+  if (!p && size && radioYieldHeap()) p = malloc(size);
+  return p;
+}
+extern "C" void *lvMemRealloc(void *old, size_t size) {
+  void *p = realloc(old, size);
+  if (!p && size && radioYieldHeap()) p = realloc(old, size);
+  return p;
+}
+
+// While the radio plays, LVGL renders into one draw buffer and the second one's 7.7 KB go to the radio (radio.h
+// waits for this before it connects). Runs between frames, from loop().
+static void drawBufSingle(bool single) {
+  if (single == (buf2 == nullptr)) return;
+  if (single) {
+    tftIdle();  // no DMA strip may still be reading buf2
+    lv_disp_draw_buf_init(&drawBuf, buf1, nullptr, 480 * 8);
+    heap_caps_free(buf2);
+    buf2 = nullptr;
+  } else {
+    lv_color_t *b = (lv_color_t *)heap_caps_malloc(480 * 8 * sizeof(lv_color_t), MALLOC_CAP_DMA | MALLOC_CAP_8BIT);
+    if (!b) return;  // the radio has not let go of its heap yet: next pass
+    tftIdle();
+    buf2 = b;
+    lv_disp_draw_buf_init(&drawBuf, buf1, buf2, 480 * 8);
+  }
+}
+
 void loop() {
+  if (gNetHeavy) {  // radio.h: a TLS handshake needs nearly all the free heap for a moment; the screen waits
+    delay(5);
+    return;
+  }
+  drawBufSingle(radioTaskH != nullptr);
+  if (radioYielded) {
+    radioYielded = false;
+    uiToast(DL("Radio đã dừng: thiết bị cần bộ nhớ cho màn hình này", "Radio stopped: this screen needs the memory"), C_WARN);
+  }
   wifiLoop();
   webTick();
   uint32_t idle = lv_timer_handler();  // ms until LVGL's next timer is due

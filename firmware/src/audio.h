@@ -169,6 +169,17 @@ static TaskHandle_t aTask = nullptr;
 
 static void audioEnsureTask();
 
+// Radio (radio.h): a ring of 8-bit samples at A_RATE that the radio task fills and the mixer drains. The mixer
+// waits until the ring is half full before it plays (and again after running dry), so short network stalls are
+// silent pauses instead of crackle. The radio task frees the ring only after clearing aRadioOn and waiting a block.
+// Samples are packed 4 to a 32-bit word (sample n = byte n & 3 of word n / 4) so the ring can live in IRAM, which
+// takes 32-bit loads and stores only; the writer publishes aRadioHead a whole word at a time.
+static uint32_t *volatile aRadioBuf = nullptr;
+static uint32_t aRadioSize = 0;                          // in samples, power of two
+static volatile uint32_t aRadioHead = 0, aRadioTail = 0;  // samples written / read so far
+static volatile bool aRadioOn = false, aRadioPlaying = false;
+static volatile bool aRadioNoDriver = false;  // the I2S driver could not start (no heap): the radio gives up
+
 // Interface / game sound. false = no such file (the caller falls back to beeps).
 static bool audioFx(const char *name, bool loop = false) {
   if (!audioHas(name)) return false;
@@ -212,9 +223,11 @@ static bool audioDriverUp(bool up) {
     c.channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT;
     c.communication_format = (i2s_comm_format_t)I2S_COMM_FORMAT_STAND_MSB;
     c.intr_alloc_flags = ESP_INTR_FLAG_LEVEL1;
-    c.dma_buf_count = 6;
-    c.dma_buf_len = A_BLOCK;
-    c.use_apll = false;
+    c.dma_buf_count = 4;  // 4 x 256 frames, 4 KB of DMA RAM (was 12 KB: too much next to the radio)
+    c.dma_buf_len = A_BLOCK / 2;
+    // APLL: in built-in DAC mode the ordinary clock divider ran ~5.5x too fast (88.6 kHz for 16 kHz: sounds
+    // played chipmunk-fast, the radio ring drained in no time); the audio PLL gives the asked rate exactly
+    c.use_apll = true;
     c.tx_desc_auto_clear = true;
     ledcWrite(SPK_CH, 0);
     ledcDetachPin(PIN_SPK);  // the beeper lets go of the pin; the DAC takes it
@@ -267,7 +280,9 @@ static void audioTask(void *) {
     }
     aFxOn = fx.on;
     aBgOn = bg.on;
-    if (!fx.on && !bg.on) {
+    bool radio = aRadioOn;
+    if (!radio) aRadioPlaying = false;
+    if (!fx.on && !bg.on && !radio) {
       if (up && millis() - idleSince > 1500) {
         for (int i = 0; i < A_BLOCK; i++) {  // ramp the DC level down, then release the pin
           dc = dc > 0 ? dc - 1 : 0;
@@ -294,6 +309,10 @@ static void audioTask(void *) {
       if (!audioDriverUp(true)) {
         chClose(fx);
         chClose(bg);
+        if (aRadioOn) {  // tell the radio (it shows "out of memory") instead of retrying for ever
+          aRadioOn = false;
+          aRadioNoDriver = true;
+        }
         continue;
       }
       up = true;
@@ -313,8 +332,20 @@ static void audioTask(void *) {
     }
     int vol = cfg.volume * 256 / 100;
     int gb = vol * bgFade / 256 * 3 / 4, gf = vol;  // background a little under the effects
+    if (radio) {
+      uint32_t avail = aRadioHead - aRadioTail;
+      if (!aRadioPlaying && avail >= aRadioSize / 2) aRadioPlaying = true;
+      else if (aRadioPlaying && avail < A_BLOCK) aRadioPlaying = false;  // ran dry: wait for it to fill again
+    }
+    const uint32_t *rb = aRadioPlaying ? aRadioBuf : nullptr;
+    uint32_t rt = aRadioTail, rm = aRadioSize - 1;
     for (int i = 0; i < A_BLOCK; i++) {
       int s = 0;
+      if (rb) {
+        int v = (rb[(rt & rm) >> 2] >> ((rt & 3) * 8)) & 255;
+        rt++;
+        s += (v - 128) * vol >> 8;
+      }
       if (bg.on) s += (chNext(bg) - 128) * gb >> 8;
       if (fx.on) s += (chNext(fx) - 128) * gf >> 8;
       if (dc < 128 && (i & 3) == 0) dc++;
@@ -322,6 +353,7 @@ static void audioTask(void *) {
       s = s < 0 ? 0 : s > 255 ? 255 : s;
       blk[i * 2] = blk[i * 2 + 1] = (int16_t)(s << 8);
     }
+    if (rb) aRadioTail = rt;
     size_t w;
     i2s_write(I2S_NUM_0, blk, sizeof(blk), &w, portMAX_DELAY);  // blocks until the DMA has room: that is the pacing
   }

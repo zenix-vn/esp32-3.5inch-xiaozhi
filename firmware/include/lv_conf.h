@@ -5,10 +5,10 @@
 #define LV_COLOR_DEPTH 16
 #define LV_COLOR_16_SWAP 0
 #define LV_MEM_CUSTOM 1
-#define LV_MEM_CUSTOM_INCLUDE <stdlib.h>
-#define LV_MEM_CUSTOM_ALLOC malloc
+#define LV_MEM_CUSTOM_INCLUDE "lv_mem_hook.h"  /* malloc/realloc that can stop the radio for heap (main.cpp) */
+#define LV_MEM_CUSTOM_ALLOC lvMemAlloc
 #define LV_MEM_CUSTOM_FREE free
-#define LV_MEM_CUSTOM_REALLOC realloc
+#define LV_MEM_CUSTOM_REALLOC lvMemRealloc
 #define LV_MEMCPY_MEMSET_STD 1       /* libc memcpy/memset (ROM, word-optimised) instead of LVGL's byte loops */
 #define LV_DISP_DEF_REFR_PERIOD 20   /* up to 50 fps; frames are drawn and sent over DMA in parallel (main.cpp) */
 #define LV_INDEV_DEF_READ_PERIOD 20  /* touch polled more often: swipes follow the finger more closely */

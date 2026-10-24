@@ -711,6 +711,20 @@ static void webBegin() {
     bool ok = web.hasArg("fx") ? audioFx(web.arg("name").c_str(), false) : audioBg(web.arg("name").c_str(), web.arg("min").toInt());
     web.send(ok ? 200 : 404, "text/plain", ok ? "ok" : "no such sound");
   });
+  web.on("/api/radio", HTTP_ANY, []() {  // ?ch=0..5 plays a channel, ?stop=1 stops; answers the state
+    if (!webAuthOk()) return;
+    radioRelayLoad();
+    if (web.hasArg("relay")) radioRelaySet(web.arg("relay"));  // "ip:port" of tools/radio_relay.py, "" = direct
+    if (web.hasArg("stop")) radioStop();
+    else if (web.hasArg("ch")) radioPlay(web.arg("ch").toInt());
+    char b[300];
+    snprintf(b, sizeof(b), "{\"ch\":%d,\"state\":%d,\"playing\":%s,\"err\":\"%s\",\"heap\":%u,\"heap8\":%u,\"big8\":%u,\"iram\":%u,\"fill\":%u,\"relay\":\"%s\"}",
+             radioWant, radioState, aRadioPlaying ? "true" : "false", radioErr, (unsigned)ESP.getFreeHeap(),
+             (unsigned)heap_caps_get_free_size(MALLOC_CAP_8BIT), (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT),
+             (unsigned)(heap_caps_get_free_size(MALLOC_CAP_32BIT) - heap_caps_get_free_size(MALLOC_CAP_8BIT)),
+             (unsigned)(aRadioHead - aRadioTail), radioRelay);
+    web.send(200, "application/json", b);
+  });
   web.on("/api/weather", HTTP_POST, []() {
     if (!webAuthOk()) return;
     if (web.hasArg("auto")) {

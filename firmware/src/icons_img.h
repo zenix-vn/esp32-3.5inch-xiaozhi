@@ -20,6 +20,7 @@ extern const lv_img_dsc_t ic_games;
 extern const lv_img_dsc_t ic_calendar;
 extern const lv_img_dsc_t ic_2048;
 extern const lv_img_dsc_t ic_caro;
+extern const lv_img_dsc_t ic_radio;
 #ifdef __cplusplus
 }
 #endif

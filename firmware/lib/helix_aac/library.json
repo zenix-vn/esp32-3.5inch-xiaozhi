@@ -1,0 +1,6 @@
+{
+  "name": "helix_aac",
+  "version": "1.0.0",
+  "description": "RealNetworks Helix fixed-point AAC-LC decoder (from ESP8266Audio 1.9.7, SBR removed)",
+  "build": { "srcDir": "src", "includeDir": "src" }
+}
