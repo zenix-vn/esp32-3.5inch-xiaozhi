@@ -204,7 +204,8 @@ static const int CAT_U = 32, CAT_V = 24;
 static const int CAT_TOP = CLOCK_W / 2 - CAT_U;  // top run: from the middle of the clock to its corner
 static int catSideLen() { return max(4, clockH / 2 + 8 - CAT_U); }  // left run: down to about half the height
 static lv_obj_t *hCat;
-static int catS = 0, catDir = 1, catStep = 0, catPause = 0;  // place on the path (0 = middle of the top), +1 = toward the corner
+static int catS = 0, catDir = 1, catStep = 0;  // place on the path (0 = middle of the top), +1 = toward the corner
+static uint32_t catRestUntil = 0;                // millis() until which the cat sits
 static bool catEyesShut = false;
 
 struct CatPen {  // where and how the frame is drawn this time
@@ -272,7 +273,7 @@ static void catDraw(lv_event_t *e) {
   lv_obj_get_coords(hCat, &b);
   CatPen p = {lv_event_get_draw_ctx(e), b.x1, b.y1, catSide(), catDir > 0};  // toward the corner = facing left / down
   const uint32_t FUR = 0xF7A34B, FUR2 = 0xE5852F, CREAM = 0xFFE7C7, PINK = 0xFF9DB4, INK = 0x3A2A33;
-  bool still = catPause > 0 || catEyesShut;
+  bool still = (int32_t)(catRestUntil - millis()) > 0 || catEyesShut;
   int lift = still ? 0 : (catStep % 2 ? 2 : 0);  // the two leg pairs take turns
   catArc(p, 7, 13, 5, 180, 360, 3, FUR2);                    // tail curling over the back
   catBox(p, 10, 18, 14, 24 - (2 - lift), 2, FUR2);           // far legs
@@ -318,40 +319,42 @@ static void catPlace() {
   lv_obj_invalidate(hCat);
 }
 
-static const uint32_t HOME_QUIET_MS = 120000;  // after 2 min untouched the cat sleeps and the colon stops blinking:
-                                               // the screen then barely redraws (less power, less speaker buzz)
+static const int CAT_TICK_MS = 60;  // one pixel per tick: ~17 px/s, smooth steps (the screen is mostly on ambient anyway)
 static void catTick(lv_timer_t *) {
   if (!hCat || !homeIsActive() || screenOff) return;
-  if (themeIsNight() || lv_disp_get_inactive_time(nullptr) > HOME_QUIET_MS) {  // asleep: eyes shut, still
+  uint32_t now = millis();
+  if (themeIsNight()) {  // asleep: eyes shut, still
     if (!catEyesShut) {
       catEyesShut = true;
       lv_obj_invalidate(hCat);
     }
     return;
   }
-  if (catPause > 0) {  // sitting: blink now and then
-    catPause--;
-    bool shut = catPause % 14 == 0;
+  if ((int32_t)(catRestUntil - now) > 0) {  // sitting: blinks for 150 ms every 2.5 s
+    bool shut = (catRestUntil - now) % 2500 < 150;
     if (shut != catEyesShut) {
       catEyesShut = shut;
       lv_obj_invalidate(hCat);
     }
     return;
   }
-  catEyesShut = false;
-  if (random(0, 25) == 0) {  // mostly sitting: each step redraws, and constant redraws buzz in the speaker
-    catPause = random(15, 50);
+  if (catEyesShut) {
+    catEyesShut = false;
+    lv_obj_invalidate(hCat);
+  }
+  if (random(0, 300) == 0) {  // now and then (~every 18 s) a little rest
+    catRestUntil = now + random(2000, 5000);
     lv_obj_invalidate(hCat);
     return;
   }
   int end = CAT_TOP + catSideLen();
-  catS += catDir * 3;
-  if (catS <= 0 || catS >= end) {  // an end of the path: turn round, sometimes after a little rest
+  catS += catDir;
+  if (catS <= 0 || catS >= end) {  // an end of the path: turn round, sometimes after a rest
     catS = catS <= 0 ? 0 : end;
     catDir = -catDir;
-    if (random(0, 3) == 0) catPause = random(10, 30);
+    if (random(0, 3) == 0) catRestUntil = now + random(1500, 4000);
   }
-  catStep = catS / 3;
+  catStep = catS / 4;  // the leg pairs swap every 4 px
   catPlace();
 }
 
@@ -508,7 +511,7 @@ static void refreshHome() {
     char hs[4], ms[4];
     snprintf(hs, sizeof(hs), cfg.clock24 ? "%02d" : "%d", hh);
     snprintf(ms, sizeof(ms), "%02d", t.tm_min);
-    clockSet(hs, ms, t.tm_sec % 2 == 0 || lv_disp_get_inactive_time(nullptr) > HOME_QUIET_MS);
+    clockSet(hs, ms, t.tm_sec % 2 == 0);
     setText(lblAmPm, cfg.clock24 ? "" : isVi() ? (h < 12 ? "SA" : "CH") : (h < 12 ? "AM" : "PM"));
 
     // one line: the weekday in white, the date in the accent colour (label recolouring)
@@ -669,7 +672,7 @@ static void buildHome(lv_obj_t *tile) {
   lv_obj_clear_flag(hCat, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_add_event_cb(hCat, catDraw, LV_EVENT_DRAW_MAIN, nullptr);
   catPlace();
-  lv_timer_create(catTick, 200, nullptr);
+  lv_timer_create(catTick, CAT_TICK_MS, nullptr);
 
 
   // right: this month (tap: Calendar)

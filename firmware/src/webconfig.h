@@ -1,7 +1,8 @@
 #pragma once
 // Local web setup page: http://<hostname>.local (mDNS) or http://<device ip>.
 // For options the on-device Settings screen does not have: start screen, language, clock and greeting,
-// weather location/units, payment QR details, app list and order, device name and page password.
+// weather location/units, payment QR details, countdown events (names with Vietnamese accents, which the on-screen
+// keyboard cannot type), app list and order, device name and page password.
 // Included by main.cpp after pages.h (uses cfg, sdOk, FW_VERSION, appName()).
 #include <WebServer.h>
 #include <ESPmDNS.h>
@@ -128,6 +129,7 @@ canvas#wpPrev{display:block;width:100%;aspect-ratio:3/2;border-radius:12px;backg
 <symbol id=i-cd viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
 <symbol id=i-back viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
 <symbol id=i-pin viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx=12 cy=9 r=2.5 /></symbol>
+<symbol id=i-hg viewBox="0 0 24 24"><path d="M6 3h12M6 21h12M7 3c0 5 10 5 10 9s-10 4-10 9M17 3c0 5-10 5-10 9s10 4 10 9"/></symbol>
 <symbol id=i-plus viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
 <symbol id=i-lock viewBox="0 0 24 24"><rect x=5 y=11 width=14 height=10 rx=2 /><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
 </defs></svg>
@@ -139,6 +141,7 @@ canvas#wpPrev{display:block;width:100%;aspect-ratio:3/2;border-radius:12px;backg
 <a href=#media data-p=media><svg class=i><use href=#i-img /></svg><span data-t=nMedia></span></a>
 <a href=#wx data-p=wx><svg class=i><use href=#i-cloud /></svg><span data-t=wxTitle></span></a>
 <a href=#qr data-p=qr><svg class=i><use href=#i-qr /></svg><span data-t=nQr></span></a>
+<a href=#cd data-p=cd><svg class=i><use href=#i-hg /></svg><span data-t=nCd></span></a>
 <a href=#apps data-p=apps><svg class=i><use href=#i-apps /></svg><span data-t=appsTitle></span></a>
 <a href=#dg data-p=dg><svg class=i><use href=#i-dg /></svg><span data-t=nDg></span></a>
 <a href=#sys data-p=sys><svg class=i><use href=#i-sys /></svg><span data-t=nSys></span></a>
@@ -218,6 +221,19 @@ canvas#wpPrev{display:block;width:100%;aspect-ratio:3/2;border-radius:12px;backg
 </div><div class=ft><button class="btn pri" id=saveQr data-t=save></button></div></section>
 </div>
 
+<div class=panel id=p-cd><h1 class=pt data-t=nCd></h1>
+<section class=card><div class=hd><h2 data-t=cdList></h2><p data-t=cdHint></p></div><div class=bd><div class=lst id=cdLst></div>
+<div style="margin-top:12px"><button class="btn sec" id=cdNew data-t=cdAdd></button></div></div></section>
+<section class=card><div class=hd><h2 id=cdEdTitle></h2></div><div class=bd>
+<div class=fld><label for=cdN data-t=cdName></label><input id=cdN maxlength=30 data-ph=cdNamePh></div>
+<div class=fld><label for=cdK data-t=cdKind></label><select id=cdK><option value=0 data-t=cdOnce><option value=1 data-t=cdYearly><option value=2 data-t=cdLunar></select></div>
+<div class=two><div class=fld><label for=cdD data-t=cdDay></label><select id=cdD></select></div><div class=fld><label for=cdM data-t=cdMonth></label><select id=cdM></select></div></div>
+<div class=fld id=cdYf><label for=cdY data-t=cdYear></label><input id=cdY type=number min=2024 max=2099 inputmode=numeric></div>
+<p class=hint id=cdLunHint data-t=cdLunHint></p>
+<label class=sw-row style="margin-top:8px"><span data-t=cdHome></span><input type=checkbox class=sw id=cdH></label>
+</div><div class=ft><button class="btn pri" id=saveCd data-t=save></button></div></section>
+</div>
+
 <div class=panel id=p-apps><h1 class=pt data-t=appsTitle></h1>
 <section class=card><div class=hd><h2 data-t=appsTitle></h2><p data-t=appsHint></p></div><div class=bd><div class=lst id=apps></div></div>
 <div class=ft><span class=rn data-t=restartNote></span><button class="btn pri" id=saveApps data-t=save></button></div></section>
@@ -245,6 +261,7 @@ const D={vi:{status:'Trạng thái',lang:'Ngôn ngữ',restartNote:'Thiết bị
 clockTitle:'Đồng hồ & chào hỏi',timeFmt:'Định dạng giờ',h24:'24 giờ',h12:'12 giờ',dateFmt:'Hiển thị ngày',dLong:'Đầy đủ (Thứ Hai, 19 tháng 10)',dNum:'Số (19/10/2026)',dHide:'Ẩn',greetOn:'Hiện lời chào',nameLbl:'Tên trong lời chào (không bắt buộc)',
 wxTitle:'Thời tiết',wxNow:'Vị trí hiện tại',wxSearch:'Đổi thành phố',wxPh:'Ví dụ: Đà Nẵng',search:'Tìm',wxAuto:'Tự xác định vị trí (theo IP)',unit:'Đơn vị nhiệt độ',auto:'Tự động',manual:'Đặt thủ công',noRes:'Không tìm thấy',
 qrTitle:'QR thanh toán',qrHint:'Dán chuỗi VietQR/EMV (bắt đầu bằng 000201...) lấy từ ứng dụng ngân hàng.',qrT:'Tiêu đề',qrTPh:'Quét để thanh toán',qrB:'Dòng ngân hàng',qrN:'Tên tài khoản',qrA:'Số tài khoản',qrP:'Nội dung mã QR',qrList:'Tài khoản nhận tiền',qrListHint:'Thêm nhiều tài khoản; tài khoản đang dùng hiển thị trên màn hình chính. Cũng chọn được trong Cài đặt trên thiết bị.',qrUse:'Dùng',qrInUse:'đang dùng',qrEdit:'Sửa',qrAdd:'Thêm tài khoản',qrEdNew:'Tài khoản mới',qrEdEdit:'Sửa tài khoản',qrDelAsk:'Xoá tài khoản này?',qrMax:'Tối đa 8 tài khoản',
+nCd:'Đếm ngược',cdList:'Sự kiện',cdHint:'Tên có dấu gõ ở đây; danh sách đồng bộ với ứng dụng Đếm ngược trên thiết bị. Tối đa 12 sự kiện.',cdAdd:'Thêm sự kiện',cdEdNew:'Sự kiện mới',cdEdEdit:'Sửa sự kiện',cdName:'Tên sự kiện',cdNamePh:'Ví dụ: Sinh nhật mẹ',cdKind:'Lặp lại',cdOnce:'Một lần',cdYearly:'Hằng năm (dương lịch)',cdLunar:'Hằng năm (âm lịch)',cdDay:'Ngày',cdMonth:'Tháng',cdYear:'Năm',cdLunHint:'Ngày và tháng theo âm lịch, ví dụ Tết là 1/1, Trung thu là 15/8.',cdHome:'Hiện trên màn hình chính',cdDelAsk:'Xoá sự kiện này?',cdToday:'Hôm nay!',cdTomorrow:'Ngày mai',cdLeft:'Còn ',cdDays:' ngày',cdPast:'Đã qua',cdOnHome:'Trên màn hình chính',cdNone:'Chưa có sự kiện',cdNeedName:'Nhập tên sự kiện',
 appsTitle:'Ứng dụng',appsHint:'Bật ứng dụng muốn hiển thị, dùng mũi tên để đổi thứ tự.',lock:'Luôn hiện',
 hostLbl:'Tên thiết bị',pwLbl:'Mật khẩu trang web',pwHint:'Tên đăng nhập là admin. Để trống rồi lưu để bỏ mật khẩu.',
 wifi:'Wi-Fi',ip:'Địa chỉ IP',fw:'Phần mềm',sd:'Thẻ nhớ',heap:'RAM trống',up:'Thời gian chạy',sdOk:'Có thẻ',sdNo:'Không có thẻ',sigS:'Mạnh',sigM:'Khá',sigW:'Yếu',
@@ -254,6 +271,7 @@ en:{status:'Status',lang:'Language',restartNote:'The device will restart',save:'
 clockTitle:'Clock & greeting',timeFmt:'Time format',h24:'24-hour',h12:'12-hour',dateFmt:'Date display',dLong:'Long (Monday, 19 October)',dNum:'Numeric (19/10/2026)',dHide:'Hidden',greetOn:'Show greeting',nameLbl:'Name in the greeting (optional)',
 wxTitle:'Weather',wxNow:'Current location',wxSearch:'Change city',wxPh:'e.g. Da Nang',search:'Search',wxAuto:'Detect location automatically (by IP)',unit:'Temperature unit',auto:'Automatic',manual:'Set manually',noRes:'No results',
 qrTitle:'Payment QR',qrHint:'Paste the VietQR/EMV string (starts with 000201...) from your banking app.',qrT:'Title',qrTPh:'Scan to pay',qrB:'Bank line',qrN:'Account name',qrA:'Account number',qrP:'QR content',qrList:'Receiving accounts',qrListHint:'Add several accounts; the one in use is shown on the main screen. It can also be chosen in Settings on the device.',qrUse:'Use',qrInUse:'in use',qrEdit:'Edit',qrAdd:'Add an account',qrEdNew:'New account',qrEdEdit:'Edit account',qrDelAsk:'Delete this account?',qrMax:'At most 8 accounts',
+nCd:'Countdown',cdList:'Events',cdHint:'Type names with accents here; the list is the same as in the Countdown app on the device. Up to 12 events.',cdAdd:'Add event',cdEdNew:'New event',cdEdEdit:'Edit event',cdName:'Event name',cdNamePh:'e.g. Mum\'s birthday',cdKind:'Repeats',cdOnce:'Once',cdYearly:'Every year (solar)',cdLunar:'Every year (lunar)',cdDay:'Day',cdMonth:'Month',cdYear:'Year',cdLunHint:'Day and month of the lunar calendar: Tết is 1/1, Mid-Autumn 15/8.',cdHome:'Show on the home screen',cdDelAsk:'Delete this event?',cdToday:'Today!',cdTomorrow:'Tomorrow',cdLeft:'',cdDays:' days left',cdPast:'Past',cdOnHome:'On the home screen',cdNone:'No events yet',cdNeedName:'Enter the event name',
 appsTitle:'Apps',appsHint:'Switch on the apps to show and use the arrows to reorder.',lock:'Always shown',
 hostLbl:'Device name',pwLbl:'Web page password',pwHint:'The user name is admin. Save it empty to remove the password.',
 wifi:'Wi-Fi',ip:'IP address',fw:'Firmware',sd:'microSD',heap:'Free RAM',up:'Uptime',sdOk:'Detected',sdNo:'No card',sigS:'Strong',sigM:'Fair',sigW:'Weak',
@@ -301,6 +319,7 @@ async function load(){S=await (await fetch('/api/state')).json();applyLang(S.lan
  $('c24').value=S.c24?1:0;$('datef').value=S.datef;$('greet').checked=S.greet;$('name').value=S.name;
  $('wxCity').textContent=S.wx.city||'—';$('wxNow').textContent=(S.wx.manual?T.manual:T.auto)+' · '+S.wx.lat.toFixed(2)+', '+S.wx.lon.toFixed(2);$('tempF').value=S.tempF?1:0;
  if(qrEd>=S.qrList.length)qrEd=S.qrSel;drawQr();qrFill(qrEd);
+ if(cdEd>=S.cd.length)cdEd=-1;drawCd();if(!cdFilled){cdFill(cdEd);cdFilled=1}
  $('host').value=S.host;
  $('wpState').textContent=S.wall?T.wpHas:T.wpNone;
  $('theme').value=S.theme;$('phS').value=S.phS;$('fx').checked=S.fx;$('lunar').checked=S.lunar;$('quote').checked=S.quote;$('idleM').value=S.idleM;$('vol').value=S.vol;$('volV').textContent=S.vol+'%';
@@ -310,6 +329,25 @@ async function load(){S=await (await fetch('/api/state')).json();applyLang(S.lan
  $('saveDg').disabled=$('dgReset').disabled=!g.ok;
  order=S.apps.map(a=>({id:a.id,name:a.name,on:a.on,lock:a.lock}));drawApps();segs();wpDimV()}
 function fillHours(id,v){const s=$(id);s.innerHTML=(id=='ambS'?'<option value=-1>'+T.schedOff:'')+Array.from({length:24},(_,h)=>'<option value='+h+'>'+h+':00').join('');s.value=v}
+let cdEd=-1,cdFilled=0;  // event being edited: -1 = a new one
+function cdWhen(e){return e.left==null?'':e.left==0?T.cdToday:e.left==1?T.cdTomorrow:e.left<0?T.cdPast:T.cdLeft+e.left+T.cdDays}
+function cdDate(e){return e.d+'/'+e.m+(e.k==0?'/'+e.y:e.k==2?' ('+T.cdLunar.replace(/^.*\(|\)$/g,'')+')':'')}
+function drawCd(){const L=S.cd;$('cdLst').innerHTML=L.length?L.map((e,i)=>'<div class=it><span class=n>'+esc(e.n)+'<small>'+cdDate(e)+' · '+cdWhen(e)+(e.h?' · '+T.cdOnHome:'')+'</small></span>'+
+ '<button class="btn sec" data-ed='+i+'>'+T.qrEdit+'</button><button class="btn sec ib" data-rm='+i+' aria-label=delete>'+ic('del')+'</button></div>').join(''):'<div class=empty>'+T.cdNone+'</div>';
+ $('cdNew').disabled=L.length>=12;
+ $('cdLst').querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{cdEd=+b.dataset.ed;cdFill(cdEd);$('cdEdTitle').scrollIntoView({behavior:'smooth',block:'center'})});
+ $('cdLst').querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{if(confirm(T.cdDelAsk)&&await post('/api/cd/delete',{idx:b.dataset.rm})){cdEd=-1;cdFilled=0;toast(T.saved);load()}})}
+function cdKind(){const k=+$('cdK').value;$('cdYf').style.display=k==0?'':'none';$('cdLunHint').style.display=k==2?'':'none';
+ const dm=k==2?30:31,v=+$('cdD').value||1;$('cdD').innerHTML=Array.from({length:dm},(_,i)=>'<option>'+(i+1)).join('');$('cdD').value=Math.min(v,dm)}
+function cdFill(i){const now=new Date(),e=i<0?{n:'',k:0,d:now.getDate(),m:now.getMonth()+1,y:now.getFullYear(),h:1}:S.cd[i];
+ $('cdEdTitle').textContent=i<0?T.cdEdNew:T.cdEdEdit;$('cdN').value=e.n;$('cdK').value=e.k;
+ $('cdM').innerHTML=Array.from({length:12},(_,i)=>'<option>'+(i+1)).join('');$('cdD').innerHTML='';$('cdD').dataset.v=e.d;cdKind();$('cdD').value=e.d;
+ $('cdM').value=e.m;$('cdY').value=e.y||now.getFullYear();$('cdH').checked=!!e.h}
+$('cdK').onchange=cdKind;
+$('cdNew').onclick=()=>{cdEd=-1;cdFill(-1);$('cdN').focus()};
+$('saveCd').onclick=()=>{const n=$('cdN').value.trim();if(!n){toast(T.cdNeedName,1);return $('cdN').focus()}
+ busy($('saveCd'),async()=>{const r=await post('/api/cd/save',{idx:cdEd,n:n,k:$('cdK').value,d:$('cdD').value,m:$('cdM').value,y:$('cdY').value,h:$('cdH').checked?1:0});
+ if(r){cdEd=r.idx;toast(T.saved);load()}})};
 function qrLen(){$('qrLen').textContent=$('qrP').value.trim().length+'/500'}
 let qrEd=0;  // account being edited: -1 = a new one
 function drawQr(){const L=S.qrList;$('qrLst').innerHTML=L.map((a,i)=>'<div class=it><span class=n>'+esc(a.n||a.t||'#'+(i+1))+'<small>'+esc(a.a)+(i==S.qrSel?' · '+T.qrInUse:'')+'</small></span>'+
@@ -488,6 +526,21 @@ static void webSendState() {
   d["ambS"] = cfg.ambStart;
   d["ambE"] = cfg.ambEnd;
   d["vol"] = cfg.volume;
+  cdLoad();  // countdown events, with the days left (null while the clock is not set)
+  long cdNow = cdToday();
+  if (cdNow) cdRefresh(cdNow);
+  JsonArray cl = d["cd"].to<JsonArray>();
+  for (int i = 0; i < cdCount; i++) {
+    JsonObject o = cl.add<JsonObject>();
+    o["n"] = cdEv[i].name;
+    o["k"] = (int)cdEv[i].kind;
+    o["d"] = cdEv[i].d;
+    o["m"] = cdEv[i].m;
+    o["y"] = cdEv[i].y;
+    o["h"] = !cdEv[i].hidden;
+    if (cdNow) o["left"] = cdNextJd[i] - cdNow;
+    else o["left"] = nullptr;
+  }
   d["qrSel"] = qrSel;
   JsonArray ql = d["qrList"].to<JsonArray>();
   for (int i = 0; i < qrCount; i++) {
@@ -649,6 +702,45 @@ static void webBegin() {
     bool restart = webApplyCfg();
     web.send(200, "application/json", restart ? "{\"restart\":true}" : "{\"restart\":false}");
     if (restart) webRestartAt = millis() + 800;
+  });
+  // ---- countdown events ----
+  web.on("/api/cd/save", HTTP_POST, []() {
+    if (!webAuthOk()) return;
+    cdLoad();
+    int idx = web.arg("idx").toInt();
+    if (idx < 0) {
+      if (cdCount >= CD_MAX) return web.send(400, "text/plain", "at most 12 events");
+      idx = cdCount++;
+    }
+    if (idx >= cdCount) return web.send(400, "text/plain", "bad event");
+    CdEvent e = {};
+    String n = web.arg("n");
+    n.trim();
+    // cut at a whole UTF-8 character so the name fits its 40 bytes
+    int len = min((int)n.length(), (int)sizeof(e.name) - 1);
+    while (len > 0 && len < (int)n.length() && ((uint8_t)n[len] & 0xC0) == 0x80) len--;
+    memcpy(e.name, n.c_str(), len);
+    e.name[len] = 0;
+    e.kind = constrain(web.arg("k").toInt(), 0, 2);
+    e.m = constrain(web.arg("m").toInt(), 1, 12);
+    e.d = constrain(web.arg("d").toInt(), 1, e.kind == CD_LUNAR ? 30 : 31);
+    e.y = constrain(web.arg("y").toInt(), 2000, 2099);
+    e.hidden = web.arg("h").toInt() ? 0 : 1;
+    cdEv[idx] = e;
+    cdSave();
+    if (cdScr && !cdEdOv) cdBuildList();  // the Countdown app is open on the device: show the change
+    web.send(200, "application/json", String("{\"idx\":") + idx + "}");
+  });
+  web.on("/api/cd/delete", HTTP_POST, []() {
+    if (!webAuthOk()) return;
+    cdLoad();
+    int idx = web.arg("idx").toInt();
+    if (idx < 0 || idx >= cdCount) return web.send(400, "text/plain", "bad event");
+    for (int i = idx; i < cdCount - 1; i++) cdEv[i] = cdEv[i + 1];
+    cdCount--;
+    cdSave();
+    if (cdScr && !cdEdOv) cdBuildList();
+    web.send(200, "application/json", "{}");
   });
   // ---- payment QR accounts ----
   web.on("/api/qr/save", HTTP_POST, []() {
