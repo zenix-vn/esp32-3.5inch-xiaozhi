@@ -424,6 +424,55 @@ static void pageSettingsDock() {
   pageShow(dkScr);
 }
 
+// ---------- Home screen > Pet ----------
+static lv_obj_t *ptList;
+static void ptBuild() {
+  lv_obj_clean(ptList);
+  for (int i = 0; i <= PET_N; i++) {
+    lv_obj_t *r = lv_obj_create(ptList);
+    lv_obj_remove_style_all(r);
+    lv_obj_set_size(r, 456, 52);
+    lv_obj_set_style_border_width(r, 1, 0);
+    lv_obj_set_style_border_side(r, LV_BORDER_SIDE_BOTTOM, 0);
+    lv_obj_set_style_border_color(r, C_BORDER, 0);
+    lv_obj_set_style_border_opa(r, LV_OPA_60, 0);
+    lv_obj_set_style_bg_color(r, C_ACCENT, 0);
+    lv_obj_set_style_bg_opa(r, LV_OPA_20, LV_STATE_PRESSED);
+    lv_obj_clear_flag(r, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(r, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(r, [](lv_event_t *e) {
+      cfg.pet = (int)(intptr_t)lv_event_get_user_data(e);
+      cfgSave();
+      petApply();
+      ptBuild();
+    }, LV_EVENT_CLICKED, (void *)(intptr_t)i);
+    if (i) {
+      lv_obj_t *im = lv_img_create(r);
+      lv_img_set_src(im, PET_FRAMES[i - 1][0]);
+      lv_obj_align(im, LV_ALIGN_LEFT_MID, 4, 0);
+    }
+    lv_obj_t *t = makeLabel(r, "", F_BODY, i == cfg.pet ? C_ACCENT : C_TEXT);
+    lv_label_set_text(t, i ? PET_NAMES[i - 1][isVi() ? 0 : 1] : DL("Không hiện", "None"));
+    lv_obj_align(t, LV_ALIGN_LEFT_MID, 64, 0);
+    if (i == cfg.pet) {
+      lv_obj_t *ok = makeLabel(r, LV_SYMBOL_OK, F_BODY, C_ACCENT);
+      lv_obj_align(ok, LV_ALIGN_RIGHT_MID, -14, 0);
+    }
+  }
+}
+static void pageSettingsPet() {
+  lv_obj_t *c;
+  lv_obj_t *s = stPage(DL("Thú cưng", "Pet"), &c);
+  ptList = stGroup(c);
+  ptBuild();
+  lv_obj_t *h = makeLabel(c, "", F_CAPTION, C_MUTED);
+  lv_obj_set_width(h, 440);
+  lv_label_set_long_mode(h, LV_LABEL_LONG_WRAP);
+  lv_label_set_text(h, DL("Con vật đi dạo trên đồng hồ ở màn hình chính, thỉnh thoảng nằm nghỉ; ban đêm thì ngủ.",
+                          "The animal strolls on the home screen clock and lies down now and then; at night it sleeps."));
+  pageShow(s);
+}
+
 // ---------- language, time zone ----------
 static uint8_t stPendingLang = LANG_VI;
 static void stDoLang() {
@@ -495,6 +544,9 @@ static void pageSettings() {
       strlcat(b, tr(appName(cfg.dock[k])), sizeof(b));
     }
   stRow(g, LV_SYMBOL_LIST, 0x3FA7D6, "Dock", b, C_MUTED, [](lv_event_t *) { stOpen(pageSettingsDock); });
+  stRow(g, LV_SYMBOL_IMAGE, 0xF2A33A, DL("Thú cưng", "Pet"),
+        cfg.pet >= 1 && cfg.pet <= PET_N ? PET_NAMES[cfg.pet - 1][isVi() ? 0 : 1] : DL("Không hiện", "None"), C_MUTED,
+        [](lv_event_t *) { stOpen(pageSettingsPet); });
 
   // general
   stHeader(c, DL("CHUNG", "GENERAL"));

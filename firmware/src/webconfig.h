@@ -162,6 +162,7 @@ canvas#wpPrev{display:block;width:100%;aspect-ratio:3/2;border-radius:12px;backg
 
 <section class=card><div class=hd><h2 data-t=lookTitle></h2></div><div class=bd>
 <div class=fld><span class=lbl data-t=themeLbl></span><select id=theme class=seg data-k=th><option value=0 data-t=thSky><option value=1 data-t=thForest><option value=2 data-t=thSunset><option value=3 data-t=thMono></select></div>
+<div class=fld><label for=pet data-t=petLbl></label><select id=pet></select></div>
 <label class=sw-row style="margin-top:8px"><span data-t=fxOn></span><input type=checkbox class=sw id=fx></label>
 <label class=sw-row><span data-t=lunarOn></span><input type=checkbox class=sw id=lunar></label>
 <label class=sw-row><span data-t=quoteOn></span><input type=checkbox class=sw id=quote></label>
@@ -261,7 +262,7 @@ const D={vi:{status:'Trạng thái',lang:'Ngôn ngữ',restartNote:'Thiết bị
 clockTitle:'Đồng hồ & chào hỏi',timeFmt:'Định dạng giờ',h24:'24 giờ',h12:'12 giờ',dateFmt:'Hiển thị ngày',dLong:'Đầy đủ (Thứ Hai, 19 tháng 10)',dNum:'Số (19/10/2026)',dHide:'Ẩn',greetOn:'Hiện lời chào',nameLbl:'Tên trong lời chào (không bắt buộc)',
 wxTitle:'Thời tiết',wxNow:'Vị trí hiện tại',wxSearch:'Đổi thành phố',wxPh:'Ví dụ: Đà Nẵng',search:'Tìm',wxAuto:'Tự xác định vị trí (theo IP)',unit:'Đơn vị nhiệt độ',auto:'Tự động',manual:'Đặt thủ công',noRes:'Không tìm thấy',
 qrTitle:'QR thanh toán',qrHint:'Dán chuỗi VietQR/EMV (bắt đầu bằng 000201...) lấy từ ứng dụng ngân hàng.',qrT:'Tiêu đề',qrTPh:'Quét để thanh toán',qrB:'Dòng ngân hàng',qrN:'Tên tài khoản',qrA:'Số tài khoản',qrP:'Nội dung mã QR',qrList:'Tài khoản nhận tiền',qrListHint:'Thêm nhiều tài khoản; tài khoản đang dùng hiển thị trên màn hình chính. Cũng chọn được trong Cài đặt trên thiết bị.',qrUse:'Dùng',qrInUse:'đang dùng',qrEdit:'Sửa',qrAdd:'Thêm tài khoản',qrEdNew:'Tài khoản mới',qrEdEdit:'Sửa tài khoản',qrDelAsk:'Xoá tài khoản này?',qrMax:'Tối đa 8 tài khoản',
-nCd:'Đếm ngược',cdList:'Sự kiện',cdHint:'Tên có dấu gõ ở đây; danh sách đồng bộ với ứng dụng Đếm ngược trên thiết bị. Tối đa 12 sự kiện.',cdAdd:'Thêm sự kiện',cdEdNew:'Sự kiện mới',cdEdEdit:'Sửa sự kiện',cdName:'Tên sự kiện',cdNamePh:'Ví dụ: Sinh nhật mẹ',cdKind:'Lặp lại',cdOnce:'Một lần',cdYearly:'Hằng năm (dương lịch)',cdLunar:'Hằng năm (âm lịch)',cdDay:'Ngày',cdMonth:'Tháng',cdYear:'Năm',cdLunHint:'Ngày và tháng theo âm lịch, ví dụ Tết là 1/1, Trung thu là 15/8.',cdHome:'Hiện trên màn hình chính',cdDelAsk:'Xoá sự kiện này?',cdToday:'Hôm nay!',cdTomorrow:'Ngày mai',cdLeft:'Còn ',cdDays:' ngày',cdPast:'Đã qua',cdOnHome:'Trên màn hình chính',cdNone:'Chưa có sự kiện',cdNeedName:'Nhập tên sự kiện',
+petLbl:'Thú cưng trên đồng hồ',petNone:'Không hiện',nCd:'Đếm ngược',cdList:'Sự kiện',cdHint:'Tên có dấu gõ ở đây; danh sách đồng bộ với ứng dụng Đếm ngược trên thiết bị. Tối đa 12 sự kiện.',cdAdd:'Thêm sự kiện',cdEdNew:'Sự kiện mới',cdEdEdit:'Sửa sự kiện',cdName:'Tên sự kiện',cdNamePh:'Ví dụ: Sinh nhật mẹ',cdKind:'Lặp lại',cdOnce:'Một lần',cdYearly:'Hằng năm (dương lịch)',cdLunar:'Hằng năm (âm lịch)',cdDay:'Ngày',cdMonth:'Tháng',cdYear:'Năm',cdLunHint:'Ngày và tháng theo âm lịch, ví dụ Tết là 1/1, Trung thu là 15/8.',cdHome:'Hiện trên màn hình chính',cdDelAsk:'Xoá sự kiện này?',cdToday:'Hôm nay!',cdTomorrow:'Ngày mai',cdLeft:'Còn ',cdDays:' ngày',cdPast:'Đã qua',cdOnHome:'Trên màn hình chính',cdNone:'Chưa có sự kiện',cdNeedName:'Nhập tên sự kiện',
 appsTitle:'Ứng dụng',appsHint:'Bật ứng dụng muốn hiển thị, dùng mũi tên để đổi thứ tự.',lock:'Luôn hiện',
 hostLbl:'Tên thiết bị',pwLbl:'Mật khẩu trang web',pwHint:'Tên đăng nhập là admin. Để trống rồi lưu để bỏ mật khẩu.',
 wifi:'Wi-Fi',ip:'Địa chỉ IP',fw:'Phần mềm',sd:'Thẻ nhớ',heap:'RAM trống',up:'Thời gian chạy',sdOk:'Có thẻ',sdNo:'Không có thẻ',sigS:'Mạnh',sigM:'Khá',sigW:'Yếu',
@@ -271,7 +272,7 @@ en:{status:'Status',lang:'Language',restartNote:'The device will restart',save:'
 clockTitle:'Clock & greeting',timeFmt:'Time format',h24:'24-hour',h12:'12-hour',dateFmt:'Date display',dLong:'Long (Monday, 19 October)',dNum:'Numeric (19/10/2026)',dHide:'Hidden',greetOn:'Show greeting',nameLbl:'Name in the greeting (optional)',
 wxTitle:'Weather',wxNow:'Current location',wxSearch:'Change city',wxPh:'e.g. Da Nang',search:'Search',wxAuto:'Detect location automatically (by IP)',unit:'Temperature unit',auto:'Automatic',manual:'Set manually',noRes:'No results',
 qrTitle:'Payment QR',qrHint:'Paste the VietQR/EMV string (starts with 000201...) from your banking app.',qrT:'Title',qrTPh:'Scan to pay',qrB:'Bank line',qrN:'Account name',qrA:'Account number',qrP:'QR content',qrList:'Receiving accounts',qrListHint:'Add several accounts; the one in use is shown on the main screen. It can also be chosen in Settings on the device.',qrUse:'Use',qrInUse:'in use',qrEdit:'Edit',qrAdd:'Add an account',qrEdNew:'New account',qrEdEdit:'Edit account',qrDelAsk:'Delete this account?',qrMax:'At most 8 accounts',
-nCd:'Countdown',cdList:'Events',cdHint:'Type names with accents here; the list is the same as in the Countdown app on the device. Up to 12 events.',cdAdd:'Add event',cdEdNew:'New event',cdEdEdit:'Edit event',cdName:'Event name',cdNamePh:'e.g. Mum\'s birthday',cdKind:'Repeats',cdOnce:'Once',cdYearly:'Every year (solar)',cdLunar:'Every year (lunar)',cdDay:'Day',cdMonth:'Month',cdYear:'Year',cdLunHint:'Day and month of the lunar calendar: Tết is 1/1, Mid-Autumn 15/8.',cdHome:'Show on the home screen',cdDelAsk:'Delete this event?',cdToday:'Today!',cdTomorrow:'Tomorrow',cdLeft:'',cdDays:' days left',cdPast:'Past',cdOnHome:'On the home screen',cdNone:'No events yet',cdNeedName:'Enter the event name',
+petLbl:'Pet on the clock',petNone:'None',nCd:'Countdown',cdList:'Events',cdHint:'Type names with accents here; the list is the same as in the Countdown app on the device. Up to 12 events.',cdAdd:'Add event',cdEdNew:'New event',cdEdEdit:'Edit event',cdName:'Event name',cdNamePh:'e.g. Mum\'s birthday',cdKind:'Repeats',cdOnce:'Once',cdYearly:'Every year (solar)',cdLunar:'Every year (lunar)',cdDay:'Day',cdMonth:'Month',cdYear:'Year',cdLunHint:'Day and month of the lunar calendar: Tết is 1/1, Mid-Autumn 15/8.',cdHome:'Show on the home screen',cdDelAsk:'Delete this event?',cdToday:'Today!',cdTomorrow:'Tomorrow',cdLeft:'',cdDays:' days left',cdPast:'Past',cdOnHome:'On the home screen',cdNone:'No events yet',cdNeedName:'Enter the event name',
 appsTitle:'Apps',appsHint:'Switch on the apps to show and use the arrows to reorder.',lock:'Always shown',
 hostLbl:'Device name',pwLbl:'Web page password',pwHint:'The user name is admin. Save it empty to remove the password.',
 wifi:'Wi-Fi',ip:'IP address',fw:'Firmware',sd:'microSD',heap:'Free RAM',up:'Uptime',sdOk:'Detected',sdNo:'No card',sigS:'Strong',sigM:'Fair',sigW:'Weak',
@@ -322,6 +323,7 @@ async function load(){S=await (await fetch('/api/state')).json();applyLang(S.lan
  if(cdEd>=S.cd.length)cdEd=-1;drawCd();if(!cdFilled){cdFill(cdEd);cdFilled=1}
  $('host').value=S.host;
  $('wpState').textContent=S.wall?T.wpHas:T.wpNone;
+ $('pet').innerHTML='<option value=0>'+T.petNone+S.pets.map((n,i)=>'<option value='+(i+1)+'>'+esc(n)).join('');$('pet').value=S.pet;
  $('theme').value=S.theme;$('phS').value=S.phS;$('fx').checked=S.fx;$('lunar').checked=S.lunar;$('quote').checked=S.quote;$('idleM').value=S.idleM;$('vol').value=S.vol;$('volV').textContent=S.vol+'%';
  fillHours('ambS',S.ambS);fillHours('ambE',S.ambE);
  const g=S.dragon;$('dgInfo').innerHTML=dragon(g,1);$('ovDg').innerHTML=dragon(g,0);
@@ -361,7 +363,7 @@ function qrFill(i){const a=i<0?{t:'',b:'',n:'',a:'',p:''}:S.qrList[i];$('qrEdTit
  $('qrT').value=a.t;$('qrB').value=a.b;$('qrN').value=a.n;$('qrA').value=a.a;$('qrP').value=a.p;qrLen()}
 $('qrNew').onclick=()=>{qrEd=-1;qrFill(-1);$('qrT').focus()}
 $('qrP').oninput=qrLen;$('vol').oninput=()=>$('volV').textContent=$('vol').value+'%';
-$('saveLook').onclick=()=>saveCfg({phS:$('phS').value,theme:$('theme').value,fx:$('fx').checked?1:0,lunar:$('lunar').checked?1:0,quote:$('quote').checked?1:0});
+$('saveLook').onclick=()=>saveCfg({pet:$('pet').value,phS:$('phS').value,theme:$('theme').value,fx:$('fx').checked?1:0,lunar:$('lunar').checked?1:0,quote:$('quote').checked?1:0});
 $('saveAmb').onclick=()=>saveCfg({idleM:$('idleM').value,ambS:$('ambS').value,ambE:$('ambE').value,vol:$('vol').value});
 $('saveLang').onclick=()=>saveCfg({lang:$('lang').value});
 $('saveStart').onclick=()=>saveCfg({start:$('start').value,idle:$('idle').value,qrOn:$('qrOn').checked?1:0});
@@ -520,6 +522,9 @@ static void webSendState() {
   d["wall"] = cfg.wallOn;
   d["phS"] = cfg.photoSec;
   d["fx"] = cfg.fxOn;
+  d["pet"] = cfg.pet;
+  JsonArray pets = d["pets"].to<JsonArray>();
+  for (int i = 0; i < PET_N; i++) pets.add(PET_NAMES[i][isVi() ? 0 : 1]);
   d["lunar"] = cfg.lunarOn;
   d["quote"] = cfg.quoteOn;
   d["idleM"] = cfg.idleMode;
@@ -658,6 +663,10 @@ static bool webApplyCfg() {
   }
   if (has("phS")) cfg.photoSec = constrain(web.arg("phS").toInt(), 3, 120);
   if (has("fx")) cfg.fxOn = web.arg("fx").toInt() != 0;
+  if (has("pet")) {
+    cfg.pet = constrain(web.arg("pet").toInt(), 0, PET_N);
+    petApply();
+  }
   if (has("lunar")) cfg.lunarOn = web.arg("lunar").toInt() != 0;
   if (has("quote")) cfg.quoteOn = web.arg("quote").toInt() != 0;
   if (has("idleM")) cfg.idleMode = web.arg("idleM").toInt() ? 1 : 0;

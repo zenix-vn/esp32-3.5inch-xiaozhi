@@ -46,6 +46,7 @@ struct AppCfg {
   uint8_t ledBri = 40;    // LED brightness 5..100 %
   bool ledTouch = false;  // LED blinks on every touch
   bool ledNight = true;   // only alarms and an empty battery at night / in do-not-disturb
+  uint8_t pet = 1;        // the animal on the home screen clock: 0 none, 1.. (tools/gen_pets.py: cat, dog, bunny, panda, penguin)
   int8_t dock[3] = {8, 14, 15};  // the home screen dock: app ids (clock, countdown, kids letters), -1 = empty
 };
 static AppCfg cfg;
@@ -124,6 +125,7 @@ static void cfgLoad() {
   cfg.ledBri = constrain(p.getUChar("ledB", 40), 5, 100);
   cfg.ledTouch = p.getBool("ledT", false);
   cfg.ledNight = p.getBool("ledN", true);
+  cfg.pet = p.getUChar("pet", 1);
   if (p.getBytesLength("dock") == 3) p.getBytes("dock", cfg.dock, 3);
   for (auto &d : cfg.dock)
     if (d < -1 || d >= APP_COUNT || (d >= 0 && !appInLauncher(d))) d = -1;
@@ -164,6 +166,7 @@ static void cfgSave() {
   p.putBool("ledT", cfg.ledTouch);
   p.putBool("ledN", cfg.ledNight);
   p.putBytes("dock", cfg.dock, 3);
+  p.putUChar("pet", cfg.pet);
   p.remove("vmk");  // settings of the removed Vietmap app
   p.remove("veh");
   p.remove("spw");

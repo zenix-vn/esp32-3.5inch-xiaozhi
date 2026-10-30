@@ -1,5 +1,5 @@
 #pragma once
-// Home V3: left, a big clock (a little cat pads around its corner) with the date, the lunar date, a line that takes
+// Home V3: left, a big clock (a little animal pads along its top) with the date, the lunar date, a line that takes
 // turns between the next alarm and the nearest countdown, and a dock of three apps (Settings > Home screen);
 // right, this month's calendar and the weather with the next hours. Weather effects drift over the background.
 // Tap the clock for the Clock app, the month for the Calendar, the weather card for the forecast.
@@ -7,6 +7,7 @@
 #include "lunar.h"
 #include "quotes.h"
 #include "almanac.h"
+#include "pets_img.h"
 
 static const char DEG[] = {(char)0xC2, (char)0xB0, 0};  // UTF-8 degree sign
 static const char *const DAYS_VI[] = {"Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"};
@@ -181,7 +182,7 @@ static int fxWanted() {
 
 // ---------- clock ----------
 // Hours and minutes in Bebas Neue (clock_font.c, tools/gen_font.swift); the colon blinks with the seconds.
-static const int CLOCK_X = 26, CLOCK_Y = 44;  // in the left column, leaving room for the cat above and to the left
+static const int CLOCK_X = 26, CLOCK_Y = 48;  // in the left column, leaving room for the pet above
 static const int CLOCK_W = 194;               // "00:00" in clock_font
 static int clockH = 80;                       // the font's line height = the digits' height
 static const char *const HOME_WD_VI[7] = {"T2", "T3", "T4", "T5", "T6", "T7", "CN"};  // Monday first
@@ -195,167 +196,83 @@ static void clockSet(const char *hh, const char *mm, bool colon) {
   if (lv_obj_get_style_text_opa(lblColon, 0) != o) lv_obj_set_style_text_opa(lblColon, o, 0);
 }
 
-// ---------- a little cat in the clock's corner ----------
-// A chubby orange kitten drawn with smooth shapes (circles, rounded boxes, triangles, an arc for the tail) in a 32 x 24
-// frame: u runs from tail to nose, v from ear tips to paws. It pads back and forth around the top-left corner of the
-// clock: along the left half of the top and down the upper half of the left side (sideways, paws on the digits).
-// Now and then it sits and blinks; at night it sleeps where it is.
-static const int CAT_U = 32, CAT_V = 24;
-static const int CAT_TOP = CLOCK_W / 2 - CAT_U;  // top run: from the middle of the clock to its corner
-static int catSideLen() { return max(4, clockH / 2 + 8 - CAT_U); }  // left run: down to about half the height
-static lv_obj_t *hCat;
-static int catS = 0, catDir = 1, catStep = 0;  // place on the path (0 = middle of the top), +1 = toward the corner
-static uint32_t catRestUntil = 0;                // millis() until which the cat sits
-static bool catEyesShut = false;
+// ---------- a little animal on the clock ----------
+// The pet chosen in Settings > Home screen (or on the web page) pads back and forth on the left half of the clock's
+// top edge: sprites made by tools/gen_pets.py from assets/*.png (walk, walk, rest, asleep, facing right; mirrored here
+// for walking left). Now and then it
+// lies down and blinks; at night it sleeps where it is. cfg.pet: 0 = none, 1..PET_N.
+static const int PET_RUN = CLOCK_W / 2 - PET_W + 4;  // path length: from the corner to the middle of the clock
+static const int PET_TICK_MS = 60;                  // one pixel per tick: ~17 px/s, smooth steps
+static lv_obj_t *hPet;
+static int petX = PET_RUN, petDir = -1;  // place on the path (0 = corner), +1 = walking right
+static uint32_t petRestUntil = 0;       // millis() until which it lies down
+static int petFrame = -1;
 
-struct CatPen {  // where and how the frame is drawn this time
-  lv_draw_ctx_t *ctx;
-  int x, y, k;  // box top-left on screen, quarter turns clockwise
-  bool flip;    // walking back: mirrored
-};
+// Walking left: the right-facing frame mirrored into RAM (8-bit indexed: a 1 KB palette, then one byte per pixel).
+// Two buffers taken in turn, so the image source always changes and LVGL redraws it.
+static uint8_t petMirBuf[2][1024 + PET_W * PET_H];
+static lv_img_dsc_t petMir[2];
+static int petMirNext = 0;
 
-static int catSide() { return catS <= CAT_TOP ? 0 : 3; }  // quarter turns: 0 on top, 3 on the left side
-
-static lv_point_t catPt(const CatPen &p, int u, int v) {
-  if (p.flip) u = CAT_U - u;
-  int x, y;
-  switch (p.k) {
-    case 0: x = u, y = v; break;
-    case 1: x = CAT_V - v, y = u; break;
-    case 2: x = CAT_U - u, y = CAT_V - v; break;
-    default: x = v, y = CAT_U - u; break;
+static void petShow(int frame) {  // frame 0..3, facing the way it walks
+  int f = frame + (petDir < 0 ? 4 : 0);
+  if (f == petFrame) return;
+  petFrame = f;
+  const lv_img_dsc_t *src = PET_FRAMES[cfg.pet - 1][frame];
+  if (petDir > 0) {
+    lv_img_set_src(hPet, src);
+    return;
   }
-  return {(lv_coord_t)(p.x + x), (lv_coord_t)(p.y + y)};
-}
-
-// box (u0, v0) - (u1, v1), corner radius r
-static void catBox(const CatPen &p, int u0, int v0, int u1, int v1, int r, uint32_t col, lv_opa_t opa = LV_OPA_COVER) {
-  lv_point_t a = catPt(p, u0, v0), b = catPt(p, u1, v1);
-  lv_draw_rect_dsc_t d;
-  lv_draw_rect_dsc_init(&d);
-  d.radius = r;
-  d.bg_color = lv_color_hex(col);
-  d.bg_opa = opa;
-  lv_area_t ar = {(lv_coord_t)min(a.x, b.x), (lv_coord_t)min(a.y, b.y), (lv_coord_t)(max(a.x, b.x) - 1), (lv_coord_t)(max(a.y, b.y) - 1)};
-  lv_draw_rect(p.ctx, &d, &ar);
-}
-static void catDot(const CatPen &p, int u, int v, int r, uint32_t col, lv_opa_t opa = LV_OPA_COVER) {
-  catBox(p, u - r, v - r, u + r, v + r, LV_RADIUS_CIRCLE, col, opa);
-}
-static void catTri(const CatPen &p, int u0, int v0, int u1, int v1, int u2, int v2, uint32_t col) {
-  lv_point_t pt[3] = {catPt(p, u0, v0), catPt(p, u1, v1), catPt(p, u2, v2)};
-  lv_draw_rect_dsc_t d;
-  lv_draw_rect_dsc_init(&d);
-  d.bg_color = lv_color_hex(col);
-  d.bg_opa = LV_OPA_COVER;
-  lv_draw_polygon(p.ctx, &d, pt, 3);
-}
-// arc around (u, v) from angle a0 to a1 (degrees, clockwise from +u as on screen)
-static void catArc(const CatPen &p, int u, int v, int r, int a0, int a1, int w, uint32_t col) {
-  if (p.flip) {  // mirror: angles reflect and swap ends
-    int t = 180 - a1;
-    a1 = 180 - a0;
-    a0 = t;
+  int k = petMirNext;
+  petMirNext ^= 1;
+  uint8_t *dst = petMirBuf[k];
+  memcpy(dst, src->data, 1024);
+  for (int y = 0; y < PET_H; y++) {
+    const uint8_t *row = src->data + 1024 + y * PET_W;
+    uint8_t *out = dst + 1024 + y * PET_W;
+    for (int x = 0; x < PET_W; x++) out[x] = row[PET_W - 1 - x];
   }
-  a0 = ((a0 + p.k * 90) % 360 + 360) % 360;
-  a1 = ((a1 + p.k * 90) % 360 + 360) % 360;
-  lv_draw_arc_dsc_t d;
-  lv_draw_arc_dsc_init(&d);
-  d.color = lv_color_hex(col);
-  d.width = w;
-  d.rounded = 1;
-  lv_point_t c = catPt(p, u, v);
-  lv_draw_arc(p.ctx, &d, &c, r, a0, a1);
+  petMir[k] = *src;
+  petMir[k].data = dst;
+  lv_img_cache_invalidate_src(&petMir[k]);
+  lv_img_set_src(hPet, &petMir[k]);
 }
 
-static void catDraw(lv_event_t *e) {
-  lv_area_t b;
-  lv_obj_get_coords(hCat, &b);
-  CatPen p = {lv_event_get_draw_ctx(e), b.x1, b.y1, catSide(), catDir > 0};  // toward the corner = facing left / down
-  const uint32_t FUR = 0xF7A34B, FUR2 = 0xE5852F, CREAM = 0xFFE7C7, PINK = 0xFF9DB4, INK = 0x3A2A33;
-  bool still = (int32_t)(catRestUntil - millis()) > 0 || catEyesShut;
-  int lift = still ? 0 : (catStep % 2 ? 2 : 0);  // the two leg pairs take turns
-  catArc(p, 7, 13, 5, 180, 360, 3, FUR2);                    // tail curling over the back
-  catBox(p, 10, 18, 14, 24 - (2 - lift), 2, FUR2);           // far legs
-  catBox(p, 19, 18, 23, 24 - lift, 2, FUR2);
-  catBox(p, 8, 10, 25, 21, 6, FUR);                          // body
-  catBox(p, 13, 15, 23, 21, 4, CREAM);                       // belly
-  catBox(p, 8, 18, 12, 24 - lift, 2, FUR);                   // near legs, cream paws
-  catBox(p, 17, 18, 21, 24 - (2 - lift), 2, FUR);
-  catBox(p, 8, 22 - lift, 12, 24 - lift, 1, CREAM);
-  catBox(p, 17, 20 + lift, 21, 22 + lift, 1, CREAM);
-  catTri(p, 17, 8, 18, 0, 23, 4, FUR);                       // ears
-  catTri(p, 25, 4, 30, 0, 31, 8, FUR);
-  catTri(p, 19, 6, 19, 2, 22, 4, PINK);
-  catTri(p, 27, 4, 29, 2, 29, 6, PINK);
-  catDot(p, 24, 11, 8, FUR);                                 // head
-  catBox(p, 23, 3, 25, 6, 1, FUR2);                          // forehead stripes
-  catBox(p, 26, 4, 27, 6, 1, FUR2);
-  catBox(p, 21, 12, 30, 18, 4, CREAM);                       // muzzle
-  if (catEyesShut) {                                         // eyes: closed lines or dots with a shine
-    catBox(p, 20, 10, 24, 11, 1, INK);
-    catBox(p, 26, 10, 30, 11, 1, INK);
-  } else {
-    catBox(p, 21, 8, 24, 12, 2, INK);
-    catBox(p, 27, 8, 30, 12, 2, INK);
-    catBox(p, 22, 9, 23, 10, 0, 0xFFFFFF);
-    catBox(p, 28, 9, 29, 10, 0, 0xFFFFFF);
+static void petApply() {  // after cfg.pet changed (Settings, web page)
+  if (!hPet) return;
+  petFrame = -1;
+  if (cfg.pet < 1 || cfg.pet > PET_N) {
+    lv_obj_add_flag(hPet, LV_OBJ_FLAG_HIDDEN);
+    return;
   }
-  catBox(p, 25, 12, 27, 14, 1, PINK);                        // nose
-  catDot(p, 20, 14, 2, PINK, LV_OPA_60);                     // blush
-  catDot(p, 31, 14, 2, PINK, LV_OPA_60);
+  lv_obj_clear_flag(hPet, LV_OBJ_FLAG_HIDDEN);
+  petShow(0);
 }
 
-// Box size and position in the left column for the current place on the path.
-static void catPlace() {
-  lv_obj_invalidate(hCat);
-  if (catSide() == 0) {
-    lv_obj_set_size(hCat, CAT_U, CAT_V);
-    lv_obj_set_pos(hCat, CLOCK_X + CAT_TOP - catS, CLOCK_Y - CAT_V);
-  } else {
-    lv_obj_set_size(hCat, CAT_V, CAT_U);
-    lv_obj_set_pos(hCat, CLOCK_X - CAT_V, CLOCK_Y + (catS - CAT_TOP));
-  }
-  lv_obj_invalidate(hCat);
-}
-
-static const int CAT_TICK_MS = 60;  // one pixel per tick: ~17 px/s, smooth steps (the screen is mostly on ambient anyway)
-static void catTick(lv_timer_t *) {
-  if (!hCat || !homeIsActive() || screenOff) return;
+static void petTick(lv_timer_t *) {
+  if (!hPet || cfg.pet < 1 || cfg.pet > PET_N || !homeIsActive() || screenOff) return;
   uint32_t now = millis();
-  if (themeIsNight()) {  // asleep: eyes shut, still
-    if (!catEyesShut) {
-      catEyesShut = true;
-      lv_obj_invalidate(hCat);
-    }
+  if (themeIsNight()) {  // asleep at night
+    petShow(3);
     return;
   }
-  if ((int32_t)(catRestUntil - now) > 0) {  // sitting: blinks for 150 ms every 2.5 s
-    bool shut = (catRestUntil - now) % 2500 < 150;
-    if (shut != catEyesShut) {
-      catEyesShut = shut;
-      lv_obj_invalidate(hCat);
-    }
+  if ((int32_t)(petRestUntil - now) > 0) {  // lying down: blinks for 150 ms every 2.5 s
+    petShow((petRestUntil - now) % 2500 < 150 ? 3 : 2);
     return;
-  }
-  if (catEyesShut) {
-    catEyesShut = false;
-    lv_obj_invalidate(hCat);
   }
   if (random(0, 300) == 0) {  // now and then (~every 18 s) a little rest
-    catRestUntil = now + random(2000, 5000);
-    lv_obj_invalidate(hCat);
+    petRestUntil = now + random(2500, 6000);
+    petShow(2);
     return;
   }
-  int end = CAT_TOP + catSideLen();
-  catS += catDir;
-  if (catS <= 0 || catS >= end) {  // an end of the path: turn round, sometimes after a rest
-    catS = catS <= 0 ? 0 : end;
-    catDir = -catDir;
-    if (random(0, 3) == 0) catRestUntil = now + random(1500, 4000);
+  petX += petDir;
+  if (petX <= 0 || petX >= PET_RUN) {  // an end of the path: turn round, sometimes after a rest
+    petX = petX <= 0 ? 0 : PET_RUN;
+    petDir = -petDir;
+    if (random(0, 3) == 0) petRestUntil = now + random(1500, 4000);
   }
-  catStep = catS / 4;  // the leg pairs swap every 4 px
-  catPlace();
+  lv_obj_set_x(hPet, CLOCK_X - 8 + petX);
+  petShow((petX / 4) % 2);  // the two walking frames take turns every 4 px
 }
 
 // ---------- month calendar ----------
@@ -632,12 +549,11 @@ static void buildHome(lv_obj_t *tile) {
 
   // left: greeting, clock, date (tap: Clock app)
   lv_obj_t *left = homeBox(tile, 0, SB_H + 4, 252, 268, [](lv_event_t *) { pageClock(); });
-  lblGreet = makeLabel(left, "", F_LABEL, lv_color_hex(0xC9D2F2));
-  lv_obj_set_width(lblGreet, 180);
+  lblGreet = makeLabel(left, "", F_LABEL, lv_color_hex(0xC9D2F2));  // top right: the pet walks on the left
+  lv_obj_set_width(lblGreet, 150);
   lv_label_set_long_mode(lblGreet, LV_LABEL_LONG_DOT);
-  lv_obj_set_pos(lblGreet, 12, 0);
-  lblAmPm = makeLabel(left, "", F_LABEL, C_ACCENT);
-  lv_obj_align(lblAmPm, LV_ALIGN_TOP_RIGHT, -16, 0);
+  lv_obj_set_style_text_align(lblGreet, LV_TEXT_ALIGN_RIGHT, 0);
+  lv_obj_align(lblGreet, LV_ALIGN_TOP_RIGHT, -12, 0);
   hClock = lv_obj_create(left);  // HH : MM in a row
   lv_obj_remove_style_all(hClock);
   lv_obj_set_size(hClock, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
@@ -649,6 +565,7 @@ static void buildHome(lv_obj_t *tile) {
   lblColon = makeLabel(hClock, ":", &clock_font, C_ACCENT);
   lv_obj_set_style_translate_y(lblColon, -11, 0);  // Bebas Neue's colon sits low (centre 27 px up vs 38 for digits)
   lblMM = makeLabel(hClock, "--", &clock_font, C_TEXT);
+  lblAmPm = makeLabel(hClock, "", F_LABEL, C_ACCENT);  // 12-hour clock: SA / CH right after the minutes, at the top
   clockH = lv_font_get_line_height(&clock_font);
   int y = CLOCK_Y + clockH + 8;  // under the clock: date, lunar date, alarm / countdown, then the dock
   lblDate = makeLabel(left, "", F_TITLE, C_TEXT);
@@ -667,12 +584,11 @@ static void buildHome(lv_obj_t *tile) {
   hDock = homePanel(left, 12, 268 - 66, 228, 66);  // bottom aligned with the weather card on the right
   lv_obj_clear_flag(hDock, LV_OBJ_FLAG_CLICKABLE);
   homeDockBuild();
-  hCat = lv_obj_create(left);  // last child: walks over the clock
-  lv_obj_remove_style_all(hCat);
-  lv_obj_clear_flag(hCat, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_add_event_cb(hCat, catDraw, LV_EVENT_DRAW_MAIN, nullptr);
-  catPlace();
-  lv_timer_create(catTick, CAT_TICK_MS, nullptr);
+  hPet = lv_img_create(left);  // last child: walks over the clock, paws on the digits
+  lv_obj_clear_flag(hPet, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_set_pos(hPet, CLOCK_X - 8 + petX, CLOCK_Y - PET_H + 1);
+  petApply();
+  lv_timer_create(petTick, PET_TICK_MS, nullptr);
 
 
   // right: this month (tap: Calendar)
