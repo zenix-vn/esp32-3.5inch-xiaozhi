@@ -1,16 +1,22 @@
 #pragma once
-// Ambient screen: a calm, information-rich clock face shown after the idle time, on the nightly schedule or
-// from the control center. Left: big clock, date, lunar date. Right: weather now, today's high/low and the
-// next hours. Bottom: the sleeping dragon and its state, alarm / timer, offline warning, quote of the day.
-// Redraws only when the minute changes; the whole face drifts a few pixels every minute (no burn-in) and the
-// backlight is dimmed (more at night). Any touch goes back to the previous screen.
+// Ambient screen: a calm, minimal clock face shown after the idle time, on the nightly schedule or from the control
+// center. Black background; the date and the lunar date on top, a big thin clock (Outfit ExtraLight, ambient_font.c)
+// in the middle, and three rounded chips underneath: weather, the next alarm (or a running timer) and the nearest
+// countdown. At night everything turns a warm amber. Redraws only when the minute changes; the whole face drifts a
+// few pixels every minute (no burn-in) and the backlight is dimmed (more at night). Any touch goes back.
 // Included by main.cpp after home.h and clock_app.h.
 
 static lv_obj_t *ambScr = nullptr, *ambPrev = nullptr, *ambBox;
 static lv_obj_t *ambTime, *ambAmPm, *ambDate, *ambLunar;
-static lv_obj_t *ambWxIcon, *ambTemp, *ambDesc, *ambHiLo, *ambHr[3], *ambHt[3];
-static lv_obj_t *ambPet, *ambPetLbl, *ambInfo, *ambQuote;
-static int ambMinute = -1, ambWxKey = -1, ambPetSig = -1;
+static lv_obj_t *ambChip[3], *ambChipIcon[3], *ambChipVal[3], *ambChipCap[3];
+static int ambMinute = -1, ambWxKey = -1, ambNight = -1;
+
+struct AmbTint {
+  uint32_t text, sub, accent, chipBg, chipLine;
+};
+static const AmbTint AMB_DAY = {0xF2F5FF, 0x8A93B8, 0x38E1FF, 0x0E1120, 0x1F2538};
+static const AmbTint AMB_NIGHT = {0xFFB27A, 0x9A6B4A, 0xFF7A3D, 0x140C07, 0x2C1B10};  // easy on the eyes in the dark
+static const AmbTint &ambTint() { return ambNight == 1 ? AMB_NIGHT : AMB_DAY; }
 
 static void ambDim() {
   int h = themeSlotNow() == 3 ? 8 : 15;  // percent of the normal brightness; darker at night
@@ -30,86 +36,87 @@ static void ambientExit() {
   lv_disp_trig_activity(nullptr);
 }
 
-static void ambRefreshPet() {
-  if (!dgOk) return;
-  int sig = dg.stage | (dg.sick << 4) | ((dg.stage == ST_EGG && dg.energy < 30) << 5);
-  if (sig != ambPetSig) {
-    ambPetSig = sig;
-    lv_obj_clean(ambPet);
-    if (dg.stage == ST_EGG) dgDrawEgg(ambPet, 120, 92, 2, false);
-    else dgDrawDragon(ambPet, dg.stage, true, dg.sick, 1, 120, 92, 2, false);
-  }
-  const char *al = dgAlert();
-  String n = dgName();
-  if (al) {
-    setText(ambPetLbl, al);
-    lv_obj_set_style_text_color(ambPetLbl, lv_color_hex(0xFFB84A), 0);
-  } else {
-    if (dg.stage == ST_EGG) setText(ambPetLbl, DL("Quả trứng đang được ấp ấm", "The egg is keeping warm"));
-    else setTextFmt(ambPetLbl, isVi() ? "%s đang ngủ ngon" : "%s is fast asleep", n.c_str());
-    lv_obj_set_style_text_color(ambPetLbl, lv_color_hex(0xB7C3EE), 0);
+static void ambApplyTint() {
+  const AmbTint &c = ambTint();
+  lv_obj_set_style_text_color(ambTime, lv_color_hex(c.text), 0);
+  lv_obj_set_style_text_color(ambAmPm, lv_color_hex(c.accent), 0);
+  lv_obj_set_style_text_color(ambDate, lv_color_hex(c.text), 0);
+  lv_obj_set_style_text_color(ambLunar, lv_color_hex(c.sub), 0);
+  for (int i = 0; i < 3; i++) {
+    lv_obj_set_style_bg_color(ambChip[i], lv_color_hex(c.chipBg), 0);
+    lv_obj_set_style_border_color(ambChip[i], lv_color_hex(c.chipLine), 0);
+    lv_obj_set_style_text_color(ambChipVal[i], lv_color_hex(c.text), 0);
+    lv_obj_set_style_text_color(ambChipCap[i], lv_color_hex(c.sub), 0);
+    if (i) lv_obj_set_style_text_color(ambChipIcon[i], lv_color_hex(c.accent), 0);
   }
 }
 
-static void ambRefreshInfo(const struct tm *t) {
-  String s;
-  int next = alarmNext();
-  if (next >= 0) {  // the alarm that rings next
-    char tm[12], b[48];
-    alarmTimeText(alarms[next].h, alarms[next].m, tm, sizeof(tm));
-    snprintf(b, sizeof(b), "%s  %s %s", LV_SYMBOL_BELL, DL("Báo thức", "Alarm"), tm);
-    s += b;
-  }
-  if (tmrEnd && t) {  // running timer: when it ends
-    time_t end = time(nullptr) + (tmrEnd - millis()) / 1000;
-    struct tm e;
-    localtime_r(&end, &e);
-    char b[48];
-    snprintf(b, sizeof(b), isVi() ? LV_SYMBOL_LOOP "  Hẹn giờ xong lúc %02d:%02d" : LV_SYMBOL_LOOP "  Timer ends %02d:%02d", e.tm_hour, e.tm_min);
-    if (s.length()) s += "     ";
-    s += b;
-  }
-  if (!wifiConnected()) {
-    if (s.length()) s += "     ";
-    s += LV_SYMBOL_WARNING;
-    s += DL("  Mất Wi-Fi", "  Wi-Fi offline");
-  }
-  if (!s.length()) s = DL("Chạm vào màn hình để quay lại", "Touch the screen to go back");
-  setText(ambInfo, s.c_str());
+// chip i: value (one line, bold) over a caption
+static void ambChipSet(int i, const char *val, const char *cap) {
+  setText(ambChipVal[i], val);
+  setText(ambChipCap[i], cap);
 }
 
 static void ambRefreshWeather() {
   WeatherData w = weatherGet();
   if (!w.valid) {
-    setText(ambTemp, "--");
-    setText(ambDesc, tr(wifiConnected() ? "Loading weather..." : "Waiting for network"));
-    setText(ambHiLo, "");
-    for (int i = 0; i < 3; i++) {
-      setText(ambHr[i], "");
-      setText(ambHt[i], "");
-    }
+    ambChipSet(0, "--", tr(wifiConnected() ? "Loading weather..." : "Waiting for network"));
     return;
   }
   int key = iconKindFor(w.code, w.isDay);
   if (key != ambWxKey) {
-    drawWxIcon(ambWxIcon, key);
+    drawWxIcon(ambChipIcon[0], key);
     ambWxKey = key;
   }
-  setTextFmt(ambTemp, "%d%s", tempOut(w.temp), DEG);
-  setTextFmt(ambDesc, "%s  -  %s", tr(weatherText(w.code)), w.city);
-  if (w.nDays) {
-    const WxDay &d = w.days[0];
-    char rain[24] = "";
-    if (d.pop >= 30) snprintf(rain, sizeof(rain), isVi() ? "   mưa %d%%" : "   rain %d%%", d.pop);
-    setTextFmt(ambHiLo, LV_SYMBOL_UP " %d%s   " LV_SYMBOL_DOWN " %d%s%s", tempOut(d.tmax), DEG, tempOut(d.tmin), DEG, rain);
+  char v[16], c[40];
+  snprintf(v, sizeof(v), "%d%s", tempOut(w.temp), DEG);
+  if (w.nDays) snprintf(c, sizeof(c), "%d%s / %d%s", tempOut(w.days[0].tmax), DEG, tempOut(w.days[0].tmin), DEG);
+  else strlcpy(c, tr(weatherText(w.code)), sizeof(c));
+  ambChipSet(0, v, c);
+}
+
+static void ambRefreshAlarm() {
+  char v[24], c[40];
+  if (tmrEnd) {  // a running timer comes first: when it ends
+    time_t end = time(nullptr) + (tmrEnd - millis()) / 1000;
+    struct tm e;
+    localtime_r(&end, &e);
+    snprintf(v, sizeof(v), "%02d:%02d", e.tm_hour, e.tm_min);
+    setText(ambChipIcon[1], LV_SYMBOL_LOOP);
+    ambChipSet(1, v, DL("Hẹn giờ xong", "Timer ends"));
+    return;
   }
-  for (int i = 0; i < 3; i++) {
-    int idx = 2 + i * 2;
-    if (idx < w.nHours) {
-      setTextFmt(ambHr[i], "%dh", w.hours[idx].hour);
-      setTextFmt(ambHt[i], "%d%s", tempOut(w.hours[idx].temp), DEG);
-    }
+  setText(ambChipIcon[1], LV_SYMBOL_BELL);
+  int away = 0, next = alarmNext(&away);
+  if (next < 0) {
+    ambChipSet(1, "--:--", DL("Không báo thức", "No alarm"));
+    return;
   }
+  alarmTimeText(alarms[next].h, alarms[next].m, v, sizeof(v));
+  alarmAwayText(away, c, sizeof(c));
+  ambChipSet(1, v, c);
+}
+
+static void ambRefreshCountdown() {
+  int ev[12];
+  int n = cdHomeList(ev);
+  if (!wifiConnected()) {  // being offline matters more: the time and weather stop updating
+    setText(ambChipIcon[2], LV_SYMBOL_WARNING);
+    ambChipSet(2, "Wi-Fi", DL("Mất kết nối", "Offline"));
+    return;
+  }
+  if (!n) {
+    setText(ambChipIcon[2], LV_SYMBOL_WIFI);
+    ambChipSet(2, "Wi-Fi", DL("Đã kết nối", "Connected"));
+    return;
+  }
+  long days = cdDaysLeft(ev[0]);
+  char v[24];
+  if (days == 0) strlcpy(v, DL("Hôm nay", "Today"), sizeof(v));
+  else snprintf(v, sizeof(v), isVi() ? "%ld ngày" : "%ld days", days);
+  setText(ambChipIcon[2], LV_SYMBOL_LIST);
+  lv_obj_set_style_text_color(ambChipIcon[2], lv_color_hex(ambNight == 1 ? 0xFF9A6A : 0xFF9BC8), 0);  // pink, as on home
+  ambChipSet(2, v, cdName(ev[0]));
 }
 
 static void ambientRefresh(lv_timer_t *) {
@@ -119,30 +126,33 @@ static void ambientRefresh(lv_timer_t *) {
   int minute = ok ? t.tm_hour * 60 + t.tm_min : -2;
   if (minute == ambMinute) return;  // nothing visible changes within a minute
   ambMinute = minute;
+  int night = themeSlotNow() == 3 ? 1 : 0;
+  if (night != ambNight) {
+    ambNight = night;
+    ambApplyTint();
+  }
+  char acc[8];
+  snprintf(acc, sizeof(acc), "%06X", (unsigned)ambTint().accent);
   if (ok) {
-    if (cfg.clock24) {
-      setTextFmt(ambTime, "%02d:%02d", t.tm_hour, t.tm_min);
-      setText(ambAmPm, "");
-    } else {
-      setTextFmt(ambTime, "%d:%02d", t.tm_hour % 12 ? t.tm_hour % 12 : 12, t.tm_min);
-      setText(ambAmPm, isVi() ? (t.tm_hour < 12 ? "SA" : "CH") : (t.tm_hour < 12 ? "AM" : "PM"));
-      lv_obj_align_to(ambAmPm, ambTime, LV_ALIGN_OUT_RIGHT_BOTTOM, 6, -18);
-    }
+    int h = cfg.clock24 ? t.tm_hour : (t.tm_hour % 12 ? t.tm_hour % 12 : 12);
+    setTextFmt(ambTime, cfg.clock24 ? "%02d#%s :#%02d" : "%d#%s :#%02d", h, acc, t.tm_min);  // the colon in the accent colour
+    setText(ambAmPm, cfg.clock24 ? "" : isVi() ? (t.tm_hour < 12 ? "SA" : "CH") : (t.tm_hour < 12 ? "AM" : "PM"));
     if (isVi()) setTextFmt(ambDate, "%s, %d tháng %d", DAYS_VI[t.tm_wday], t.tm_mday, t.tm_mon + 1);
     else setTextFmt(ambDate, "%s, %d %s", DAYS_EN[t.tm_wday], t.tm_mday, MONTHS_EN[t.tm_mon]);
-    setText(ambLunar, lunarText(t.tm_mday, t.tm_mon + 1, t.tm_year + 1900).c_str());
-    setText(ambQuote, quoteOfDay(t.tm_yday));
+    setText(ambLunar, cfg.lunarOn ? lunarText(t.tm_mday, t.tm_mon + 1, t.tm_year + 1900).c_str() : "");
     int dx = (minute * 7) % 13 - 6, dy = (minute * 5) % 11 - 5;  // drift
     lv_obj_set_pos(ambBox, dx, dy);
   } else {
-    setText(ambTime, "--:--");
+    setTextFmt(ambTime, "--#%s :#--", acc);
     setText(ambAmPm, "");
     setText(ambDate, tr("Syncing time..."));
     setText(ambLunar, "");
   }
+  lv_obj_align(ambTime, LV_ALIGN_TOP_MID, 0, 80);
+  lv_obj_align_to(ambAmPm, ambTime, LV_ALIGN_OUT_RIGHT_TOP, 6, 8);
   ambRefreshWeather();
-  ambRefreshPet();
-  ambRefreshInfo(ok ? &t : nullptr);
+  ambRefreshAlarm();
+  ambRefreshCountdown();
   ambDim();
 }
 
@@ -150,7 +160,7 @@ static void ambientShow() {
   if (ambOn) return;
   ambOn = true;
   ambPrev = lv_scr_act();
-  ambMinute = ambWxKey = ambPetSig = -1;
+  ambMinute = ambWxKey = ambNight = -1;
   ambScr = lv_obj_create(nullptr);
   lv_obj_remove_style_all(ambScr);
   lv_obj_set_style_bg_color(ambScr, lv_color_hex(0x000000), 0);
@@ -163,63 +173,50 @@ static void ambientShow() {
   lv_obj_set_size(ambBox, 480, 320);
   lv_obj_clear_flag(ambBox, LV_OBJ_FLAG_CLICKABLE);
 
-  // left: clock, date, lunar date
-  ambTime = makeLabel(ambBox, "--:--", &vi_clock_84, lv_color_hex(0xEEF2FF));
-  lv_obj_set_pos(ambTime, 18, 34);
-  ambAmPm = makeLabel(ambBox, "", F_TITLE, lv_color_hex(0x8FB4FF));
-  lv_obj_set_pos(ambAmPm, 250, 70);
-  ambDate = makeLabel(ambBox, "", F_TITLE, lv_color_hex(0x8FB4FF));
-  lv_obj_set_pos(ambDate, 26, 112);
-  ambLunar = makeLabel(ambBox, "", F_BODY, lv_color_hex(0xC2B2F5));
-  lv_obj_set_pos(ambLunar, 26, 140);
+  // top: date and lunar date, centred
+  ambDate = makeLabel(ambBox, "", F_TITLE, lv_color_hex(0xF2F5FF));
+  lv_obj_set_width(ambDate, 440);
+  lv_obj_set_style_text_align(ambDate, LV_TEXT_ALIGN_CENTER, 0);
+  lv_obj_set_style_text_letter_space(ambDate, 1, 0);
+  lv_obj_align(ambDate, LV_ALIGN_TOP_MID, 0, 24);
+  ambLunar = makeLabel(ambBox, "", F_BODY, lv_color_hex(0x8A93B8));
+  lv_obj_set_width(ambLunar, 440);
+  lv_obj_set_style_text_align(ambLunar, LV_TEXT_ALIGN_CENTER, 0);
+  lv_obj_align(ambLunar, LV_ALIGN_TOP_MID, 0, 52);
 
-  // right: weather
-  ambWxIcon = wxIconBox(ambBox, WK_NONE);
-  lv_obj_set_pos(ambWxIcon, 306, 22);
-  ambTemp = makeLabel(ambBox, "--", F_HEADING, lv_color_hex(0xEEF2FF));
-  lv_obj_set_pos(ambTemp, 358, 24);
-  ambDesc = makeLabel(ambBox, "", F_BODY, lv_color_hex(0xB7C3EE));
-  lv_obj_set_width(ambDesc, 166);
-  lv_label_set_long_mode(ambDesc, LV_LABEL_LONG_DOT);
-  lv_obj_set_pos(ambDesc, 306, 74);
-  ambHiLo = makeLabel(ambBox, "", F_CAPTION, lv_color_hex(0x8C96C0));
-  lv_obj_set_width(ambHiLo, 166);
-  lv_label_set_long_mode(ambHiLo, LV_LABEL_LONG_DOT);
-  lv_obj_set_pos(ambHiLo, 306, 96);
+  // middle: the clock
+  ambTime = makeLabel(ambBox, "--:--", &ambient_font, lv_color_hex(0xF2F5FF));
+  lv_label_set_recolor(ambTime, true);
+  ambAmPm = makeLabel(ambBox, "", F_TITLE, lv_color_hex(0x38E1FF));
+
+  // bottom: three chips
   for (int i = 0; i < 3; i++) {
-    ambHr[i] = makeLabel(ambBox, "", F_CAPTION, lv_color_hex(0x8C96C0));
-    lv_obj_set_pos(ambHr[i], 306 + i * 56, 130);
-    ambHt[i] = makeLabel(ambBox, "", F_LABEL, lv_color_hex(0xDDE3FF));
-    lv_obj_set_pos(ambHt[i], 306 + i * 56, 146);
-  }
-
-  shape(ambBox, 24, 180, 432, 1, 0x252C4A, 0);  // divider
-
-  // bottom: dragon, its state, alarm / timer, quote
-  ambPet = lv_obj_create(ambBox);
-  lv_obj_remove_style_all(ambPet);
-  lv_obj_set_size(ambPet, 120, 92);
-  lv_obj_set_pos(ambPet, 14, 196);
-  lv_obj_clear_flag(ambPet, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_set_style_opa(ambPet, LV_OPA_80, 0);
-  ambPetLbl = makeLabel(ambBox, "", F_LABEL, lv_color_hex(0xB7C3EE));
-  lv_obj_set_width(ambPetLbl, 320);
-  lv_label_set_long_mode(ambPetLbl, LV_LABEL_LONG_DOT);
-  lv_obj_set_pos(ambPetLbl, 146, 196);
-  ambInfo = makeLabel(ambBox, "", F_BODY, lv_color_hex(0x7FD8C4));
-  lv_obj_set_width(ambInfo, 320);
-  lv_label_set_long_mode(ambInfo, LV_LABEL_LONG_DOT);
-  lv_obj_set_pos(ambInfo, 146, 222);
-  ambQuote = makeLabel(ambBox, "", F_BODY, lv_color_hex(0x7F89B5));
-  lv_obj_set_width(ambQuote, 320);
-  lv_label_set_long_mode(ambQuote, LV_LABEL_LONG_WRAP);
-  lv_obj_set_pos(ambQuote, 146, 248);
-  if (!dgOk) {  // no dragon: the quote takes the whole bottom row
-    lv_obj_add_flag(ambPetLbl, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_set_pos(ambInfo, 26, 196);
-    lv_obj_set_pos(ambQuote, 26, 228);
-    lv_obj_set_width(ambInfo, 430);
-    lv_obj_set_width(ambQuote, 430);
+    lv_obj_t *c = lv_obj_create(ambBox);
+    lv_obj_remove_style_all(c);
+    lv_obj_set_size(c, 142, 58);
+    lv_obj_set_pos(c, 18 + i * 150, 238);
+    lv_obj_set_style_radius(c, 20, 0);
+    lv_obj_set_style_bg_opa(c, LV_OPA_COVER, 0);
+    lv_obj_set_style_border_width(c, 1, 0);
+    lv_obj_clear_flag(c, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+    ambChip[i] = c;
+    if (i == 0) {
+      ambChipIcon[0] = wxIconBox(c, WK_NONE);
+      lv_obj_set_pos(ambChipIcon[0], 6, 7);
+    } else {
+      ambChipIcon[i] = makeLabel(c, LV_SYMBOL_BELL, F_TITLE, lv_color_hex(0x38E1FF));
+      lv_obj_set_width(ambChipIcon[i], 44);
+      lv_obj_set_style_text_align(ambChipIcon[i], LV_TEXT_ALIGN_CENTER, 0);
+      lv_obj_align(ambChipIcon[i], LV_ALIGN_LEFT_MID, 6, 0);
+    }
+    ambChipVal[i] = makeLabel(c, "", F_LABEL, lv_color_hex(0xF2F5FF));
+    lv_obj_set_size(ambChipVal[i], 86, 20);
+    lv_label_set_long_mode(ambChipVal[i], LV_LABEL_LONG_DOT);
+    lv_obj_set_pos(ambChipVal[i], 52, 9);
+    ambChipCap[i] = makeLabel(c, "", F_CAPTION, lv_color_hex(0x8A93B8));
+    lv_obj_set_size(ambChipCap[i], 86, 16);
+    lv_label_set_long_mode(ambChipCap[i], LV_LABEL_LONG_DOT);
+    lv_obj_set_pos(ambChipCap[i], 52, 32);
   }
 
   pageTimer(ambScr, ambientRefresh, 2000);

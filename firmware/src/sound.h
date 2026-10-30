@@ -13,6 +13,7 @@ static const char *sndFileFor(const struct Note *seq);
 struct Note {
   uint16_t hz, ms;  // hz 0 = rest
 };
+static void ledForSound(const Note *seq);  // led.h: a blink that matches the sound
 static const Note *sndSeq = nullptr;
 static int sndLen = 0, sndPos = 0, sndRepeat = 0;
 static uint32_t sndNext = 0;
@@ -29,7 +30,7 @@ static void soundTone(uint16_t hz) {
     return;
   }
   ledcWriteTone(SPK_CH, hz);
-  ledcWrite(SPK_CH, 2 + (uint32_t)cfg.volume * 300 / 100);  // duty sets loudness (511 = 50% = loudest)
+  ledcWrite(SPK_CH, 2 + (uint32_t)cfg.volume * 509 / 100);  // duty sets loudness (511 = 50% = loudest)
 }
 
 static void soundStop() {
@@ -41,6 +42,7 @@ static void soundStop() {
 
 // repeat: number of extra plays, -1 = until soundStop()
 static void soundPlay(const Note *seq, int len, int repeat = 0, bool evenInDnd = false) {
+  ledForSound(seq);  // the light shows it even when the sound is muted
   if (cfg.volume == 0 || (cfg.dnd && !evenInDnd)) return;
   const char *file = sndFileFor(seq);
   if (file && audioFx(file, repeat < 0)) {  // a recording on the card replaces the beeps
@@ -97,6 +99,7 @@ static const char *sndFileFor(const Note *seq) {
 
 // A named game / interface sound with a beep fallback for when the card has no such file.
 static void sfx(const char *name, const Note *fallback, int fallbackLen, bool evenInDnd = false) {
+  ledForSound(fallback);
   if (cfg.volume == 0 || (cfg.dnd && !evenInDnd)) return;
   if (audioFx(name, false)) return;
   soundPlay(fallback, fallbackLen, 0, evenInDnd);

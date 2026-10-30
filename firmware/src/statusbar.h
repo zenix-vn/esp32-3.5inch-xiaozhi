@@ -2,7 +2,7 @@
 // V2 shell: status bar on every screen (top layer), toasts, and the pull-down control center.
 // Included by main.cpp after dragon.h (reads the dragon's needs for the alert chip).
 
-static lv_obj_t *sbBar, *sbTime, *sbDragon, *sbAi, *sbWifi[4], *sbWifiBox;
+static lv_obj_t *sbBar, *sbTime, *sbDragon, *sbWifi[4], *sbWifiBox;
 static lv_obj_t *sbBat, *sbBatFill, *sbBatPct;
 static lv_obj_t *chgOv = nullptr;
 static lv_obj_t *ccOv = nullptr, *ccPanel = nullptr, *ccDndBtn = nullptr;
@@ -14,6 +14,8 @@ static bool ambOn = false;      // ambient screen showing (ambient.h)
 static void screenSleepNow();   // main.cpp
 static bool homeIsActive();     // main.cpp: main screen showing the home tile
 static void soundPlay(const Note *seq, int len, int repeat, bool evenInDnd);
+static void ledForToast(lv_color_t col);                // led.h
+static void ledAlert(uint32_t rgb, int blinks, int ms);  // led.h
 
 // ---------- dragon alert ----------
 static const char *dgAlert() {
@@ -32,6 +34,7 @@ static const char *dgAlert() {
 static void toastAnimY(void *o, int32_t v) { lv_obj_set_y((lv_obj_t *)o, v); }
 static void uiToast(const char *text, lv_color_t col = C_ACCENT) {
   if (toastObj) lv_obj_del(toastObj);
+  ledForToast(col);
   toastObj = lv_obj_create(lv_layer_top());
   lv_obj_remove_style_all(toastObj);
   lv_obj_set_size(toastObj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
@@ -309,6 +312,7 @@ static void batRefresh() {
   char buf[48];
   if (ev == BAT_EV_PLUG) {
     chgShow();
+    ledAlert(0x20FF40, 2, 150);
     soundPlay(SND(SND_NOTIFY), 0, false);
   } else if (ev == BAT_EV_UNPLUG) {
     chgClose();
@@ -349,8 +353,7 @@ static void statusbarLayout() {
     lv_obj_align_to(sbBatPct, sbBat, LV_ALIGN_OUT_LEFT_MID, -4, 0);
     lv_obj_align_to(sbWifiBox, sbBatPct, LV_ALIGN_OUT_LEFT_MID, -10, 0);
   }
-  lv_obj_align_to(sbAi, sbWifiBox, LV_ALIGN_OUT_LEFT_MID, -8, 0);
-  lv_obj_align_to(sbDragon, sbAi, LV_ALIGN_OUT_LEFT_MID, -14, 0);
+  lv_obj_align_to(sbDragon, sbWifiBox, LV_ALIGN_OUT_LEFT_MID, -12, 0);
 }
 
 // ---------- status bar ----------
@@ -378,9 +381,6 @@ static void statusbarRefresh(lv_timer_t * = nullptr) {
   } else {
     lv_obj_add_flag(sbDragon, LV_OBJ_FLAG_HIDDEN);
   }
-  bool ai = xiaozhiState() == XZ_ACTIVATED;
-  lv_obj_set_style_text_color(sbAi, ai ? C_OK : C_MUTED, 0);
-  setText(sbAi, cfg.dnd ? LV_SYMBOL_MUTE "  AI" : "AI");
   bool on = wifiConnected();
   int rssi = on ? WiFi.RSSI() : -100;
   int level = !on ? 0 : rssi > -55 ? 4 : rssi > -65 ? 3 : rssi > -75 ? 2 : 1;
@@ -418,7 +418,6 @@ static void statusbarBegin() {
   for (int i = 0; i < 4; i++) sbWifi[i] = shape(sbWifiBox, i * 5 + 2, 13 - (4 + i * 3), 3, 4 + i * 3, 0xFFFFFF, 1);
   sbBat = batIcon(sbBar, 22, 11, 1, &sbBatFill);
   sbBatPct = makeLabel(sbBar, "", F_CAPTION, C_TEXT);
-  sbAi = makeLabel(sbBar, "AI", F_CAPTION, C_MUTED);
   sbDragon = makeLabel(sbBar, "", F_CAPTION, C_WARN);
   lv_obj_set_style_text_align(sbDragon, LV_TEXT_ALIGN_RIGHT, 0);
   lv_obj_set_width(sbDragon, 140);

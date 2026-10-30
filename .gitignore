@@ -13,3 +13,6 @@ libs/xiaozhi-esp32/
 
 # generated sound files (python tools/gen_sounds.py)
 tools/sounds/
+
+# generated letter voices (python3 tools/gen_letter_voice.py)
+tools/letters/

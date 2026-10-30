@@ -1,4 +1,5 @@
 #pragma once
+#include "hd_img.h"
 // Games hub with three games for children made to be played for months:
 //
 //  * "Lật hình" (memory match): 30 levels from 3 to 12 pairs. The cards show the pixel-art dragons and treats of the

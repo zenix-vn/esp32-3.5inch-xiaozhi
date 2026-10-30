@@ -591,8 +591,6 @@ static void pageAbout() {
   infoRow(c, "Wi-Fi", wifiConnected() ? WiFi.SSID().c_str() : "Not connected", wifiConnected() ? C_OK : C_WARN);
   infoRow(c, "IP address", wifiConnected() ? WiFi.localIP().toString().c_str() : "-");
   infoRow(c, "MAC", WiFi.macAddress().c_str());
-  infoRow(c, "Xiaozhi", xiaozhiState() == XZ_ACTIVATED ? "Connected" : xiaozhiMessage(),
-          xiaozhiState() == XZ_ACTIVATED ? C_OK : C_WARN);
 
   sectionLabel(c, "SYSTEM");
   aboutUp = infoRow(c, "Uptime", "");

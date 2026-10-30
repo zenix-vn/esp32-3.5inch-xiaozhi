@@ -9,22 +9,33 @@
 //
 // Included by main.cpp after sdOk exists and before pages.h.
 #include <driver/i2s.h>
+#include <driver/dac.h>
+#include <driver/rtc_io.h>
 
 static const int A_RATE = 16000;
 static const int A_BLOCK = 512;  // samples per I2S write = 32 ms
 
 // ---------- which files exist ----------
+// The first 40 names are kept in RAM (the interface and game sounds); past that (the kids' letter voices make ~150
+// more) audioHas() asks the card itself.
 static char audioNames[40][20];
 static int audioNameCount = 0;
+static bool audioMore = false;  // /sounds holds more files than the list
 static volatile bool audioDirty = true;
 
 static void audioRescan() {
   audioNameCount = 0;
+  audioMore = false;
   audioDirty = false;
   if (!sdOk) return;
   File dir = SD.open("/sounds");
   if (!dir || !dir.isDirectory()) return;
-  for (File f = dir.openNextFile(); f && audioNameCount < 40; f = dir.openNextFile()) {
+  for (File f = dir.openNextFile(); f; f = dir.openNextFile()) {
+    if (audioNameCount >= 40) {
+      audioMore = true;
+      f.close();
+      break;
+    }
     String n = f.name();
     int sl = n.lastIndexOf('/');
     if (sl >= 0) n = n.substring(sl + 1);
@@ -43,7 +54,10 @@ static bool audioHas(const char *name) {
   if (audioDirty) audioRescan();
   for (int i = 0; i < audioNameCount; i++)
     if (strcasecmp(audioNames[i], name) == 0) return true;
-  return false;
+  if (!audioMore || !sdOk) return false;
+  char path[40];
+  snprintf(path, sizeof(path), "/sounds/%s.wav", name);
+  return SD.exists(path);
 }
 
 // ---------- one WAV stream ----------
@@ -242,10 +256,24 @@ static bool audioDriverUp(bool up) {
   } else {
     i2s_driver_uninstall(I2S_NUM_0);
     Serial.println("AUDIO down");
+    // Hand the pin back to the digital side: left in DAC / RTC mode it floats, and the amplifier hums and whines.
+    i2s_set_dac_mode(I2S_DAC_CHANNEL_DISABLE);
+    dac_output_disable(DAC_CHANNEL_2);
+    rtc_gpio_deinit((gpio_num_t)PIN_SPK);
+    pinMode(PIN_SPK, OUTPUT);
+    digitalWrite(PIN_SPK, LOW);
     ledcAttachPin(PIN_SPK, SPK_CH);
     ledcWrite(SPK_CH, 0);
   }
   return true;
+}
+
+// Around the DC level: linear up to +-96, then compressed 4:1 up to the 8-bit DAC's limit, so a loud sound
+// flattens a little instead of cracking.
+static inline int softClip(int s) {
+  if (s > 96) return 96 + (s - 96) / 4;
+  if (s < -96) return -96 + (s + 96) / 4;
+  return s;
 }
 
 static void audioTask(void *) {
@@ -330,7 +358,7 @@ static void audioTask(void *) {
         }
       }
     }
-    int vol = cfg.volume * 256 / 100;
+    int vol = cfg.volume * 410 / 100;  // 100 % = 1.6x: the files leave headroom, and softClip() rounds off the peaks
     int gb = vol * bgFade / 256 * 3 / 4, gf = vol;  // background a little under the effects
     if (radio) {
       uint32_t avail = aRadioHead - aRadioTail;
@@ -349,7 +377,7 @@ static void audioTask(void *) {
       if (bg.on) s += (chNext(bg) - 128) * gb >> 8;
       if (fx.on) s += (chNext(fx) - 128) * gf >> 8;
       if (dc < 128 && (i & 3) == 0) dc++;
-      s += dc;
+      s = softClip(s) + dc;
       s = s < 0 ? 0 : s > 255 ? 255 : s;
       blk[i * 2] = blk[i * 2 + 1] = (int16_t)(s << 8);
     }

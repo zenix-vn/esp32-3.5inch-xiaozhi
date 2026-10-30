@@ -9,7 +9,7 @@ import math
 import os
 import sys
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gen_dragons  # noqa: E402
@@ -167,6 +167,22 @@ def glyph_radio(g, c):
     g.ell(72, 73, 4, 4, hexc(0xFFC93C))
 
 
+def glyph_countdown(g, c):
+    g.rect(24, 12, 76, 21, 4)  # hourglass: top and bottom bars, two glass bulbs, sand
+    g.rect(24, 79, 76, 88, 4)
+    g.poly([(30, 21), (70, 21), (54, 50), (46, 50)])
+    g.poly([(46, 50), (54, 50), (70, 79), (30, 79)])
+    g.poly([(38, 26), (62, 26), (51, 44), (49, 44)], hexc(0xFFD54A))
+    g.poly([(50, 56), (50, 56), (64, 75), (36, 75)], hexc(0xFFD54A))
+    g.rect(48.5, 44, 51.5, 70, 1.5, hexc(0xFFD54A))
+
+
+def glyph_abc(g, c):
+    font = ImageFont.truetype(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'fonts', 'Nunito-ExtraBold-latin.ttf'), int(58 * K))
+    g.d.text((50 * K, 54 * K), 'Ab', font=font, fill=WHITE, anchor='mm')
+    g.poly([(78, 10), (81, 18), (90, 18), (83, 23), (86, 31), (78, 26), (70, 31), (73, 23), (66, 18), (75, 18)], hexc(0xFFE27A))  # star
+
+
 def glyph_qr(g, c):
     for x, y in ((20, 20), (58, 20), (20, 58)):
         g.rect(x, y, x + 22, y + 22, 4)
@@ -214,7 +230,6 @@ def dragon_icon(c1, c2):
 
 ICONS = [
     # name, top colour, bottom colour, glyph
-    ('ic_assistant', 0xFFFFFF, 0xA3B4F0, glyph_assistant),  # light gradient tile so the coloured bars stand out
     ('ic_weather', 0x5AB0FF, 0x2F5FD0, glyph_weather),
     ('ic_dragon', 0xB38BFF, 0x5B2BD6, None),
     ('ic_photos', 0xFFB84A, 0xE8602A, glyph_photos),
@@ -230,6 +245,8 @@ ICONS = [
     ('ic_2048', 0xFFB86B, 0xE0603A, glyph_2048),
     ('ic_caro', 0x6BE0C8, 0x2A78B8, glyph_caro),
     ('ic_radio', 0xFF9E6B, 0xD63A4A, glyph_radio),
+    ('ic_countdown', 0x5BE3C0, 0x1C8C9C, glyph_countdown),
+    ('ic_abc', 0xFF9BC8, 0xE0508A, glyph_abc),
 ]
 
 

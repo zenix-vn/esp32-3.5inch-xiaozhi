@@ -12,12 +12,6 @@ static const Pair TABLE[] = {
     // home
     {"No Wi-Fi", "Chưa có Wi-Fi"},
     {"Offline", "Ngoại tuyến"},
-    {"Xiaozhi online", "AI sẵn sàng"},
-    {"Pairing", "Đang ghép nối"},
-    {"Connecting...", "Đang kết nối..."},
-    {"Retrying", "Đang thử lại"},
-    {"Pair this device", "Ghép nối thiết bị"},
-    {"Enter this code at xiaozhi.me > Add device", "Nhập mã này tại xiaozhi.me > Thêm thiết bị"},
     {"Good morning", "Chào buổi sáng"},
     {"Good afternoon", "Chào buổi chiều"},
     {"Good evening", "Chào buổi tối"},
@@ -25,9 +19,6 @@ static const Pair TABLE[] = {
     {"Hello", "Xin chào"},
     {"Syncing time...", "Đang đồng bộ giờ..."},
     {"Waiting for network", "Đang chờ mạng"},
-    {"Device linked to xiaozhi.me", "Đã liên kết với xiaozhi.me"},
-    {"Listening...", "Đang nghe..."},
-    {"Tap the face to talk", "Chạm để trò chuyện"},
     {"Weather unavailable", "Không có dữ liệu thời tiết"},
     {"Loading weather...", "Đang tải thời tiết..."},
     {"Updating...", "Đang cập nhật..."},
@@ -62,6 +53,8 @@ static const Pair TABLE[] = {
     {"Sleep sounds", "Ru ngủ"},
     {"Games", "Trò chơi"},
     {"Radio", "Radio"},
+    {"Countdown", "Đếm ngược"},
+    {"Kids letters", "Voi học chữ"},
     {"Reincarnate?", "Luân hồi?"},
     {"Your divine dragon leaves a new egg. You keep your coins and the next dragon grows faster.",
      "Rồng thần để lại một quả trứng mới. Bạn giữ nguyên xu và rồng kế tiếp sẽ lớn nhanh hơn."},
@@ -155,13 +148,6 @@ static const Pair TABLE[] = {
     {"Other", "Khác"},
     // touch calibration
     {"Touch calibration\nTap each circle", "Hiệu chuẩn cảm ứng\nChạm vào từng vòng tròn"},
-    // xiaozhi status
-    {"Waiting for Wi-Fi", "Đang chờ Wi-Fi"},
-    {"Contacting Xiaozhi...", "Đang kết nối Xiaozhi..."},
-    {"Server error %d, retrying", "Lỗi máy chủ %d, đang thử lại"},
-    {"Bad server reply, retrying", "Máy chủ trả lời lỗi, đang thử lại"},
-    {"Activated", "Đã kích hoạt"},
-    {"Enter the code at xiaozhi.me", "Nhập mã tại xiaozhi.me"},
 };
 
 bool isVi() { return gLang == LANG_VI; }

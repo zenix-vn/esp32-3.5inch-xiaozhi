@@ -4,16 +4,16 @@
 #include <Arduino.h>
 #include <Preferences.h>
 
-static const int APP_COUNT = 14;
+static const int APP_COUNT = 16;
 static const int SETTINGS_APP = 6;  // index of the Settings app; it can never be hidden
 
 static const char *QR_DEFAULT_PAYLOAD =
     "00020101021138570010A000000727012700069704220113VQRQAHIZT41140208QRIBFTTA53037045802VN62150107NPS686908006304C8A9";
 
-// Wi-Fi (4), Storage (5) and About (7) live in Settings now, not in the launcher.
-static bool appInLauncher(int id) { return id != 4 && id != 5 && id != 7; }
-// app ids: 0 assistant, 1 weather, 2 dragon, 3 photos, 4 wi-fi, 5 storage, 6 settings, 7 about, 8 clock, 9 payment, 10 calendar, 11 sleep sounds, 12 games, 13 radio
-static const char *APPS_DEFAULT = "0,2,1,8,10,11,12,13,9,3,6";
+// Wi-Fi (4), Storage (5) and About (7) live in Settings now, not in the launcher; 0 (the AI assistant) is gone.
+static bool appInLauncher(int id) { return id != 0 && id != 4 && id != 5 && id != 7; }
+// app ids: 0 (removed: assistant), 1 weather, 2 dragon, 3 photos, 4 wi-fi, 5 storage, 6 settings, 7 about, 8 clock, 9 payment, 10 calendar, 11 sleep sounds, 12 games, 13 radio, 14 countdown, 15 kids letters
+static const char *APPS_DEFAULT = "2,1,8,10,14,15,11,12,13,9,3,6";
 
 struct AppCfg {
   uint8_t startTile = 0;    // 0 home, 1 payment QR, 2 apps
@@ -42,6 +42,11 @@ struct AppCfg {
   int8_t ambEnd = 6;
   uint8_t photoSec = 10;  // slideshow: seconds per picture
   bool wallOn = false;    // a wallpaper is stored in flash and shown on the main screen
+  uint8_t ledMode = 2;    // front RGB LED (led.h): 0 off, 1 alerts only, 2 everything
+  uint8_t ledBri = 40;    // LED brightness 5..100 %
+  bool ledTouch = false;  // LED blinks on every touch
+  bool ledNight = true;   // only alarms and an empty battery at night / in do-not-disturb
+  int8_t dock[3] = {8, 14, 15};  // the home screen dock: app ids (clock, countdown, kids letters), -1 = empty
 };
 static AppCfg cfg;
 
@@ -101,6 +106,8 @@ static void cfgLoad() {
   if (appsV < 5 && !cfgAppsContain(apps, 11)) apps += ",11";  // the Sleep sounds app
   if (appsV < 6 && !cfgAppsContain(apps, 12)) apps += ",12";  // the Games app
   if (appsV < 7 && !cfgAppsContain(apps, 13)) apps += ",13";  // the Radio app
+  if (appsV < 8 && !cfgAppsContain(apps, 14)) apps += ",14";  // Countdown
+  if (appsV < 8 && !cfgAppsContain(apps, 15)) apps += ",15";  // the kids' alphabet game
   cfg.apps = cfgCleanApps(apps);
   cfg.theme = p.getUChar("theme", 0) & 3;
   cfg.volume = constrain(p.getUChar("vol", 60), 0, 100);
@@ -113,6 +120,13 @@ static void cfgLoad() {
   cfg.ambEnd = p.getChar("ambE", 6);
   cfg.photoSec = constrain(p.getUChar("phS", 10), 3, 120);
   cfg.wallOn = p.getBool("wall", false);
+  cfg.ledMode = min((int)p.getUChar("ledM", 2), 2);
+  cfg.ledBri = constrain(p.getUChar("ledB", 40), 5, 100);
+  cfg.ledTouch = p.getBool("ledT", false);
+  cfg.ledNight = p.getBool("ledN", true);
+  if (p.getBytesLength("dock") == 3) p.getBytes("dock", cfg.dock, 3);
+  for (auto &d : cfg.dock)
+    if (d < -1 || d >= APP_COUNT || (d >= 0 && !appInLauncher(d))) d = -1;
   p.end();
   if (!cfg.qrOn && cfg.startTile == 1) cfg.startTile = 0;
 }
@@ -145,10 +159,15 @@ static void cfgSave() {
   p.putChar("ambE", cfg.ambEnd);
   p.putUChar("phS", cfg.photoSec);
   p.putBool("wall", cfg.wallOn);
+  p.putUChar("ledM", cfg.ledMode);
+  p.putUChar("ledB", cfg.ledBri);
+  p.putBool("ledT", cfg.ledTouch);
+  p.putBool("ledN", cfg.ledNight);
+  p.putBytes("dock", cfg.dock, 3);
   p.remove("vmk");  // settings of the removed Vietmap app
   p.remove("veh");
   p.remove("spw");
-  p.putUChar("appsV", 7);
+  p.putUChar("appsV", 8);
   p.end();
 }
 

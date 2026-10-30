@@ -5,7 +5,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern const lv_img_dsc_t ic_assistant;
 extern const lv_img_dsc_t ic_weather;
 extern const lv_img_dsc_t ic_dragon;
 extern const lv_img_dsc_t ic_photos;
@@ -21,6 +20,8 @@ extern const lv_img_dsc_t ic_calendar;
 extern const lv_img_dsc_t ic_2048;
 extern const lv_img_dsc_t ic_caro;
 extern const lv_img_dsc_t ic_radio;
+extern const lv_img_dsc_t ic_countdown;
+extern const lv_img_dsc_t ic_abc;
 #ifdef __cplusplus
 }
 #endif

@@ -10,7 +10,7 @@
 static const int MIC_PIN_A = 21;
 static const int MIC_PIN_B = 22;
 static const int MIC_PIN_SD = 35;
-static const int MIC_RATE = 16000;  // what Xiaozhi expects for the uplink
+static const int MIC_RATE = 16000;
 
 static bool micSwap = false;  // false: SCK = IO22, WS = IO21; true: SCK = IO21, WS = IO22
 static bool micUp = false;

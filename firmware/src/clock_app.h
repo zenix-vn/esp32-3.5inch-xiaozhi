@@ -113,6 +113,17 @@ static void alarmTimeText(int h, int m, char *out, size_t n) {
   else snprintf(out, n, "%d:%02d %s", h % 12 ? h % 12 : 12, m, h < 12 ? DL("SA", "AM") : DL("CH", "PM"));
 }
 
+// "06:30  -  in 7 h" for the home screen; false when no alarm is on.
+static bool homeAlarmText(char *out, size_t n) {
+  int away = 0, i = alarmNext(&away);
+  if (i < 0) return false;
+  char t[16], w[32];
+  alarmTimeText(alarms[i].h, alarms[i].m, t, sizeof(t));
+  alarmAwayText(away, w, sizeof(w));
+  snprintf(out, n, "%s  -  %s", t, w);
+  return true;
+}
+
 // ---------- ringing ----------
 static uint32_t tmrEnd = 0, tmrLeft = 0, tmrTotal = 5 * 60000;  // timer: end time (running) or time left (paused)
 static uint32_t swStart = 0, swAcc = 0;                          // stopwatch: start (running) and accumulated ms

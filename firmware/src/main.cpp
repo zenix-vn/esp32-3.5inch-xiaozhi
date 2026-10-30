@@ -16,7 +16,6 @@
 #include "theme.h"
 #include "sound.h"
 #include "touch.h"
-#include "xiaozhi_activation.h"
 #include "weather.h"
 #include "icons_img.h"
 
@@ -115,7 +114,7 @@ static void backlightInit() {
   p.begin("ui", true);
   blLevel = p.getUChar("bl", 255);
   p.end();
-  ledcSetup(0, 5000, 8);
+  ledcSetup(0, 25000, 8);  // above hearing: at 5 kHz the PWM leaked into the speaker amplifier as a whine
   ledcAttachPin(PIN_BL, 0);
   ledcWrite(0, blLevel);
 }
@@ -194,6 +193,7 @@ static bool screenOff = false;  // backlight off until the next touch (see scree
 #include "photos.h"
 #include "qr_page.h"
 #include "ambient.h"
+#include "power.h"
 
 // ---------- payment QR (VietQR; details come from the web setup page) ----------
 
@@ -252,6 +252,9 @@ static void qrRebuild() {
 
 #include "wallpaper.h"
 #include "settings_page.h"
+#include "led.h"
+#include "countdown.h"
+#include "kids.h"
 #include "webconfig.h"
 
 // ---------- launcher ----------
@@ -261,16 +264,8 @@ struct App {
   void (*open)();
 };
 
-static void goAssistant() {
-  lv_obj_set_tile(tv, homeTile, LV_ANIM_ON);
-  if (xiaozhiState() == XZ_ACTIVATED) {
-    listening = true;
-    refreshHome();
-  }
-}
-
 static const App apps[] = {
-    {&ic_assistant, "Assistant", goAssistant}, {&ic_weather, "Weather", pageWeather},  {&ic_dragon, "Dragon", pageDragon},
+    {nullptr, "", nullptr},  /* 0: was the Xiaozhi assistant (removed), kept so saved app ids stay valid */ {&ic_weather, "Weather", pageWeather},  {&ic_dragon, "Dragon", pageDragon},
     {&ic_photos, "Photos", pagePhotos},        {&ic_wifi, "Wi-Fi", pageWifi},          {&ic_storage, "Storage", pageStorage},
     {&ic_settings, "Settings", pageSettings},  {&ic_about, "About", pageAbout},        {&ic_clock, "Clock", pageClock},
     {&ic_qr, "Payment", pageQr},
@@ -278,10 +273,18 @@ static const App apps[] = {
     {&ic_sleep, "Sleep sounds", pageSleep},
     {&ic_games, "Games", pageGames},
     {&ic_radio, "Radio", pageRadio},
+    {&ic_countdown, "Countdown", pageCountdown},
+    {&ic_abc, "Kids letters", pageKids},
 };
 static_assert(sizeof(apps) / sizeof(apps[0]) == APP_COUNT, "APP_COUNT must match apps[]");
 static const char *appName(int i) { return apps[i].name; }
 static lv_obj_t *dragonBadge = nullptr;
+
+static const lv_img_dsc_t *appIcon(int i) { return apps[i].icon; }
+static void appOpen(int i) {
+  soundPlay(SND(SND_TAP), 0, false);
+  apps[i].open();
+}
 
 static void appClicked(lv_event_t *e) {
   const App *a = (const App *)lv_event_get_user_data(e);
@@ -422,6 +425,7 @@ void setup() {
   Serial.begin(115200);
   i18nLoad();
   cfgLoad();
+  ledBegin();  // the pins float until now: the LED glows at random
   micPrefLoad();
   qrLoad();
   clockBegin();  // alarms ring whether or not the Clock app is ever opened
@@ -476,7 +480,6 @@ void setup() {
   statusbarBegin();
   dragonBegin();
   wifiBegin();
-  xiaozhiBegin();
   weatherBegin();
 }
 
@@ -496,6 +499,8 @@ static void sleepTick() {
     if (gTouchWake) {
       gTouchWake = false;
       screenOff = false;
+      powerTick();  // full speed before the first frame
+      if (lv_scr_act() == mainScr) refreshHome();  // the home screen is not updated while the backlight is off
       ledcWrite(0, blLevel);
       lv_disp_trig_activity(nullptr);
     }
@@ -575,6 +580,8 @@ void loop() {
   sleepTick();
   idleReturnTick();
   soundTick();
+  ledTick();
+  powerTick();
   static uint32_t clockAt = 0;
   if (millis() - clockAt > 250) {
     clockAt = millis();
@@ -589,9 +596,12 @@ void loop() {
   static uint32_t memAt = 0;
   if (millis() - memAt > 30000) {  // heap health on the serial log: TLS needs ~40 KB in one block
     memAt = millis();
-    Serial.printf("MEM free=%u min=%u largest=%u wifi=%d %s\n", (unsigned)ESP.getFreeHeap(), (unsigned)ESP.getMinFreeHeap(),
-                  (unsigned)ESP.getMaxAllocHeap(), (int)WiFi.status(), wifiStatus());
+    Serial.printf("MEM free=%u min=%u largest=%u wifi=%d %s bat=%dmV %d%% usb=%d present=%d\n", (unsigned)ESP.getFreeHeap(),
+                  (unsigned)ESP.getMinFreeHeap(), (unsigned)ESP.getMaxAllocHeap(), (int)WiFi.status(), wifiStatus(), batMv, batPct, batUsb,
+                  batPresent);
   }
-  // sleep only until LVGL needs to run again (was a fixed 5 ms, which delayed every frame and touch read)
-  delay(idle < 1 ? 1 : idle > 5 ? 5 : idle);
+  // sleep until LVGL needs to run again: at most 10 ms in use (beeps and the LED step on that), 40 ms while idle
+  // (screen off / ambient: only a touch to wake up matters)
+  uint32_t cap = pwrLow && !soundPlaying() ? 40 : 10;
+  delay(idle < 1 ? 1 : idle > cap ? cap : idle);
 }

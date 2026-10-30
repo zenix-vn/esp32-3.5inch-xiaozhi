@@ -4,6 +4,8 @@
 // return here through pageParent (pages.h). Included by main.cpp after wallpaper.h.
 
 static lv_obj_t *stScr = nullptr;  // the hub, while it exists
+static void pageSettingsLed();      // led.h
+static const char *ledModeName(int m);
 
 // Opens a page as a child of Settings: its back button comes back to the hub.
 static void stOpen(void (*open)()) {
@@ -326,6 +328,102 @@ static void pageSettingsQr() {
   pageShow(s);
 }
 
+// ---------- Home screen > Dock ----------
+// Three slots; tap one, then pick its app from the list (or leave it empty).
+static lv_obj_t *dkScr, *dkSlots, *dkPick;
+static int dkSlot = 0;
+static void dkBuild();
+
+static lv_obj_t *dkAppRow(lv_obj_t *parent, int id, const char *title, lv_event_cb_t cb, void *ud) {
+  lv_obj_t *r = lv_obj_create(parent);
+  lv_obj_remove_style_all(r);
+  lv_obj_set_size(r, 456, 50);
+  lv_obj_set_style_border_width(r, 1, 0);
+  lv_obj_set_style_border_side(r, LV_BORDER_SIDE_BOTTOM, 0);
+  lv_obj_set_style_border_color(r, C_BORDER, 0);
+  lv_obj_set_style_border_opa(r, LV_OPA_60, 0);
+  lv_obj_set_style_bg_color(r, C_ACCENT, 0);
+  lv_obj_set_style_bg_opa(r, LV_OPA_20, LV_STATE_PRESSED);
+  lv_obj_clear_flag(r, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_add_flag(r, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_event_cb(r, cb, LV_EVENT_CLICKED, ud);
+  if (id >= 0) {
+    lv_obj_t *ic = lv_img_create(r);
+    lv_img_set_src(ic, appIcon(id));
+    lv_img_set_zoom(ic, 160);  // ~35 px
+    lv_img_set_antialias(ic, true);
+    lv_obj_align(ic, LV_ALIGN_LEFT_MID, 2, 0);
+  } else {
+    lv_obj_t *p = makeLabel(r, LV_SYMBOL_MINUS, F_TITLE, C_MUTED);
+    lv_obj_align(p, LV_ALIGN_LEFT_MID, 20, 0);
+  }
+  lv_obj_t *t = makeLabel(r, "", F_BODY, C_TEXT);
+  lv_label_set_text(t, title);
+  lv_obj_align(t, LV_ALIGN_LEFT_MID, 60, 0);
+  return r;
+}
+
+static void dkChoose(lv_event_t *e) {
+  int id = (int)(intptr_t)lv_event_get_user_data(e);
+  cfg.dock[dkSlot] = id;
+  cfgSave();
+  homeDockBuild();
+  if (dkPick) lv_obj_del(dkPick);
+  dkPick = nullptr;
+  dkBuild();
+}
+
+static void dkOpenPicker(lv_event_t *e) {
+  dkSlot = (int)(intptr_t)lv_event_get_user_data(e);
+  dkPick = lv_obj_create(dkScr);
+  lv_obj_remove_style_all(dkPick);
+  lv_obj_set_size(dkPick, 480, 320 - SB_H);
+  lv_obj_set_pos(dkPick, 0, SB_H);
+  lv_obj_set_style_bg_color(dkPick, lv_color_hex(0x0B1024), 0);
+  lv_obj_set_style_bg_opa(dkPick, LV_OPA_COVER, 0);
+  lv_obj_set_style_pad_hor(dkPick, 12, 0);
+  lv_obj_set_style_pad_top(dkPick, 8, 0);
+  lv_obj_set_flex_flow(dkPick, LV_FLEX_FLOW_COLUMN);
+  lv_obj_add_flag(dkPick, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_t *h = makeLabel(dkPick, "", F_TITLE, C_TEXT);
+  setTextFmt(h, isVi() ? "Chọn ứng dụng cho ô %d" : "Pick the app for slot %d", dkSlot + 1);
+  lv_obj_t *x = smallBtn(dkPick, LV_SYMBOL_CLOSE, C_MUTED, [](lv_event_t *) {  // close without changing anything
+    lv_obj_del_async(dkPick);
+    dkPick = nullptr;
+  }, nullptr, 44);
+  lv_obj_add_flag(x, LV_OBJ_FLAG_FLOATING);
+  lv_obj_align(x, LV_ALIGN_TOP_RIGHT, 0, 0);
+  dkAppRow(dkPick, -1, DL("Để trống", "Leave empty"), dkChoose, (void *)(intptr_t)-1);
+  for (int i = 0; i < APP_COUNT; i++)
+    if (appInLauncher(i)) dkAppRow(dkPick, i, tr(appName(i)), dkChoose, (void *)(intptr_t)i);
+}
+
+static void dkBuild() {
+  lv_obj_clean(dkSlots);
+  for (int k = 0; k < 3; k++) {
+    char b[48];
+    int id = cfg.dock[k];
+    snprintf(b, sizeof(b), isVi() ? "Ô %d:  %s" : "Slot %d:  %s", k + 1, id >= 0 ? tr(appName(id)) : DL("trống", "empty"));
+    lv_obj_t *r = dkAppRow(dkSlots, id, b, dkOpenPicker, (void *)(intptr_t)k);
+    lv_obj_t *c = makeLabel(r, LV_SYMBOL_RIGHT, F_CAPTION, C_MUTED);
+    lv_obj_align(c, LV_ALIGN_RIGHT_MID, -12, 0);
+  }
+}
+
+static void pageSettingsDock() {
+  lv_obj_t *c;
+  dkScr = stPage(DL("Dock màn hình chính", "Home screen dock"), &c);
+  dkPick = nullptr;
+  dkSlots = stGroup(c);
+  dkBuild();
+  lv_obj_t *h = makeLabel(c, "", F_CAPTION, C_MUTED);
+  lv_obj_set_width(h, 440);
+  lv_label_set_long_mode(h, LV_LABEL_LONG_WRAP);
+  lv_label_set_text(h, DL("Ba ứng dụng hiện ở thanh dock dưới đồng hồ trên màn hình chính, chạm một lần là mở. Chạm vào một ô để đổi ứng dụng.",
+                          "Three apps sit in the dock under the clock on the home screen, one tap away. Tap a slot to change its app."));
+  pageShow(dkScr);
+}
+
 // ---------- language, time zone ----------
 static uint8_t stPendingLang = LANG_VI;
 static void stDoLang() {
@@ -366,8 +464,6 @@ static void pageSettings() {
     snprintf(b, sizeof(b), "%s.local", webHost());
     stRow(g, LV_SYMBOL_GPS, 0x6A7BE8, DL("Trang web cấu hình", "Web setup"), b, C_ACCENT, nullptr, false);
   }
-  stRow(g, LV_SYMBOL_AUDIO, 0x9B6AE0, "Xiaozhi", xiaozhiState() == XZ_ACTIVATED ? DL("Đã kết nối", "Connected") : xiaozhiMessage(),
-        xiaozhiState() == XZ_ACTIVATED ? C_OK : C_WARN, nullptr, false);
 
   // device
   stHeader(c, DL("THIẾT BỊ", "DEVICE"));
@@ -377,6 +473,8 @@ static void pageSettings() {
   snprintf(b, sizeof(b), cfg.dnd ? DL("Im lặng", "Silent") : "%d%%", cfg.volume);
   stRow(g, LV_SYMBOL_VOLUME_MAX, 0x7B6BFF, DL("Âm thanh", "Sound"), b, C_MUTED, [](lv_event_t *) { stOpen(pageSettingsSound); });
   stRow(g, LV_SYMBOL_AUDIO, 0xD9559A, DL("Micro", "Microphone"), "", C_MUTED, [](lv_event_t *) { stOpen(pageSettingsMic); });
+  stRow(g, LV_SYMBOL_CHARGE, 0x2FB67C, DL("Đèn LED", "LED light"), ledModeName(cfg.ledMode), cfg.ledMode ? C_MUTED : C_WARN,
+        [](lv_event_t *) { stOpen(pageSettingsLed); });
   if (cfg.qrOn) stRow(g, "QR", 0x2FB67C, DL("Tài khoản QR", "Payment account"), qrCount ? (cfg.qrName.length() ? cfg.qrName.c_str() : cfg.qrAcct.c_str()) : "", C_MUTED,
                       [](lv_event_t *) { stOpen(pageSettingsQr); });
   if (sdOk) {
@@ -386,6 +484,17 @@ static void pageSettings() {
   } else {
     stRow(g, LV_SYMBOL_DRIVE, 0x4C8BF5, DL("Bộ nhớ", "Storage"), DL("Chưa có thẻ", "No card"), C_WARN, [](lv_event_t *) { stOpen(pageStorage); });
   }
+
+  // home screen
+  stHeader(c, DL("MÀN HÌNH CHÍNH", "HOME SCREEN"));
+  g = stGroup(c);
+  b[0] = 0;
+  for (int k = 0; k < 3; k++)
+    if (cfg.dock[k] >= 0) {
+      if (b[0]) strlcat(b, ", ", sizeof(b));
+      strlcat(b, tr(appName(cfg.dock[k])), sizeof(b));
+    }
+  stRow(g, LV_SYMBOL_LIST, 0x3FA7D6, "Dock", b, C_MUTED, [](lv_event_t *) { stOpen(pageSettingsDock); });
 
   // general
   stHeader(c, DL("CHUNG", "GENERAL"));

@@ -137,6 +137,31 @@ static void jdToDate(long jd, int &dd, int &mm, int &yy) {
   yy = (int)(b * 100 + d - 4800 + m / 10);
 }
 
+// Lunar date -> Julian day number of the first day of that lunar month, or 0 when the year has no such (leap) month.
+static long lunarMonthStart(int lm, int ly, bool leap, double tz = 7) {
+  using namespace lunar;
+  long a11, b11;
+  if (lm < 11) {
+    a11 = lunarMonth11(ly - 1, tz);
+    b11 = lunarMonth11(ly, tz);
+  } else {
+    a11 = lunarMonth11(ly, tz);
+    b11 = lunarMonth11(ly + 1, tz);
+  }
+  long k = (long)floor(0.5 + (a11 - 2415021.076998695) / 29.530588853);
+  int off = lm - 11;
+  if (off < 0) off += 12;
+  if (b11 - a11 > 365) {
+    int leapOff = leapMonthOffset(a11, tz), leapMonth = leapOff - 2;
+    if (leapMonth < 0) leapMonth += 12;
+    if (leap && lm != leapMonth) return 0;
+    if (leap || off >= leapOff) off += 1;
+  } else if (leap) {
+    return 0;
+  }
+  return newMoonDay(k + off, tz);
+}
+
 // Number of days of the lunar month that starts on Julian day `start` (29 or 30).
 static int lunarMonthLength(long start, double tz = 7) {
   long k = (long)floor((start - 2415021.076998695) / 29.530588853 + 0.5);

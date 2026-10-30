@@ -7,7 +7,9 @@
 extern "C" {
 #endif
 extern const lv_font_t vi_font_12, vi_font_14, vi_font_16, vi_font_20, vi_font_28;
-extern const lv_font_t vi_clock_84;  // digits, colon, dash and space only (ambient clock)
+extern const lv_font_t kids_font;   // Nunito ExtraBold 88 px, the 29 Vietnamese letters in both cases (kids.h)
+extern const lv_font_t clock_font;  // Bebas Neue 109 px, digits, colon, dash and space only (home clock)
+extern const lv_font_t ambient_font;  // Outfit ExtraLight 150 px, digits, colon, dash and space only (ambient clock)
 #ifdef __cplusplus
 }
 #endif

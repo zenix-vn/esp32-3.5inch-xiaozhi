@@ -48,6 +48,7 @@ static void touchInject(int x1, int y1, int x2, int y2, uint32_t dur) {
 
 // While the screen is off the first touch only wakes it: it is swallowed until the finger lifts.
 static volatile bool gTouchSwallow = false, gTouchWake = false;
+static volatile uint32_t gTouchPresses = 0;  // counts presses (led.h blinks on each)
 
 static void touchRead(lv_indev_drv_t *, lv_indev_data_t *data) {
   static int16_t lx = 0, ly = 0;          // smoothed position
@@ -83,6 +84,7 @@ static void touchRead(lv_indev_drv_t *, lv_indev_data_t *data) {
     lastSeen = millis();
     if (!down) {
       down = true;
+      gTouchPresses++;
       reporting = false;
       downAt = lastSeen;
     }
