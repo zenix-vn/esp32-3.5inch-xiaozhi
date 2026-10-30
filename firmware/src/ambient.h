@@ -1,13 +1,41 @@
 #pragma once
 // Ambient screen: a calm, minimal clock face shown after the idle time, on the nightly schedule or from the control
 // center. Black background; the date and the lunar date on top, a big thin clock (Outfit ExtraLight, ambient_font.c)
-// in the middle, and three rounded chips underneath: weather, the next alarm (or a running timer) and the nearest
+// in the middle with the home screen pet asleep across it, like the depth effect of a phone lock screen: it faces
+// left with its head behind the hours, and its tail over the minutes, and three rounded chips underneath: weather, the next alarm (or a running timer) and the nearest
 // countdown. At night everything turns a warm amber. Redraws only when the minute changes; the whole face drifts a
 // few pixels every minute (no burn-in) and the backlight is dimmed (more at night). Any touch goes back.
 // Included by main.cpp after home.h and clock_app.h.
 
 static lv_obj_t *ambScr = nullptr, *ambPrev = nullptr, *ambBox;
-static lv_obj_t *ambTime, *ambAmPm, *ambDate, *ambLunar;
+// Layers, bottom to top: minutes, pet, hours, colon (separate objects, placed in ambLayout()).
+static lv_obj_t *ambHH, *ambMid, *ambMM, *ambAmPm, *ambDate, *ambLunar, *ambPet;  // ambMid: the colon
+static const int AMB_CLOCK_Y = 90, AMB_PET_W = 184;  // clock top; the sleeping pet's drawn width
+// LVGL cannot zoom an indexed image, so while the ambient screen is up the pet lives in RAM as true colour + alpha
+// (RGB565 low byte, high byte, alpha: ~23 KB), mirrored to face left, freed on exit.
+static uint8_t *ambPetBuf = nullptr;
+static lv_img_dsc_t ambPetImg;
+
+static const lv_img_dsc_t *ambPetTrueColor(const lv_img_dsc_t *src) {
+  int w = src->header.w, h = src->header.h;
+  ambPetBuf = (uint8_t *)malloc(w * h * 3);
+  if (!ambPetBuf) return nullptr;
+  const uint8_t *pal = src->data, *px = src->data + 1024;  // palette: blue, green, red, alpha
+  for (int y = 0; y < h; y++)
+    for (int x = 0; x < w; x++) {
+      const uint8_t *c = pal + px[y * w + (w - 1 - x)] * 4;
+      uint16_t v = ((c[2] >> 3) << 11) | ((c[1] >> 2) << 5) | (c[0] >> 3);
+      uint8_t *o = ambPetBuf + (y * w + x) * 3;
+      o[0] = v & 255;
+      o[1] = v >> 8;
+      o[2] = c[3];
+    }
+  ambPetImg = *src;
+  ambPetImg.header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA;
+  ambPetImg.data_size = w * h * 3;
+  ambPetImg.data = ambPetBuf;
+  return &ambPetImg;
+}
 static lv_obj_t *ambChip[3], *ambChipIcon[3], *ambChipVal[3], *ambChipCap[3];
 static int ambMinute = -1, ambWxKey = -1, ambNight = -1;
 
@@ -33,12 +61,20 @@ static void ambientExit() {
   ambScr = nullptr;
   lv_scr_load(ambPrev && lv_obj_is_valid(ambPrev) ? ambPrev : mainScr);
   lv_obj_del(old);
+  if (ambPetBuf) {
+    lv_img_cache_invalidate_src(&ambPetImg);
+    free(ambPetBuf);
+    ambPetBuf = nullptr;
+  }
   lv_disp_trig_activity(nullptr);
 }
 
 static void ambApplyTint() {
   const AmbTint &c = ambTint();
-  lv_obj_set_style_text_color(ambTime, lv_color_hex(c.text), 0);
+  lv_obj_set_style_text_color(ambHH, lv_color_hex(c.text), 0);
+  lv_obj_set_style_text_color(ambMM, lv_color_hex(c.text), 0);
+  lv_obj_set_style_text_color(ambMid, lv_color_hex(c.accent), 0);
+  if (ambPet) lv_obj_set_style_img_opa(ambPet, ambNight == 1 ? LV_OPA_70 : LV_OPA_COVER, 0);
   lv_obj_set_style_text_color(ambAmPm, lv_color_hex(c.accent), 0);
   lv_obj_set_style_text_color(ambDate, lv_color_hex(c.text), 0);
   lv_obj_set_style_text_color(ambLunar, lv_color_hex(c.sub), 0);
@@ -119,6 +155,23 @@ static void ambRefreshCountdown() {
   ambChipSet(2, v, cdName(ev[0]));
 }
 
+// Hours, colon and minutes centred in a row; the pet lies across the colon, its paws a little below the digits' feet.
+static void ambLayout() {
+  lv_obj_update_layout(ambBox);
+  int wh = lv_obj_get_width(ambHH), wc = lv_obj_get_width(ambMid), wm = lv_obj_get_width(ambMM), gap = 4;
+  int x = (480 - (wh + wc + wm + 2 * gap)) / 2, lh = lv_font_get_line_height(&ambient_font);
+  lv_obj_set_pos(ambHH, x, AMB_CLOCK_Y);
+  lv_obj_set_pos(ambMid, x + wh + gap, AMB_CLOCK_Y);
+  lv_obj_set_pos(ambMM, x + wh + gap + wc + gap, AMB_CLOCK_Y);
+  lv_obj_align_to(ambAmPm, ambMM, LV_ALIGN_OUT_RIGHT_TOP, 6, 8);
+  if (ambPet) {
+    const lv_img_dsc_t *d = (const lv_img_dsc_t *)lv_img_get_src(ambPet);
+    int zh = d->header.h * AMB_PET_W / d->header.w;  // drawn height (zoomed around the centre)
+    int cx = x + wh + gap + wc / 2, cy = AMB_CLOCK_Y + lh + 6 - zh / 2;
+    lv_obj_set_pos(ambPet, cx - d->header.w / 2, cy - d->header.h / 2);
+  }
+}
+
 static void ambientRefresh(lv_timer_t *) {
   if (!ambScr) return;
   struct tm t;
@@ -131,11 +184,10 @@ static void ambientRefresh(lv_timer_t *) {
     ambNight = night;
     ambApplyTint();
   }
-  char acc[8];
-  snprintf(acc, sizeof(acc), "%06X", (unsigned)ambTint().accent);
   if (ok) {
     int h = cfg.clock24 ? t.tm_hour : (t.tm_hour % 12 ? t.tm_hour % 12 : 12);
-    setTextFmt(ambTime, cfg.clock24 ? "%02d#%s :#%02d" : "%d#%s :#%02d", h, acc, t.tm_min);  // the colon in the accent colour
+    setTextFmt(ambHH, cfg.clock24 ? "%02d" : "%d", h);
+    setTextFmt(ambMM, "%02d", t.tm_min);
     setText(ambAmPm, cfg.clock24 ? "" : isVi() ? (t.tm_hour < 12 ? "SA" : "CH") : (t.tm_hour < 12 ? "AM" : "PM"));
     if (isVi()) setTextFmt(ambDate, "%s, %d tháng %d", DAYS_VI[t.tm_wday], t.tm_mday, t.tm_mon + 1);
     else setTextFmt(ambDate, "%s, %d %s", DAYS_EN[t.tm_wday], t.tm_mday, MONTHS_EN[t.tm_mon]);
@@ -143,13 +195,13 @@ static void ambientRefresh(lv_timer_t *) {
     int dx = (minute * 7) % 13 - 6, dy = (minute * 5) % 11 - 5;  // drift
     lv_obj_set_pos(ambBox, dx, dy);
   } else {
-    setTextFmt(ambTime, "--#%s :#--", acc);
+    setText(ambHH, "--");
+    setText(ambMM, "--");
     setText(ambAmPm, "");
     setText(ambDate, tr("Syncing time..."));
     setText(ambLunar, "");
   }
-  lv_obj_align(ambTime, LV_ALIGN_TOP_MID, 0, 80);
-  lv_obj_align_to(ambAmPm, ambTime, LV_ALIGN_OUT_RIGHT_TOP, 6, 8);
+  ambLayout();
   ambRefreshWeather();
   ambRefreshAlarm();
   ambRefreshCountdown();
@@ -178,15 +230,26 @@ static void ambientShow() {
   lv_obj_set_width(ambDate, 440);
   lv_obj_set_style_text_align(ambDate, LV_TEXT_ALIGN_CENTER, 0);
   lv_obj_set_style_text_letter_space(ambDate, 1, 0);
-  lv_obj_align(ambDate, LV_ALIGN_TOP_MID, 0, 24);
+  lv_obj_align(ambDate, LV_ALIGN_TOP_MID, 0, 14);
   ambLunar = makeLabel(ambBox, "", F_BODY, lv_color_hex(0x8A93B8));
   lv_obj_set_width(ambLunar, 440);
   lv_obj_set_style_text_align(ambLunar, LV_TEXT_ALIGN_CENTER, 0);
-  lv_obj_align(ambLunar, LV_ALIGN_TOP_MID, 0, 52);
+  lv_obj_align(ambLunar, LV_ALIGN_TOP_MID, 0, 40);
 
   // middle: the clock
-  ambTime = makeLabel(ambBox, "--:--", &ambient_font, lv_color_hex(0xF2F5FF));
-  lv_label_set_recolor(ambTime, true);
+  // middle: minutes, then the pet, then hours and colon on top (creation order is the drawing order)
+  ambMM = makeLabel(ambBox, "--", &ambient_font, lv_color_hex(0xF2F5FF));
+  ambPet = nullptr;
+  const lv_img_dsc_t *nap = cfg.pet >= 1 && cfg.pet <= PET_N ? ambPetTrueColor(PET_NAP[cfg.pet - 1]) : nullptr;
+  if (nap) {
+    ambPet = lv_img_create(ambBox);
+    lv_img_set_src(ambPet, nap);
+    lv_img_set_zoom(ambPet, AMB_PET_W * 256 / nap->header.w);
+    lv_img_set_antialias(ambPet, true);
+    lv_obj_clear_flag(ambPet, LV_OBJ_FLAG_CLICKABLE);
+  }
+  ambHH = makeLabel(ambBox, "--", &ambient_font, lv_color_hex(0xF2F5FF));
+  ambMid = makeLabel(ambBox, ":", &ambient_font, lv_color_hex(0x38E1FF));
   ambAmPm = makeLabel(ambBox, "", F_TITLE, lv_color_hex(0x38E1FF));
 
   // bottom: three chips
