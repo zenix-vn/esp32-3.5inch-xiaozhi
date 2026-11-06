@@ -16,3 +16,6 @@ tools/sounds/
 
 # generated letter voices (python3 tools/gen_letter_voice.py)
 tools/letters/
+
+# raw SD card images for the word machine
+*.img

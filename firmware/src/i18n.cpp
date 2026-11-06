@@ -97,6 +97,8 @@ static const Pair TABLE[] = {
     {"The device restarts and shows 4 targets to tap.", "Thiết bị khởi động lại và hiện 4 điểm để bạn chạm."},
     {"Restart?", "Khởi động lại?"},
     {"The device will reboot now.", "Thiết bị sẽ khởi động lại ngay."},
+    {"Shut down?", "Tắt máy?"},
+    {"The screen goes dark. Touch the screen to turn the device back on.", "Màn hình sẽ tắt. Chạm vào màn hình để bật lại thiết bị."},
     {"Factory reset?", "Khôi phục cài đặt gốc?"},
     {"Erases Wi-Fi, touch calibration and all settings, then restarts.",
      "Xóa Wi-Fi, hiệu chuẩn cảm ứng và mọi cài đặt rồi khởi động lại."},

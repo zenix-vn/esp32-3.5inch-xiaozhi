@@ -1,0 +1,3 @@
+kindle.zenix.vn {
+	reverse_proxy desk:8080
+}

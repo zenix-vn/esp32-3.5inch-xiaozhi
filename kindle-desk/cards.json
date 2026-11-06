@@ -1,0 +1,22 @@
+[
+  {"en": "resilient",   "ipa": "/rɪˈzɪl.i.ənt/",  "vi": "kiên cường, bền bỉ",   "ex_en": "She is resilient in the face of failure.", "ex_vi": "Cô ấy kiên cường trước thất bại."},
+  {"en": "curious",     "ipa": "/ˈkjʊə.ri.əs/",   "vi": "tò mò, ham tìm hiểu",  "ex_en": "Kids are naturally curious.",              "ex_vi": "Trẻ con vốn tò mò."},
+  {"en": "journey",     "ipa": "/ˈdʒɜː.ni/",      "vi": "hành trình",           "ex_en": "Learning is a lifelong journey.",          "ex_vi": "Học tập là hành trình suốt đời."},
+  {"en": "gratitude",   "ipa": "/ˈɡræt.ɪ.tjuːd/", "vi": "lòng biết ơn",         "ex_en": "He expressed deep gratitude.",             "ex_vi": "Anh ấy bày tỏ lòng biết ơn sâu sắc."},
+  {"en": "achieve",     "ipa": "/əˈtʃiːv/",       "vi": "đạt được",             "ex_en": "You can achieve anything with effort.",    "ex_vi": "Có nỗ lực thì bạn đạt được mọi thứ."},
+  {"en": "borrow",      "ipa": "/ˈbɒr.əʊ/",       "vi": "mượn",                 "ex_en": "May I borrow your pen?",                   "ex_vi": "Tôi mượn bút của bạn được không?"},
+  {"en": "neighbour",   "ipa": "/ˈneɪ.bər/",      "vi": "hàng xóm",             "ex_en": "My neighbour feeds the cat.",              "ex_vi": "Hàng xóm tôi cho mèo ăn."},
+  {"en": "improve",     "ipa": "/ɪmˈpruːv/",      "vi": "cải thiện",            "ex_en": "I want to improve my English.",            "ex_vi": "Tôi muốn cải thiện tiếng Anh."},
+  {"en": "reliable",    "ipa": "/rɪˈlaɪ.ə.bəl/",  "vi": "đáng tin cậy",         "ex_en": "He is a reliable friend.",                 "ex_vi": "Anh ấy là người bạn đáng tin cậy."},
+  {"en": "schedule",    "ipa": "/ˈʃed.juːl/",     "vi": "lịch trình",           "ex_en": "My schedule is full today.",               "ex_vi": "Hôm nay lịch của tôi kín rồi."},
+  {"en": "memory",      "ipa": "/ˈmem.ər.i/",     "vi": "trí nhớ, kỷ niệm",     "ex_en": "This song brings back memories.",          "ex_vi": "Bài hát gợi lại kỷ niệm."},
+  {"en": "daily",       "ipa": "/ˈdeɪ.li/",       "vi": "hằng ngày",            "ex_en": "Read a little every day.",               "ex_vi": "Mỗi ngày đọc một chút."},
+  {"en": "weather",     "ipa": "/ˈweð.ər/",       "vi": "thời tiết",            "ex_en": "The weather is lovely today.",             "ex_vi": "Hôm nay thời tiết đẹp."},
+  {"en": "patient",     "ipa": "/ˈpeɪ.ʃənt/",     "vi": "kiên nhẫn",            "ex_en": "Be patient with yourself.",                "ex_vi": "Hãy kiên nhẫn với chính mình."},
+  {"en": "challenge",   "ipa": "/ˈtʃæl.ɪndʒ/",    "vi": "thử thách",            "ex_en": "Every day is a new challenge.",            "ex_vi": "Mỗi ngày là một thử thách mới."},
+  {"en": "discover",    "ipa": "/dɪˈskʌv.ər/",    "vi": "khám phá, phát hiện",  "ex_en": "She discovered a hidden path.",            "ex_vi": "Cô ấy phát hiện một lối đi ẩn."},
+  {"en": "enough",      "ipa": "/ɪˈnʌf/",         "vi": "đủ",                   "ex_en": "You are doing enough.",                    "ex_vi": "Bạn đã làm đủ tốt rồi."},
+  {"en": "familiar",    "ipa": "/fəˈmɪl.i.ər/",   "vi": "quen thuộc",           "ex_en": "This place feels familiar.",               "ex_vi": "Nơi này có cảm giác quen thuộc."},
+  {"en": "rarely",      "ipa": "/ˈreə.li/",       "vi": "hiếm khi",             "ex_en": "He rarely eats out.",                      "ex_vi": "Anh ấy hiếm khi ăn ngoài."},
+  {"en": "achievement", "ipa": "/əˈtʃiːv.mənt/",  "vi": "thành tựu",            "ex_en": "Finishing the book was an achievement.",   "ex_vi": "Đọc xong cuốn sách là một thành tựu."}
+]

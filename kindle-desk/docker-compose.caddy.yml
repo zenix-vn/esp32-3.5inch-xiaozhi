@@ -1,0 +1,24 @@
+services:
+  desk:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./cards.json:/app/cards.json:ro
+      - ./config.json:/app/config.json:ro
+      - ./data:/app/data
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      - desk
+
+volumes:
+  caddy_data:

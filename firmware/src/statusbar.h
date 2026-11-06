@@ -12,6 +12,7 @@ static bool sbVisible = true;
 static void ambientShow();      // ambient.h
 static bool ambOn = false;      // ambient screen showing (ambient.h)
 static void screenSleepNow();   // main.cpp
+static void askPowerOff(lv_event_t *);  // power.h
 static bool homeIsActive();     // main.cpp: main screen showing the home tile
 static void soundPlay(const Note *seq, int len, int repeat, bool evenInDnd);
 static void ledForToast(lv_color_t col);                // led.h
@@ -161,7 +162,7 @@ static void ccOpen() {
       },
       LV_EVENT_CLICKED, nullptr);
 
-  ccPanel = makeCard(ccOv, 464, 214);
+  ccPanel = makeCard(ccOv, 464, 264);
   lv_obj_set_x(ccPanel, 8);
   lv_obj_set_style_radius(ccPanel, 20, 0);
   lv_obj_set_style_shadow_width(ccPanel, 24, 0);
@@ -193,6 +194,30 @@ static void ccOpen() {
     ambientShow();
   });
   ccButton(row, LV_SYMBOL_SETTINGS, DL("Cài đặt", "Settings"), false, [](lv_event_t *) { ccOpenPage(pageSettings); });
+
+  // power: two wide buttons, icon beside the text
+  lv_obj_t *row2 = lv_obj_create(ccPanel);
+  lv_obj_remove_style_all(row2);
+  lv_obj_set_size(row2, 440, 44);
+  lv_obj_set_pos(row2, 12, 160);
+  lv_obj_set_flex_flow(row2, LV_FLEX_FLOW_ROW);
+  lv_obj_set_style_pad_column(row2, 8, 0);
+  lv_obj_t *pw[2] = {
+      ccButton(row2, LV_SYMBOL_REFRESH, DL("Khởi động lại", "Restart"), false, [](lv_event_t *e) {
+        ccClose();
+        askRestart(e);
+      }),
+      ccButton(row2, LV_SYMBOL_POWER, DL("Tắt máy", "Shut down"), false, [](lv_event_t *e) {
+        ccClose();
+        askPowerOff(e);
+      }),
+  };
+  for (lv_obj_t *b : pw) {
+    lv_obj_set_size(b, 216, 44);
+    lv_obj_set_flex_flow(b, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_column(b, 8, 0);
+  }
+  lv_obj_set_style_text_color(lv_obj_get_child(pw[1], 0), C_DANGER, 0);
 
   lv_obj_t *hint = makeLabel(ccPanel, DL("Chạm ra ngoài để đóng", "Tap outside to close"), F_CAPTION, C_MUTED);
   lv_obj_align(hint, LV_ALIGN_BOTTOM_MID, 0, -8);

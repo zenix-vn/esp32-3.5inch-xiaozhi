@@ -1,0 +1,242 @@
+{"id": "T0001", "zh": "牛津上海版一年级上册", "draft": "Oxford 上海L1 kỳ 1", "max_bytes": 30}
+{"id": "T0002", "zh": "牛津上海版一年级下册", "draft": "Oxford 上海L1 kỳ 2", "max_bytes": 30}
+{"id": "T0003", "zh": "牛津上海版二年级上册", "draft": "Oxford 上海L2 kỳ 1", "max_bytes": 30}
+{"id": "T0004", "zh": "牛津上海版二年级下册", "draft": "Oxford 上海L2 kỳ 2", "max_bytes": 30}
+{"id": "T0005", "zh": "牛津上海版三年级上册", "draft": "Oxford 上海L3 kỳ 1", "max_bytes": 30}
+{"id": "T0006", "zh": "牛津上海版三年级下册", "draft": "Oxford 上海L3 kỳ 2", "max_bytes": 30}
+{"id": "T0007", "zh": "牛津上海版四年级上册", "draft": "Oxford 上海L4 kỳ 1", "max_bytes": 30}
+{"id": "T0008", "zh": "牛津上海版四年级下册", "draft": "Oxford 上海L4 kỳ 2", "max_bytes": 30}
+{"id": "T0009", "zh": "牛津上海版五年级上册", "draft": "Oxford 上海L5 kỳ 1", "max_bytes": 30}
+{"id": "T0010", "zh": "牛津上海版五年级下册", "draft": "Oxford 上海L5 kỳ 2", "max_bytes": 30}
+{"id": "T0011", "zh": "牛津上海版六年级上册", "draft": "Oxford 上海L6 kỳ 1", "max_bytes": 30}
+{"id": "T0012", "zh": "牛津上海版六年级下册", "draft": "Oxford 上海L6 kỳ 2", "max_bytes": 30}
+{"id": "T0013", "zh": "JOIN版剑桥小学英语三年级上册", "draft": "JOIN剑桥Tiểu học Anh L3 kỳ 1", "max_bytes": 40}
+{"id": "T0014", "zh": "JOIN版剑桥小学英语三年级下册", "draft": "JOIN剑桥Tiểu học Anh L3 kỳ 2", "max_bytes": 40}
+{"id": "T0015", "zh": "JOIN版剑桥小学英语四年级上册", "draft": "JOIN剑桥Tiểu học Anh L4 kỳ 1", "max_bytes": 40}
+{"id": "T0016", "zh": "JOIN版剑桥小学英语四年级下册", "draft": "JOIN剑桥Tiểu học Anh L4 kỳ 2", "max_bytes": 40}
+{"id": "T0017", "zh": "JOIN版剑桥小学英语五年级上册", "draft": "JOIN剑桥Tiểu học Anh L5 kỳ 1", "max_bytes": 40}
+{"id": "T0018", "zh": "JOIN版剑桥小学英语五年级下册", "draft": "JOIN剑桥Tiểu học Anh L5 kỳ 2", "max_bytes": 40}
+{"id": "T0019", "zh": "JOIN版剑桥小学英语六年级上册", "draft": "JOIN剑桥Tiểu học Anh L6 kỳ 1", "max_bytes": 40}
+{"id": "T0020", "zh": "JOIN版剑桥小学英语六年级下册", "draft": "JOIN剑桥Tiểu học Anh L6 kỳ 2", "max_bytes": 40}
+{"id": "T0021", "zh": "牛津上海版七年级上册", "draft": "Oxford 上海L7 kỳ 1", "max_bytes": 30}
+{"id": "T0022", "zh": "牛津上海版七年级下册", "draft": "Oxford 上海L7 kỳ 2", "max_bytes": 30}
+{"id": "T0023", "zh": "牛津上海版八年级上册", "draft": "Oxford 上海L8 kỳ 1", "max_bytes": 30}
+{"id": "T0024", "zh": "牛津上海版八年级下册", "draft": "Oxford 上海L8 kỳ 2", "max_bytes": 30}
+{"id": "T0025", "zh": "牛津上海版九年级上册", "draft": "Oxford 上海L9 kỳ 1", "max_bytes": 30}
+{"id": "T0026", "zh": "牛津上海版九年级下册", "draft": "Oxford 上海L9 kỳ 2", "max_bytes": 30}
+{"id": "T0027", "zh": "北师大版初中英语九年级全一册", "draft": "BNU THCS Anh Lớp 9全一", "max_bytes": 42}
+{"id": "T0028", "zh": "牛津上海版高一上", "draft": "Oxford 上海高一上", "max_bytes": 24}
+{"id": "T0029", "zh": "牛津上海版高一下", "draft": "Oxford 上海高一下", "max_bytes": 24}
+{"id": "T0030", "zh": "牛津上海版高二上", "draft": "Oxford 上海高二上", "max_bytes": 24}
+{"id": "T0031", "zh": "牛津上海版高二下", "draft": "Oxford 上海高二下", "max_bytes": 24}
+{"id": "T0032", "zh": "牛津上海版高三上", "draft": "Oxford 上海高三上", "max_bytes": 24}
+{"id": "T0033", "zh": "牛津上海版高三下", "draft": "Oxford 上海高三下", "max_bytes": 24}
+{"id": "T0034", "zh": "上外版高中英语必修第一册", "draft": "上外THPT Anh Bắt buộctập 1", "max_bytes": 36}
+{"id": "T0035", "zh": "华研高中词汇念念不忘乱序版", "draft": "华研THPT TV念念不忘乱序", "max_bytes": 39}
+{"id": "T0036", "zh": "Part V 基础词汇 1.学校与教育", "draft": "P V Từ cơ bản 1.学校与教育", "max_bytes": 37}
+{"id": "T0037", "zh": "Part V 基础词汇 2.居家生活", "draft": "P V Từ cơ bản 2.居家生活", "max_bytes": 34}
+{"id": "T0038", "zh": "Part V 基础词汇 3.文化体育", "draft": "P V Từ cơ bản 3.文化体育", "max_bytes": 34}
+{"id": "T0039", "zh": "Part V 基础词汇 4.交通出行", "draft": "P V Từ cơ bản 4.交通出行", "max_bytes": 34}
+{"id": "T0040", "zh": "Part V 基础词汇 5.商业娱乐", "draft": "P V Từ cơ bản 5.商业娱乐", "max_bytes": 34}
+{"id": "T0041", "zh": "Part V 基础词汇 6.与人相关", "draft": "P V Từ cơ bản 6.与人相关", "max_bytes": 34}
+{"id": "T0042", "zh": "Part V 基础词汇 7.衣着食物", "draft": "P V Từ cơ bản 7.衣着食物", "max_bytes": 34}
+{"id": "T0043", "zh": "Part V 基础词汇 8.自然生命", "draft": "P V Từ cơ bản 8.自然生命", "max_bytes": 34}
+{"id": "T0044", "zh": "Part V 基础词汇 9.日常用语", "draft": "P V Từ cơ bản 9.日常用语", "max_bytes": 34}
+{"id": "T0045", "zh": "Part V 基础词汇 13.其他基础副词", "draft": "P V Từ cơ bản 13.其他基础副词", "max_bytes": 41}
+{"id": "T0046", "zh": "Part V 基础词汇 14.语法功能词", "draft": "P V Từ cơ bản 14.语法功能词", "max_bytes": 38}
+{"id": "T0047", "zh": "华研高中词汇念念不忘便携手册", "draft": "华研THPT TV念念不忘便携手", "max_bytes": 42}
+{"id": "T0048", "zh": "Part II 高中高频短语 3.介词短语", "draft": "P II CT thường gặp 3.介词CT", "max_bytes": 41}
+{"id": "T0049", "zh": "Part II 高中高频短语 5.名词短语", "draft": "P II CT thường gặp 5.名词CT", "max_bytes": 41}
+{"id": "T0050", "zh": "Part II 高中高频短语 6.其他高频短语", "draft": "P II CT thường gặp 6.其他高频CT", "max_bytes": 47}
+{"id": "T0051", "zh": "PASS巧记3500词", "draft": "PASS巧记3500 từ", "max_bytes": 17}
+{"id": "T0052", "zh": "Chapter I 新课标3500词 Unit 1", "draft": "Ch I Chuẩn mới3500 từ Bài 1", "max_bytes": 33}
+{"id": "T0053", "zh": "Chapter I 新课标3500词 Unit 2", "draft": "Ch I Chuẩn mới3500 từ Bài 2", "max_bytes": 33}
+{"id": "T0054", "zh": "Chatper I 新课标3500词 Unit 3", "draft": "Ch I Chuẩn mới3500 từ Bài 3", "max_bytes": 33}
+{"id": "T0055", "zh": "Chapter I 新课标3500记号 Unit 4", "draft": "Ch I Chuẩn mới3500记号 Unit 4", "max_bytes": 36}
+{"id": "T0056", "zh": "Chapter I 新课标3500词 Unit 5", "draft": "Ch I Chuẩn mới3500 từ Bài 5", "max_bytes": 33}
+{"id": "T0057", "zh": "Chapter I 新课标3500词 Unit 6", "draft": "Ch I Chuẩn mới3500 từ Bài 6", "max_bytes": 33}
+{"id": "T0058", "zh": "Chapter I 新课标3500词 Unit 7", "draft": "Ch I Chuẩn mới3500 từ Bài 7", "max_bytes": 33}
+{"id": "T0059", "zh": "Chapter I 新课标3500词 Unit 8", "draft": "Ch I Chuẩn mới3500 từ Bài 8", "max_bytes": 33}
+{"id": "T0060", "zh": "Chapter I 新课标3500词 Unit 9", "draft": "Ch I Chuẩn mới3500 từ Bài 9", "max_bytes": 33}
+{"id": "T0061", "zh": "Chapter I 新课标3500词 Unit 10", "draft": "Ch I Chuẩn mới3500 từ Bài 10", "max_bytes": 34}
+{"id": "T0062", "zh": "Chapter I 新课标3500词 Unit 11", "draft": "Ch I Chuẩn mới3500 từ Bài 11", "max_bytes": 34}
+{"id": "T0063", "zh": "Chapter I 新课标3500词 Unit 12", "draft": "Ch I Chuẩn mới3500 từ Bài 12", "max_bytes": 34}
+{"id": "T0064", "zh": "Chapter I 新课标3500词 Unit 13", "draft": "Ch I Chuẩn mới3500 từ Bài 13", "max_bytes": 34}
+{"id": "T0065", "zh": "Chapter I 新课标3500词 Unit 14", "draft": "Ch I Chuẩn mới3500 từ Bài 14", "max_bytes": 34}
+{"id": "T0066", "zh": "Chapter I 新课标3500词 Unit 15", "draft": "Ch I Chuẩn mới3500 từ Bài 15", "max_bytes": 34}
+{"id": "T0067", "zh": "Chapter I 新课标3500词 Unit 16", "draft": "Ch I Chuẩn mới3500 từ Bài 16", "max_bytes": 34}
+{"id": "T0068", "zh": "Chapter I 新课标3500词 Unit 17", "draft": "Ch I Chuẩn mới3500 từ Bài 17", "max_bytes": 34}
+{"id": "T0069", "zh": "Chapter I 新课标3500词 Unit 18", "draft": "Ch I Chuẩn mới3500 từ Bài 18", "max_bytes": 34}
+{"id": "T0070", "zh": "Chapter I 新课标3500词 Unit 19", "draft": "Ch I Chuẩn mới3500 từ Bài 19", "max_bytes": 34}
+{"id": "T0071", "zh": "Chapter I 新课标3500词 Unit 20", "draft": "Ch I Chuẩn mới3500 từ Bài 20", "max_bytes": 34}
+{"id": "T0072", "zh": "Chapter I 新课标3500词 Unit 21", "draft": "Ch I Chuẩn mới3500 từ Bài 21", "max_bytes": 34}
+{"id": "T0073", "zh": "Chapter I 新课标3500词 Unit 22", "draft": "Ch I Chuẩn mới3500 từ Bài 22", "max_bytes": 34}
+{"id": "T0074", "zh": "Chapter I 新课标3500词 Unit 23", "draft": "Ch I Chuẩn mới3500 từ Bài 23", "max_bytes": 34}
+{"id": "T0075", "zh": "Chapter I 新课标3500词 Unit 24", "draft": "Ch I Chuẩn mới3500 từ Bài 24", "max_bytes": 34}
+{"id": "T0076", "zh": "Chapter I 新课标3500词 Unit 25", "draft": "Ch I Chuẩn mới3500 từ Bài 25", "max_bytes": 34}
+{"id": "T0077", "zh": "PASS巧记活用3500词", "draft": "PASS巧记活用3500 từ", "max_bytes": 23}
+{"id": "T0078", "zh": "Pass随身记3500词高频乱序版", "draft": "Pass随身记3500 từ高频乱序", "max_bytes": 35}
+{"id": "T0079", "zh": "核心词汇 第1周 Day 1", "draft": "Cốt lõi TV Tuần 1 Day 1", "max_bytes": 26}
+{"id": "T0080", "zh": "核心词汇 第1周 Day 2", "draft": "Cốt lõi TV Tuần 1 Day 2", "max_bytes": 26}
+{"id": "T0081", "zh": "核心词汇 第1周 Day 3", "draft": "Cốt lõi TV Tuần 1 Day 3", "max_bytes": 26}
+{"id": "T0082", "zh": "核心词汇 第1周 Day 4", "draft": "Cốt lõi TV Tuần 1 Day 4", "max_bytes": 26}
+{"id": "T0083", "zh": "核心词汇 第2周 Day 1", "draft": "Cốt lõi TV Tuần 2 Day 1", "max_bytes": 26}
+{"id": "T0084", "zh": "核心词汇 第2周 Day 2", "draft": "Cốt lõi TV Tuần 2 Day 2", "max_bytes": 26}
+{"id": "T0085", "zh": "核心词汇 第2周 Day 3", "draft": "Cốt lõi TV Tuần 2 Day 3", "max_bytes": 26}
+{"id": "T0086", "zh": "核心词汇 第2周 Day 4", "draft": "Cốt lõi TV Tuần 2 Day 4", "max_bytes": 26}
+{"id": "T0087", "zh": "核心词汇 第3周 Day 1", "draft": "Cốt lõi TV Tuần 3 Day 1", "max_bytes": 26}
+{"id": "T0088", "zh": "核心词汇 第3周 Day 2", "draft": "Cốt lõi TV Tuần 3 Day 2", "max_bytes": 26}
+{"id": "T0089", "zh": "核心词汇 第3周 Day 3", "draft": "Cốt lõi TV Tuần 3 Day 3", "max_bytes": 26}
+{"id": "T0090", "zh": "核心词汇 第3周 Day 4", "draft": "Cốt lõi TV Tuần 3 Day 4", "max_bytes": 26}
+{"id": "T0091", "zh": "核心词汇 第4周 Day 1", "draft": "Cốt lõi TV Tuần 4 Day 1", "max_bytes": 26}
+{"id": "T0092", "zh": "核心词汇 第4周 Day 2", "draft": "Cốt lõi TV Tuần 4 Day 2", "max_bytes": 26}
+{"id": "T0093", "zh": "核心词汇 第4周 Day 3", "draft": "Cốt lõi TV Tuần 4 Day 3", "max_bytes": 26}
+{"id": "T0094", "zh": "核心词汇 第4周 Day 4", "draft": "Cốt lõi TV Tuần 4 Day 4", "max_bytes": 26}
+{"id": "T0095", "zh": "PASS高中英语词汇乱序版", "draft": "PASSTHPT Anh Từ vựng乱序", "max_bytes": 31}
+{"id": "T0096", "zh": "简单词汇", "draft": "Từ dễ汇", "max_bytes": 12}
+{"id": "T0097", "zh": "差距词汇", "draft": "差距TV", "max_bytes": 12}
+{"id": "T0098", "zh": "PASS高中英语同步词汇人教版", "draft": "PASSTHPT Anh 同步Từ vựngPEP", "max_bytes": 37}
+{"id": "T0099", "zh": "课标外常考词汇", "draft": "课标外Từ hay thi", "max_bytes": 21}
+{"id": "T0100", "zh": "PASS高中英语同步词汇译林版", "draft": "PASSTHPT Anh 同步Từ vựngYilin", "max_bytes": 37}
+{"id": "T0101", "zh": "PASS图解速记高中英语同步词汇RJ版", "draft": "PASSNhớ qua hìnhTHPT Anh 同步TVRJ", "max_bytes": 45}
+{"id": "T0102", "zh": "PASS图解速记高中英语同步词汇YL版", "draft": "PASSNhớ qua hìnhTHPT Anh 同步TVYL", "max_bytes": 45}
+{"id": "T0103", "zh": "PASS图解速记高中词汇正序版", "draft": "PASSNhớ qua hìnhTHPT TV正序", "max_bytes": 37}
+{"id": "T0104", "zh": "附录 地名", "draft": "Phụ lục 地名", "max_bytes": 13}
+{"id": "T0105", "zh": "附录 月份", "draft": "Phụ lục 月份", "max_bytes": 13}
+{"id": "T0106", "zh": "附录 星期", "draft": "Phụ lục 星期", "max_bytes": 13}
+{"id": "T0107", "zh": "附录 数词", "draft": "Phụ lục 数词", "max_bytes": 13}
+{"id": "T0108", "zh": "PASS图解速记高中词汇乱序版", "draft": "PASSNhớ qua hìnhTHPT TV乱序", "max_bytes": 37}
+{"id": "T0109", "zh": "附录1 地名", "draft": "Phụ lục1 地名", "max_bytes": 14}
+{"id": "T0110", "zh": "附录1 月份", "draft": "Phụ lục1 月份", "max_bytes": 14}
+{"id": "T0111", "zh": "附录1 星期", "draft": "Phụ lục1 星期", "max_bytes": 14}
+{"id": "T0112", "zh": "附录1 数词", "draft": "Phụ lục1 数词", "max_bytes": 14}
+{"id": "T0113", "zh": "2021PASS图解速记高中英语短语与句型", "draft": "2021PASSNhớ qua hìnhTHPT Anh CT与句型", "max_bytes": 47}
+{"id": "T0114", "zh": "及时雨高考英语词汇手册", "draft": "及时雨高考Anh Từ vựng手", "max_bytes": 33}
+{"id": "T0115", "zh": "名校名师高考英语考纲全攻略", "draft": "名校名师高考Anh 考纲全攻略", "max_bytes": 39}
+{"id": "T0116", "zh": "思思大王高考单词一笑而过", "draft": "思思大王高考单词一笑而过", "max_bytes": 36}
+{"id": "T0117", "zh": "List 1 星座与圣斗士", "draft": "List 1 星座与圣斗士", "max_bytes": 25}
+{"id": "T0118", "zh": "List 2 白羊座", "draft": "List 2 白羊座", "max_bytes": 16}
+{"id": "T0119", "zh": "List 3 金牛座", "draft": "List 3 金牛座", "max_bytes": 16}
+{"id": "T0120", "zh": "List 4 双子座", "draft": "List 4 双子座", "max_bytes": 16}
+{"id": "T0121", "zh": "List 5 巨蟹座", "draft": "List 5 巨蟹座", "max_bytes": 16}
+{"id": "T0122", "zh": "List 6 狮子座", "draft": "List 6 狮子座", "max_bytes": 16}
+{"id": "T0123", "zh": "List 7 处女座", "draft": "List 7 处女座", "max_bytes": 16}
+{"id": "T0124", "zh": "List 8 天秤座", "draft": "List 8 天秤座", "max_bytes": 16}
+{"id": "T0125", "zh": "List 9 天蝎座", "draft": "List 9 天蝎座", "max_bytes": 16}
+{"id": "T0126", "zh": "List 10 射手座", "draft": "List 10 射手座", "max_bytes": 17}
+{"id": "T0127", "zh": "List 11 摩羯座", "draft": "List 11 摩羯座", "max_bytes": 17}
+{"id": "T0128", "zh": "List 12 水瓶座", "draft": "List 12 水瓶座", "max_bytes": 17}
+{"id": "T0129", "zh": "List 13 双鱼座", "draft": "List 13 双鱼座", "max_bytes": 17}
+{"id": "T0130", "zh": "List 14 圣衣传说", "draft": "List 14 圣衣传说", "max_bytes": 20}
+{"id": "T0131", "zh": "思思大王高考单词一笑而过（白金版）", "draft": "思思大王高考单词一笑而过(白金)", "max_bytes": 51}
+{"id": "T0132", "zh": "高考历年真题核心高频688", "draft": "高考历年真题Cốt lõi 高频688", "max_bytes": 33}
+{"id": "T0133", "zh": "核心高频688词汇", "draft": "Cốt lõi 高频688 từ汇", "max_bytes": 21}
+{"id": "T0134", "zh": "核心扩展110词汇", "draft": "Cốt lõi 扩展110 từ汇", "max_bytes": 21}
+{"id": "T0135", "zh": "高考词汇分频速记宝典", "draft": "高考TV分频速记宝典", "max_bytes": 30}
+{"id": "T0136", "zh": "第一部分 必考词汇 Unit 1", "draft": "Phần 1 Bắt buộc汇 Unit 1", "max_bytes": 32}
+{"id": "T0137", "zh": "第一部分 必考词汇 Unit 2", "draft": "Phần 1 Bắt buộc汇 Unit 2", "max_bytes": 32}
+{"id": "T0138", "zh": "第一部分 必考词汇 Unit 3", "draft": "Phần 1 Bắt buộc汇 Unit 3", "max_bytes": 32}
+{"id": "T0139", "zh": "第一部分 必考词汇 Unit 4", "draft": "Phần 1 Bắt buộc汇 Unit 4", "max_bytes": 32}
+{"id": "T0140", "zh": "第一部分 必考词汇 Unit 5", "draft": "Phần 1 Bắt buộc汇 Unit 5", "max_bytes": 32}
+{"id": "T0141", "zh": "高考词汇分频速记宝典便携版", "draft": "高考TV分频速记宝典便携", "max_bytes": 39}
+{"id": "T0142", "zh": "高中英语洞穿词汇", "draft": "THPT Anh 洞穿TV", "max_bytes": 24}
+{"id": "T0143", "zh": "零频词 Word List", "draft": "零频词 Word List", "max_bytes": 19}
+{"id": "T0144", "zh": "简单词 日常生活", "draft": "Từ dễ 日常生活", "max_bytes": 22}
+{"id": "T0145", "zh": "简单词 与人相关", "draft": "Từ dễ 与人相关", "max_bytes": 22}
+{"id": "T0146", "zh": "简单词 自然科学", "draft": "Từ dễ 自然科学", "max_bytes": 22}
+{"id": "T0147", "zh": "简单词 社会政经", "draft": "Từ dễ 社会政经", "max_bytes": 22}
+{"id": "T0148", "zh": "简单词 文体教育", "draft": "Từ dễ 文体教育", "max_bytes": 22}
+{"id": "T0149", "zh": "简单词 物体描述", "draft": "Từ dễ 物体描述", "max_bytes": 22}
+{"id": "T0150", "zh": "简单词 其他", "draft": "Từ dễ 其他", "max_bytes": 16}
+{"id": "T0151", "zh": "大学英语课程教学要求", "draft": "ĐH Anh 课程教学要求", "max_bytes": 30}
+{"id": "T0152", "zh": "大学英语参考词汇表", "draft": "ĐH Anh 参考TV表", "max_bytes": 27}
+{"id": "T0153", "zh": "大学英语词组表", "draft": "ĐH Anh 词组表", "max_bytes": 21}
+{"id": "T0154", "zh": "新世纪英语专业综合教程1（第2版）", "draft": "NC Anh 专业tổng hợp1(bản 2)", "max_bytes": 47}
+{"id": "T0155", "zh": "新世纪英语专业综合教程2（第2版）", "draft": "NC Anh 专业tổng hợp2(bản 2)", "max_bytes": 47}
+{"id": "T0156", "zh": "新世纪英语专业综合教程3（第2版）", "draft": "NC Anh 专业tổng hợp3(bản 2)", "max_bytes": 47}
+{"id": "T0157", "zh": "新世纪英语专业综合教程4（第2版）", "draft": "NC Anh 专业tổng hợp4(bản 2)", "max_bytes": 47}
+{"id": "T0158", "zh": "新世纪英语专业综合教程5（第2版）", "draft": "NC Anh 专业tổng hợp5(bản 2)", "max_bytes": 47}
+{"id": "T0159", "zh": "新世纪英语专业综合教程6（第2版）", "draft": "NC Anh 专业tổng hợp6(bản 2)", "max_bytes": 47}
+{"id": "T0160", "zh": "新目标大学英语综合教程1", "draft": "Mục tiêu mới ĐH Anh tổng hợp1", "max_bytes": 34}
+{"id": "T0161", "zh": "新目标大学英语综合教程2", "draft": "Mục tiêu mới ĐH Anh tổng hợp2", "max_bytes": 34}
+{"id": "T0162", "zh": "新目标大学英语综合教程3", "draft": "Mục tiêu mới ĐH Anh tổng hợp3", "max_bytes": 34}
+{"id": "T0163", "zh": "新目标大学英语综合教程4", "draft": "Mục tiêu mới ĐH Anh tổng hợp4", "max_bytes": 34}
+{"id": "T0164", "zh": "高级英语1（第三版）", "draft": "高级Anh 1(bản 3)", "max_bytes": 28}
+{"id": "T0165", "zh": "高级英语2（第三版）", "draft": "高级Anh 2(bản 3)", "max_bytes": 28}
+{"id": "T0166", "zh": "21世纪大学英语综合教程1（S版）", "draft": "21世纪Đại học Anh tổng hợp1(S)", "max_bytes": 43}
+{"id": "T0167", "zh": "21世纪大学英语综合教程2（S版）", "draft": "21世纪Đại học Anh tổng hợp2(S)", "max_bytes": 43}
+{"id": "T0168", "zh": "21世纪大学英语综合教程3（S版）", "draft": "21世纪Đại học Anh tổng hợp3(S)", "max_bytes": 43}
+{"id": "T0169", "zh": "21世纪大学英语综合教程4（S版）", "draft": "21世纪Đại học Anh tổng hợp4(S)", "max_bytes": 43}
+{"id": "T0170", "zh": "新一代大学英语综合教程1基础篇", "draft": "新一代ĐH Anh tổng hợp1基础篇", "max_bytes": 43}
+{"id": "T0171", "zh": "新一代大学英语综合教程2基础篇", "draft": "新一代ĐH Anh tổng hợp2基础篇", "max_bytes": 43}
+{"id": "T0172", "zh": "前景大学英语综合教程1（基础版）", "draft": "前景Đại học Anh tổng hợp1(基础)", "max_bytes": 46}
+{"id": "T0173", "zh": "前景大学英语综合教程2（基础版）", "draft": "前景Đại học Anh tổng hợp2(基础)", "max_bytes": 46}
+{"id": "T0174", "zh": "前景大学英语综合教程3（基础版）", "draft": "前景Đại học Anh tổng hợp3(基础)", "max_bytes": 46}
+{"id": "T0175", "zh": "大学体验英语综合教程基础上（第4版）", "draft": "ĐH 体验Anh tổng hợp基础上(bản 4)", "max_bytes": 52}
+{"id": "T0176", "zh": "大学体验英语综合教程基础下（第4版）", "draft": "ĐH 体验Anh tổng hợp基础下(bản 4)", "max_bytes": 52}
+{"id": "T0177", "zh": "现代大学英语全程辅导精读1（第二版）", "draft": "现代Đại học Anh Đọc sâu1(bản 2)", "max_bytes": 52}
+{"id": "T0178", "zh": "现代大学英语全程辅导精读5（第二版）", "draft": "现代Đại học Anh Đọc sâu5(bản 2)", "max_bytes": 52}
+{"id": "T0179", "zh": "现代大学英语全程辅导精读6（第二版）", "draft": "现代Đại học Anh Đọc sâu6(bản 2)", "max_bytes": 52}
+{"id": "T0180", "zh": "英语综合教程(修订版)学生用书第一册", "draft": "Anh tổng hợp(修订)学生用书tập 1", "max_bytes": 50}
+{"id": "T0181", "zh": "英语综合教程(修订版)学生用书第二册", "draft": "Anh tổng hợp(修订)学生用书tập 2", "max_bytes": 50}
+{"id": "T0182", "zh": "新视界大学英语综合教程1", "draft": "新视界ĐH Anh tổng hợp1", "max_bytes": 34}
+{"id": "T0183", "zh": "新视界大学英语综合教程2", "draft": "新视界ĐH Anh tổng hợp2", "max_bytes": 34}
+{"id": "T0184", "zh": "新视界大学英语综合教程3", "draft": "新视界ĐH Anh tổng hợp3", "max_bytes": 34}
+{"id": "T0185", "zh": "新视界大学英语综合教程4", "draft": "新视界ĐH Anh tổng hợp4", "max_bytes": 34}
+{"id": "T0186", "zh": "现代大学英语精读1", "draft": "现代Đọc sâu Anh ĐH1", "max_bytes": 25}
+{"id": "T0187", "zh": "新起点大学英语视听说教程3", "draft": "新起点Đại học Anh Nghe nói3", "max_bytes": 37}
+{"id": "T0188", "zh": "大学英语四级大纲词汇", "draft": "ĐH Anh 四级大纲TV", "max_bytes": 30}
+{"id": "T0189", "zh": "四级新大纲词汇表", "draft": "四级新大纲TV表", "max_bytes": 24}
+{"id": "T0190", "zh": "大学英语六级大纲词汇", "draft": "ĐH Anh 六级大纲TV", "max_bytes": 30}
+{"id": "T0191", "zh": "六级新大纲词汇表", "draft": "六级新大纲TV表", "max_bytes": 24}
+{"id": "T0192", "zh": "英语专业八级大纲词汇", "draft": "Anh 专业八级大纲TV", "max_bytes": 30}
+{"id": "T0193", "zh": "新概念英语第一册（新版）", "draft": "New Concepttập 1(新)", "max_bytes": 36}
+{"id": "T0194", "zh": "新概念英语第二册（新版）", "draft": "New Concepttập 2(新)", "max_bytes": 36}
+{"id": "T0195", "zh": "新概念英语第三册（新版）", "draft": "New Concepttập 3(新)", "max_bytes": 36}
+{"id": "T0196", "zh": "新概念英语第四册（新版）", "draft": "New Concepttập 4(新)", "max_bytes": 36}
+{"id": "T0197", "zh": "新概念英语青少版入门级A", "draft": "New Concept TN入门级A", "max_bytes": 34}
+{"id": "T0198", "zh": "新概念英语青少版入门级B", "draft": "New Concept TN入门级B", "max_bytes": 34}
+{"id": "T0199", "zh": "2022硕士研究生英语（一）大纲词汇", "draft": "2022硕士研究生Anh (一)大纲Từ vựng", "max_bytes": 46}
+{"id": "T0200", "zh": "2022硕士研究生英语（二）大纲词汇", "draft": "2022硕士研究生Anh (二)大纲Từ vựng", "max_bytes": 46}
+{"id": "T0201", "zh": "考研英语大纲词汇5500", "draft": "考研Anh 大纲TV5500", "max_bytes": 28}
+{"id": "T0202", "zh": "考研英语词汇大全", "draft": "考研Anh TV大全", "max_bytes": 24}
+{"id": "T0203", "zh": "Unit 23 ab-, ar-, ac- 表加强", "draft": "Unit 23 ab-, ar-, ac- 表加强", "max_bytes": 31}
+{"id": "T0204", "zh": "Unit 23 ad- 表加强", "draft": "Unit 23 ad- 表加强", "max_bytes": 21}
+{"id": "T0205", "zh": "Unit 23 com-, con-, co-, col-, cor- 表加强", "draft": "Unit 23 com-, con-, co-, col-, cor- 表加强", "max_bytes": 45}
+{"id": "T0206", "zh": "Unit 26 -al, -ial, -ical, -ual 表名词“人，物”", "draft": "Unit 26 -al, -ial, -ical, -ual 表名词“人，物”", "max_bytes": 55}
+{"id": "T0207", "zh": "Unit 26 -an, -ain, -aire 表名词“人；精通...的人，信仰...的人”", "draft": "Unit 26 -an, -ain, -aire 表名词“人；精通...的人，信仰...的人”", "max_bytes": 79}
+{"id": "T0208", "zh": "Unit 26 -an, -ain, -aire 表名词“物”", "draft": "Unit 26 -an, -ain, -aire 表名词“物”", "max_bytes": 43}
+{"id": "T0209", "zh": "Unit 26 -ant 表名词“人”", "draft": "Unit 26 -ant 表名词“人”", "max_bytes": 31}
+{"id": "T0210", "zh": "Unit 26 -ant 表名词“...物，...剂”", "draft": "Unit 26 -ant 表名词“...物，...剂”", "max_bytes": 43}
+{"id": "T0211", "zh": "Unit 26 -ar 表名词“人，物”", "draft": "Unit 26 -ar 表名词“人，物”", "max_bytes": 36}
+{"id": "T0212", "zh": "Unit 26 -ary, -iliary 表名词“从事...的人”", "draft": "Unit 26 -ary, -iliary 表名词“从事...的人”", "max_bytes": 52}
+{"id": "T0213", "zh": "Unit 27 -ate, -iate 表名词“职位，学位”或“事物的总称”", "draft": "Unit 27 -ate, -iate 表名词“职位，学位”或“事物的总称”", "max_bytes": 74}
+{"id": "T0214", "zh": "Unit 27 -dom 表名词“领域，...界”", "draft": "Unit 27 -dom 表名词“领域，...界”", "max_bytes": 43}
+{"id": "T0215", "zh": "Unit 27 -el, -et, -let, ette 表名词“人；物；总称”", "draft": "Unit 27 -el, -et, -let, ette 表名词“人；物；总称”", "max_bytes": 62}
+{"id": "T0216", "zh": "Unit 27 -en, -on 表名词“人，物”或“小”", "draft": "Unit 27 -en, -on 表名词“人，物”或“小”", "max_bytes": 53}
+{"id": "T0217", "zh": "Unit 27 -ent 表名词“...人，...物”", "draft": "Unit 27 -ent 表名词“...人，...物”", "max_bytes": 43}
+{"id": "T0218", "zh": "Unit 27 -er, -ier, -ee, -eer, -ess, -ter, -ster, -eur 表名词“人；从事...的人；女性，雌性”", "draft": "Unit 27 -er, -ier, -ee, -eer, -ess, -ter, -ster, -eur 表名词“人；从事...的人；女性，雌性”", "max_bytes": 108}
+{"id": "T0219", "zh": "Unit 27 -er, -ier, -ee, -eer, -ess, -ter, -ster, -eur 表名词“物，动物；机器”", "draft": "Unit 27 -er, -ier, -ee, -eer, -ess, -ter, -ster, -eur 表名词“物，动物；机器”", "max_bytes": 90}
+{"id": "T0220", "zh": "Unit 28 -ian, -ician 表名词“...领域的精通者，专家；从事某种职业的人”", "draft": "Unit 28 -ian, -ician 表名词“...领域的精通者，专家；从事某种职业的人”", "max_bytes": 93}
+{"id": "T0221", "zh": "Unit 28 -ism 表名词“...主义；学术”", "draft": "Unit 28 -ism 表名词“...主义；学术”", "max_bytes": 46}
+{"id": "T0222", "zh": "Unit 29 -ly 表副词“...地”", "draft": "Unit 29 -ly 表副词“...地”", "max_bytes": 33}
+{"id": "T0223", "zh": "Unit 29 -or, -ior 表名词“人”", "draft": "Unit 29 -or, -ior 表名词“人”", "max_bytes": 36}
+{"id": "T0224", "zh": "Unit 29 -or, -ior 表名词“物”", "draft": "Unit 29 -or, -ior 表名词“物”", "max_bytes": 36}
+{"id": "T0225", "zh": "Unit 29 -ry, -ery 表“集合名词”", "draft": "Unit 29 -ry, -ery 表“集合名词”", "max_bytes": 39}
+{"id": "T0226", "zh": "Unit 29 -ry, -ery 表名词“...学”", "draft": "Unit 29 -ry, -ery 表名词“...学”", "max_bytes": 39}
+{"id": "T0227", "zh": "Unit 30 -tion, -ation, -ition, -sion, -ion 表名词“物，用品”", "draft": "Unit 30 -tion, -ation, -ition, -sion, -ion 表名词“物，用品”", "max_bytes": 70}
+{"id": "T0228", "zh": "Unit 30 -work 表名词“物质或材料制作的物品”", "draft": "Unit 30 -work 表名词“物质或材料制作的物品”", "max_bytes": 59}
+{"id": "T0229", "zh": "基础常见简单词 介词/副词", "draft": "Từ đơn giản 介词/副词", "max_bytes": 35}
+{"id": "T0230", "zh": "基础常见简单词 连词", "draft": "Từ đơn giản 连词", "max_bytes": 28}
+{"id": "T0231", "zh": "基础常见简单词 代词", "draft": "Từ đơn giản 代词", "max_bytes": 28}
+{"id": "T0232", "zh": "基础常见简单词 方向", "draft": "Từ đơn giản 方向", "max_bytes": 28}
+{"id": "T0233", "zh": "基础常见简单词 季节", "draft": "Từ đơn giản 季节", "max_bytes": 28}
+{"id": "T0234", "zh": "基础常见简单词 月份", "draft": "Từ đơn giản 月份", "max_bytes": 28}
+{"id": "T0235", "zh": "基础常见简单词 星期", "draft": "Từ đơn giản 星期", "max_bytes": 28}
+{"id": "T0236", "zh": "生僻低频简单词", "draft": "生僻低频Từ dễ", "max_bytes": 21}
+{"id": "T0237", "zh": "附录 专有名词 国家、地区", "draft": "Phụ lục Tên riêng 国家、地区", "max_bytes": 35}
+{"id": "T0238", "zh": "附录 考研英语真题词组", "draft": "Phụ lục 考研Anh 真题词组", "max_bytes": 31}
+{"id": "T0239", "zh": "附录 易混淆词对", "draft": "Phụ lục 易混淆词对", "max_bytes": 22}
+{"id": "T0240", "zh": "剑桥国际少儿英语一年级", "draft": "剑桥国际少儿Anh Lớp 1", "max_bytes": 33}
+{"id": "T0241", "zh": "剑桥国际少儿英语二年级", "draft": "剑桥国际少儿Anh Lớp 2", "max_bytes": 33}
+{"id": "T0242", "zh": "剑桥国际少儿英语三年级", "draft": "剑桥国际少儿Anh Lớp 3", "max_bytes": 33}

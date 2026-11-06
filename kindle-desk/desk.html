@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Kindle Desk</title>
+<style>
+/*FONTS*/
+  :root { --ink:#000; --mid:#4a4a4a; --soft:#d9d9d9; --paper:#fff; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { background:var(--paper); color:var(--ink); }
+  body {
+    overflow:hidden; padding:52px 64px;
+    display:flex; flex-direction:column; gap:22px;
+    font-family:"Desk Sans","Segoe UI",Arial,sans-serif;
+  }
+  body.land { padding:40px 56px; gap:18px; }
+  .arr { width:.9em; height:.9em; vertical-align:-.1em; }
+
+  /* header */
+  header { flex:none; display:flex; justify-content:space-between; align-items:center;
+           font-size:34px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; }
+  header .hl, header .hr { padding:30px 26px; margin:-30px -26px; }
+  header .hr { letter-spacing:.04em; text-transform:none; font-weight:400; display:flex; gap:12px; align-items:center; }
+  header .exit { margin-left:18px; border:3px solid var(--ink); border-radius:28px; padding:8px 20px; font-size:28px; font-weight:700; }
+  .dots { display:flex; gap:14px; padding:30px 40px; margin:-30px -40px; }
+  .dots i { width:16px; height:16px; border-radius:50%; border:3px solid var(--ink); display:block; }
+  .dots i.on { background:var(--ink); }
+
+  main { flex:1; min-height:0; display:flex; flex-direction:column; gap:22px; }
+  body.land main { gap:18px; }
+
+  /* panels */
+  .panel { border:4px solid var(--ink); border-radius:30px; background:var(--paper); }
+  .clock { text-align:center; grid-area:clock; }
+  .time { font-family:"Desk Serif",Georgia,serif; font-weight:700; font-size:250px; line-height:.95;
+          letter-spacing:-.02em; font-variant-numeric:lining-nums tabular-nums; }
+  .time small { font-family:"Desk Sans",Arial,sans-serif; font-size:60px; letter-spacing:0; margin-left:12px; }
+  .date { margin-top:8px; font-size:36px; color:var(--mid); }
+  body.land .time { font-size:220px; }
+  body.land .date { font-size:30px; }
+
+  /* desk page: grid areas flip between portrait and landscape */
+  .desk { flex:1; min-height:0; display:grid; gap:22px;
+          grid-template-columns:1fr; grid-template-rows:auto 1fr auto auto;
+          grid-template-areas:"clock" "weather" "card" "dock"; }
+  body.land .desk { gap:18px 26px; grid-template-columns:.9fr 1.1fr; grid-template-rows:auto 1fr auto;
+          grid-template-areas:"clock weather" "card weather" "dock weather"; }
+
+  .weather { grid-area:weather; min-height:0; padding:24px 40px; display:flex; flex-direction:column; justify-content:space-between; }
+  body.land .weather { padding:30px 36px; }
+  .now { display:flex; align-items:center; gap:30px; }
+  .now svg.big { width:165px; height:165px; flex:none; }
+  .now .temp { font-family:"Desk Serif",Georgia,serif; font-size:150px; line-height:1; font-weight:700; }
+  .now .side { margin-left:auto; text-align:right; }
+  .side .label { font-size:46px; font-weight:700; }
+  .side .range { font-size:34px; color:var(--mid); margin-top:6px; }
+  .stats { display:flex; justify-content:space-between; font-size:26px; color:var(--mid);
+           border-top:2px solid var(--soft); border-bottom:2px solid var(--soft); padding:14px 0; white-space:nowrap; }
+  body.land .stats { display:grid; grid-template-columns:repeat(3,auto); gap:10px 12px; justify-content:space-between; font-size:28px; }
+  .stats b { color:var(--ink); font-weight:700; }
+  .stats svg.sm { width:34px; height:34px; vertical-align:middle; margin-left:6px; }
+  .strip { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; text-align:center; }
+  .strip .c { display:flex; flex-direction:column; align-items:center; font-size:26px; line-height:1.25; }
+  .strip svg { width:54px; height:54px; }
+  .strip .t { font-weight:700; font-size:32px; }
+  .strip .m { color:var(--mid); font-size:24px; }
+  .strip .k { color:var(--mid); letter-spacing:.06em; }
+  body.land .strip svg { width:84px; height:84px; }
+  body.land .strip .c { font-size:30px; }
+  body.land .strip .t { font-size:42px; }
+  body.land .strip .m { font-size:28px; }
+  body.land .now svg.big { width:190px; height:190px; }
+  body.land .now .temp { font-size:170px; }
+  body.land .now { gap:22px; }
+  body.land .side .label { font-size:46px; white-space:nowrap; }
+  body.land .side .range { font-size:32px; white-space:nowrap; }
+  body.land .stats { font-size:32px; }
+
+  /* flashcard */
+  .card { grid-area:card; padding:24px 40px 20px; height:392px; flex:none; display:flex; flex-direction:column; }
+  body.land .card { height:auto; min-height:0; padding:20px 30px 16px; }
+  .card .top { display:flex; justify-content:space-between; font-size:26px; letter-spacing:.16em;
+               text-transform:uppercase; font-weight:700; color:var(--mid); }
+  .card .front { text-align:center; margin-top:8px; }
+  .front .w { font-family:"Desk Serif",Georgia,serif; font-size:92px; font-weight:700; line-height:1.1; }
+  .front .s { font-size:34px; color:var(--mid); min-height:40px; }
+  .card .rule { border-top:3px dashed var(--ink); margin:10px 0; }
+  .card .back { text-align:center; flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .back .w { font-family:"Desk Serif",Georgia,serif; font-size:70px; font-weight:700; line-height:1.1; }
+  .back .s { font-size:30px; color:var(--mid); font-style:italic; margin-top:6px; }
+  .back .hidden { font-size:60px; letter-spacing:.5em; color:var(--soft); }
+  body.land .card .top { font-size:28px; }
+  body.land .front { margin-top:24px; }
+  body.land .front .w { font-size:120px; }
+  body.land .front .s { font-size:42px; }
+  body.land .back .w { font-size:84px; }
+  body.land .back .s { font-size:34px; }
+  body.land .back .hidden { font-size:80px; }
+
+  /* dock */
+  .dock { grid-area:dock; flex:none; justify-self:center; align-self:center; display:flex; gap:8px; background:var(--ink); padding:12px; border-radius:70px; }
+  .tab { display:flex; align-items:center; gap:12px; padding:18px 36px; border-radius:58px;
+         color:var(--paper); font-size:34px; font-weight:700; letter-spacing:.04em; }
+  .tab > svg { width:38px; height:38px; }
+  .tab.on { background:var(--paper); color:var(--ink); }
+  body.land .tab { padding:14px 22px; font-size:28px; gap:10px; }
+  body.land .tab > svg { width:32px; height:32px; }
+
+  /* shared page blocks */
+  .center { flex:1; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:26px; }
+  .muted { color:var(--mid); }
+
+  /* focus */
+  .ring { position:relative; width:700px; height:700px; }
+  body.land .ring { width:640px; height:640px; }
+  .ring svg.r { width:100%; height:100%; transform:rotate(-90deg); }
+  .ring .mid { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ring .num { font-family:"Desk Serif",Georgia,serif; font-weight:700; font-size:260px; line-height:1; }
+  .ring .unit { font-size:46px; color:var(--mid); letter-spacing:.1em; }
+  .focus .label { font-size:64px; font-weight:700; }
+  .focus .hint { font-size:38px; color:var(--mid); }
+
+  /* vocab */
+  .vocab { flex:1; min-height:0; display:flex; flex-direction:column; gap:22px; }
+  .vcard { flex:1; min-height:0; padding:36px 48px; display:flex; flex-direction:column; text-align:center; }
+  .vcard .top { display:flex; justify-content:space-between; font-size:30px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--mid); }
+  .vcard .fr { margin-top:40px; }
+  .vcard .fr .w { font-family:"Desk Serif",Georgia,serif; font-size:170px; font-weight:700; line-height:1.05; }
+  .vcard .fr .s { font-size:48px; color:var(--mid); min-height:56px; }
+  .vcard .rule { border-top:4px dashed var(--ink); margin:30px 0; }
+  .vcard .bk { flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .vcard .bk .w { font-family:"Desk Serif",Georgia,serif; font-size:112px; font-weight:700; line-height:1.1; }
+  .vcard .bk .s { font-size:42px; color:var(--mid); font-style:italic; margin-top:14px; }
+  .vcard .bk .hidden { font-size:90px; letter-spacing:.5em; color:var(--soft); }
+  body.land .vcard { padding:24px 40px; }
+  body.land .vcard .fr { margin-top:10px; }
+  body.land .vcard .fr .w { font-size:130px; }
+  body.land .vcard .bk .w { font-size:84px; }
+  body.land .vcard .rule { margin:16px 0; }
+
+  /* quote */
+  .quote .mark { font-family:"Desk Serif",Georgia,serif; font-size:300px; line-height:.6; height:150px; }
+  .quote .txt { font-family:"Desk Serif",Georgia,serif; font-size:76px; line-height:1.25; font-weight:700; max-width:1040px; }
+  body.land .quote .txt { font-size:68px; max-width:1360px; }
+  .quote .by { font-size:44px; color:var(--mid); }
+
+  /* calendar */
+  .cal { flex:1; min-height:0; display:grid; gap:22px; grid-template-columns:1fr; grid-template-rows:1fr auto;
+         grid-template-areas:"grid" "side"; }
+  body.land .cal { grid-template-columns:1.25fr .75fr; grid-template-rows:1fr; grid-template-areas:"grid side"; }
+  .calgrid { grid-area:grid; min-height:0; padding:26px 30px; display:flex; flex-direction:column; }
+  .calgrid .title { font-family:"Desk Serif",Georgia,serif; font-size:64px; font-weight:700; text-align:center; margin-bottom:14px; }
+  .g7 { flex:1; min-height:0; display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:auto; grid-auto-rows:1fr; }
+  .g7 .hd { text-align:center; font-weight:700; font-size:28px; color:var(--mid); padding-bottom:8px; }
+  .g7 .dd { display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:46px; font-weight:700; line-height:1.05; border-radius:20px; margin:3px; position:relative; }
+  .g7 .dd small { font-size:22px; font-weight:400; color:var(--mid); }
+  .g7 .dd.today { background:var(--ink); color:var(--paper); }
+  .g7 .dd.today small { color:var(--paper); }
+  .g7 .dd.ev::after { content:""; position:absolute; bottom:4px; width:12px; height:12px; border-radius:50%; background:currentColor; }
+  .side { grid-area:side; min-height:0; display:flex; flex-direction:column; gap:22px; }
+  body.land .side { gap:18px; }
+  .moon { padding:22px 28px; display:flex; align-items:center; gap:26px; }
+  .moon svg { width:130px; height:130px; flex:none; }
+  .moon .n { font-size:42px; font-weight:700; }
+  .moon .d { font-size:30px; color:var(--mid); }
+  .events { flex:1; min-height:0; padding:22px 30px; display:flex; flex-direction:column; gap:12px; }
+  .events h3 { font-size:28px; letter-spacing:.14em; text-transform:uppercase; color:var(--mid); }
+  .ev { display:flex; align-items:center; gap:20px; border-top:2px solid var(--soft); padding-top:10px; }
+  .ev .dn { font-family:"Desk Serif",Georgia,serif; font-size:76px; font-weight:700; min-width:150px; line-height:1; }
+  .ev .dn small { font-family:"Desk Sans",Arial,sans-serif; font-size:26px; font-weight:400; }
+  .ev .nm { font-size:34px; font-weight:700; }
+  .ev .dt { font-size:26px; color:var(--mid); }
+
+  /* menu */
+  .menu { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:16px; }
+  .mt { font-family:"Desk Serif",Georgia,serif; font-size:84px; font-weight:700; text-align:center; margin-bottom:8px; }
+  .ms { font-size:28px; letter-spacing:.14em; text-transform:uppercase; color:var(--mid); margin-top:10px; }
+  .mr { display:flex; flex-wrap:wrap; gap:14px; }
+  .mb { flex:1 1 220px; text-align:center; padding:26px 18px; border:4px solid var(--ink); border-radius:28px; font-size:38px; font-weight:700; background:var(--paper); }
+  .mb.on { background:var(--ink); color:var(--paper); }
+  body.land .mb { padding:18px 14px; font-size:34px; }
+  body.land .mt { font-size:64px; }
+  body.land .menu { gap:10px; }
+
+  /* sleep */
+  .sleep { flex:1; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px; text-align:center; }
+  .sleep .zz { font-family:"Desk Serif",Georgia,serif; font-size:120px; font-weight:700; }
+  .sleep .row { display:flex; gap:26px; width:100%; justify-content:center; }
+  .sleep .box { padding:24px 32px; min-width:340px; }
+  .sleep .big { font-size:56px; font-weight:700; }
+  .sleep .small { font-size:30px; color:var(--mid); }
+  .bat { display:inline-block; width:130px; height:56px; border:5px solid var(--ink); border-radius:12px; position:relative; vertical-align:middle; margin-right:16px; }
+  .bat::after { content:""; position:absolute; right:-14px; top:13px; width:9px; height:22px; background:var(--ink); border-radius:0 4px 4px 0; }
+  .bat i { position:absolute; left:4px; top:4px; bottom:4px; background:var(--ink); }
+  .sleep .q { font-family:"Desk Serif",Georgia,serif; font-size:44px; max-width:1000px; line-height:1.3; }
+  .sleep .wake { font-size:30px; color:var(--mid); letter-spacing:.1em; text-transform:uppercase; }
+  body.land .sleep { gap:20px; }
+  body.land .sleep .zz { font-size:96px; }
+  body.land .sleep .q { max-width:1300px; font-size:40px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+let S = /*STATE*/null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+
+// 100x100 line icons, stroke only so they stay crisp on e-ink
+const CLOUD = '<path d="M28 72h42a17 17 0 0 0 2-33.8A23 23 0 0 0 29 44a14 14 0 0 0-1 28z"/>';
+function sun(cx, cy, r, ray) {
+  let s = `<circle cx="${cx}" cy="${cy}" r="${r}"/>`;
+  for (let i = 0; i < 8; i++) {
+    const a = i * Math.PI / 4, x1 = cx + Math.cos(a) * (r + 6), y1 = cy + Math.sin(a) * (r + 6),
+          x2 = cx + Math.cos(a) * (r + 6 + ray), y2 = cy + Math.sin(a) * (r + 6 + ray);
+    s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/>`;
+  }
+  return s;
+}
+function kind(c) {
+  if (c === 0) return 'sun'; if (c <= 2) return 'part'; if (c === 3) return 'cloud';
+  if (c === 45 || c === 48) return 'fog'; if (c >= 95) return 'storm';
+  if ((c >= 71 && c <= 77) || c === 85 || c === 86) return 'snow'; return 'rain';
+}
+function icon(c, cls) {
+  let g;
+  switch (kind(c)) {
+    case 'sun': g = sun(50, 50, 17, 10); break;
+    case 'part': g = sun(34, 34, 12, 7) + '<g transform="translate(6 6)">' + CLOUD + '</g>'; break;
+    case 'cloud': g = '<g transform="translate(0 -4)">' + CLOUD + '</g>'; break;
+    case 'fog': g = [34, 48, 62, 76].map((y, i) => `<line x1="${22 + i % 2 * 8}" y1="${y}" x2="${78 - (i + 1) % 2 * 8}" y2="${y}"/>`).join(''); break;
+    case 'storm': g = '<g transform="translate(0 -12)">' + CLOUD + '</g><polygon points="54,66 42,84 51,84 46,98 62,78 53,78" fill="#000"/>'; break;
+    case 'snow': g = '<g transform="translate(0 -12)">' + CLOUD + '</g>' + [34, 50, 66].map(x => `<circle cx="${x}" cy="82" r="3.5" fill="#000"/>`).join(''); break;
+    default: g = '<g transform="translate(0 -12)">' + CLOUD + '</g>' + [32, 48, 64].map(x => `<line x1="${x + 6}" y1="68" x2="${x}" y2="86"/>`).join('');
+  }
+  return `<svg class="${cls || ''}" viewBox="0 0 100 100" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">${g}</svg>`;
+}
+function moonSvg(phase, attrs) {
+  const r = 45, cx = 50, cy = 50, k = Math.cos(phase * 2 * Math.PI), rx = Math.abs(k) * r;
+  const top = `${cx} ${cy - r}`, bot = `${cx} ${cy + r}`;
+  const waxing = phase < 0.5;
+  const limb = waxing ? 1 : 0;
+  const term = waxing ? (k > 0 ? 0 : 1) : (k > 0 ? 1 : 0);
+  const lit = `M ${top} A ${r} ${r} 0 0 ${limb} ${bot} A ${rx.toFixed(2)} ${r} 0 0 ${term} ${top} Z`;
+  return `<svg viewBox="0 0 100 100" ${attrs || ''}><circle cx="50" cy="50" r="45" fill="#fff" stroke="#000" stroke-width="4"/><path d="${lit}" fill="#000"/></svg>`;
+}
+const ARR = '<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h17M14 6l6 6-6 6"/></svg>';
+const DIR = {en2vi: 'EN ' + ARR + ' VI', vi2en: 'VI ' + ARR + ' EN'};
+const TABS = [['en2vi', 'EN ' + ARR + ' VI', '<path d="M4 6h10M9 4v2m-4 8c3-1 6-4 7-8M8 10c1 2 3 4 5 5"/><path d="M14 20l4-10 4 10m-6.5-3h5"/>'],
+              ['vi2en', 'VI ' + ARR + ' EN', '<path d="M20 6H10M15 4v2m5 8c-3-1-6-4-7-8m4 4c-1 2-3 4-5 5"/><path d="M2 20l4-10 4 10m-6.5-3h5"/>'],
+              ['mixed', 'Trộn', '<path d="M3 7h4l10 10h4M3 17h4l3-3m4-4l3-3h4M18 4l3 3-3 3M18 14l3 3-3 3"/>']];
+const dock = C => `<nav class="dock">${TABS.map(([m, l, p]) =>
+  `<div class="tab ${C.mode === m ? 'on' : ''}" data-act="mode?m=${m}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>${l}</div>`).join('')}</nav>`;
+const degs = () => S.unit === 'F' ? '°F' : '°';
+
+const header = () => `<header>
+  <div class="hl" data-act="menu">${esc(S.weekday)}</div>
+  <div class="dots" data-act="page?d=1">${Array.from({length: S.pages}, (_, i) => `<i class="${i === S.p ? 'on' : ''}"></i>`).join('')}</div>
+  <div class="hr" data-act="refresh"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><span>${esc(S.city)}</span><div class="exit" data-act="@exit">Đọc sách</div></div>
+</header>`;
+
+const dateLine = () => esc(S.date) + (S.lunar ? ' · ' + esc(S.lunar.text) + ' · ' + esc(S.lunar.year) : '');
+const clockBlock = () => `<section class="clock"><div class="time">${esc(S.hhmm)}${S.ampm ? `<small>${S.ampm}</small>` : ''}</div><div class="date">${dateLine()}</div></section>`;
+
+function weatherPanel() {
+  const W = S.weather;
+  if (!W) return '<section class="panel weather"><div style="font-size:40px;text-align:center;margin:auto">Chưa có dữ liệu thời tiết</div></section>';
+  return `<section class="panel weather">
+    <div class="now">${icon(W.code, 'big')}<div class="temp">${W.temp}${degs()}</div>
+      <div class="side"><div class="label">${esc(W.label)}</div><div class="range">Cao ${W.hi}° · Thấp ${W.lo}°</div></div></div>
+    <div class="stats"><span>Cảm giác <b>${W.feels}°</b></span><span>Ẩm <b>${W.hum}%</b></span>
+      <span>Gió <b>${W.wind}</b> ${W.wind_unit}</span><span>UV <b>${W.uv}</b></span>
+      ${W.aqi != null ? `<span>AQI <b>${W.aqi}</b> ${esc(W.aqi_label)}</span>` : ''}
+      <span><b>${W.sunrise}</b>–<b>${W.sunset}</b>${icon(0, 'sm')}</span></div>
+    <div class="strip">${W.hours.map(h => `<div class="c"><span class="k">${h.h}</span>${icon(h.code)}<span class="t">${h.t}°</span><span class="m">${h.pop}%</span></div>`).join('')}</div>
+    <div class="strip">${W.days.map(d => `<div class="c"><span class="k">${d.d}</span>${icon(d.code)}<span class="t">${d.hi}°</span><span class="m">${d.lo}°</span></div>`).join('')}</div>
+  </section>`;
+}
+
+function flashPanel() {
+  const C = S.card;
+  return `<section class="panel card" data-act="flip">
+    <div class="top"><span>Flashcard · ${DIR[C.direction]}</span><span>${String(C.idx).padStart(2, '0')} / ${C.total}</span></div>
+    <div class="front"><div class="w">${esc(C.front)}</div><div class="s">${esc(C.sub)}</div></div>
+    <div class="rule"></div>
+    <div class="back">${C.flipped ? `<div class="w">${esc(C.back)}</div><div class="s">${esc(C.back_sub)}</div>` : '<div class="hidden">• • •</div>'}</div>
+  </section>`;
+}
+
+function pageDesk() {
+  return `<div class="desk">${clockBlock()}${weatherPanel()}${flashPanel()}${dock(S.card)}</div>`;
+}
+
+function pageVocab() {
+  const C = S.card;
+  return `<div class="vocab"><section class="panel vcard" data-act="flip">
+    <div class="top"><span>Từ vựng · ${DIR[C.direction]}</span><span>${String(C.idx).padStart(2, '0')} / ${C.total}</span></div>
+    <div class="fr"><div class="w">${esc(C.front)}</div><div class="s">${esc(C.sub)}</div></div>
+    <div class="rule"></div>
+    <div class="bk">${C.flipped ? `<div class="w">${esc(C.back)}</div><div class="s">${esc(C.back_sub)}</div>` : '<div class="hidden">• • •</div>'}</div>
+  </section>${dock(C)}</div>`;
+}
+
+function pageFocus() {
+  const P = S.pomo, R = 88, circ = 2 * Math.PI * R, done = P.state.startsWith('done');
+  const mid = done
+    ? '<svg viewBox="0 0 24 24" width="260" height="260" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>'
+    : P.state === 'idle' ? `<div class="num">${P.total_min}</div><div class="unit">PHÚT</div>`
+    : `<div class="num">${P.remain_min}</div><div class="unit">PHÚT CÒN LẠI</div>`;
+  return `<div class="center focus" data-act="pomo?a=toggle">
+    <div class="ring"><svg class="r" viewBox="0 0 200 200"><circle cx="100" cy="100" r="${R}" fill="none" stroke="#d9d9d9" stroke-width="12"/>
+      ${P.frac > 0 ? `<circle cx="100" cy="100" r="${R}" fill="none" stroke="#000" stroke-width="12" stroke-linecap="round" stroke-dasharray="${(circ * Math.min(1, P.frac)).toFixed(1)} ${circ.toFixed(1)}"/>` : ''}</svg>
+      <div class="mid">${mid}</div></div>
+    <div class="label">${esc(P.label)}</div><div class="hint">${esc(P.hint)}</div></div>`;
+}
+
+function pageQuote() {
+  const Q = S.quote;
+  return `<div class="center quote" data-act="quote?d=1"><div class="mark">“</div>
+    <div class="txt">${esc(Q.text)}</div><div class="by">— ${esc(Q.by)}</div>
+    <div class="muted" style="font-size:34px;margin-top:20px">${dateLine()}</div></div>`;
+}
+
+function pageCalendar() {
+  const K = S.cal, hd = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+  const cells = hd.map(h => `<div class="hd">${h}</div>`).join('') + '<div></div>'.repeat(K.start) +
+    K.days.map(d => `<div class="dd ${d.d === K.today ? 'today' : ''} ${d.ev ? 'ev' : ''}">${d.d}${S.lunar ? `<small>${d.lunar}</small>` : ''}</div>`).join('');
+  const evs = S.events.slice(0, 3).map(e => `<div class="ev"><div class="dn">${e.days === 0 ? '0' : Math.abs(e.days)}<small> ${e.days < 0 ? 'ngày trước' : e.days === 0 ? 'HÔM NAY' : 'ngày nữa'}</small></div>
+    <div><div class="nm">${esc(e.name)}</div><div class="dt">${e.date}</div></div></div>`).join('');
+  return `<div class="cal"><section class="panel calgrid"><div class="title">Tháng ${K.month} · ${K.year}</div><div class="g7">${cells}</div></section>
+    <div class="side"><section class="panel moon">${moonSvg(S.moon.phase)}<div><div class="n">${esc(S.moon.name)}</div><div class="d">Sáng ${S.moon.illum}% · ngày ${S.moon.age}</div></div></section>
+    <section class="panel events"><h3>Sự kiện sắp tới</h3>${evs || '<div class="muted" style="font-size:32px">Thêm sự kiện trong trang cài đặt</div>'}</section></div></div>`;
+}
+
+function pageSleep() {
+  const W = S.weather, tm = W && W.days[0], Z = S.sleep;
+  const batHtml = Z.bat != null ? `<span class="bat"><i style="width:${Math.max(4, Math.round(Z.bat * 1.12))}px"></i></span>${Z.bat}%` : '—';
+  const ev = S.events[0];
+  return `<div class="sleep"><div class="zz">Ngủ ngon</div>
+    <div class="small" style="font-size:36px">${dateLine()}</div>
+    <div class="row">
+      <div class="panel box"><div class="small">Cập nhật lúc</div><div class="big">${esc(Z.at)}</div></div>
+      <div class="panel box"><div class="small">Pin</div><div class="big">${batHtml}</div></div>
+      ${tm ? `<div class="panel box"><div class="small">${esc(S.tomorrow_label)} · ngày mai</div><div class="big">${tm.hi}° / ${tm.lo}°</div></div>` : ''}
+    </div>
+    <div class="row">
+      <div class="panel box" style="display:flex;align-items:center;gap:24px">${moonSvg(S.moon.phase, 'width="110" height="110"')}<div style="text-align:left"><div class="big" style="font-size:40px">${esc(S.moon.name)}</div><div class="small">Sáng ${S.moon.illum}%</div></div></div>
+      ${ev ? `<div class="panel box"><div class="small">${esc(ev.name)}</div><div class="big">${ev.days === 0 ? 'Hôm nay' : Math.abs(ev.days) + (ev.days < 0 ? ' ngày trước' : ' ngày nữa')}</div></div>` : ''}
+    </div>
+    <div class="q">“${esc(S.quote.text)}”<div class="small" style="margin-top:8px">— ${esc(S.quote.by)}</div></div>
+    <div class="wake">Nhấn nút nguồn để đánh thức</div></div>`;
+}
+
+function pageMenu() {
+  const M = S.menu;
+  const b = (label, act, on) => `<div class="mb ${on ? 'on' : ''}" data-act="${act}">${label}</div>`;
+  const rots = [['portrait', 'Dọc'], ['landscape_cw', 'Ngang (xoay trái)'], ['portrait_inv', 'Dọc ngược'], ['landscape_ccw', 'Ngang (xoay phải)']];
+  return `<div class="menu"><div class="mt">Cài đặt</div>
+    <div class="ms">Trang</div><div class="mr">${b('&lt; Trang trước', '@page:-1')}${b('Trang kế &gt;', '@page:1')}</div>
+    <div class="ms">Xoay màn hình</div><div class="mr">${rots.map(([k, l]) => b(l, '@rot:' + k, M.rot === k)).join('')}</div>
+    <div class="ms">Làm mới mỗi</div><div class="mr">${[1, 2, 5, 10].map(m => b(m + ' phút', '@ref:' + m, M.ref === m)).join('')}</div>
+    <div class="ms">Ngủ</div><div class="mr">${b('Màn hình ngủ', '@sleepscreen', M.sleep_screen)}${b('Ngủ ngay', '@sleep')}</div>
+    <div class="mr">${b('Ngủ đêm ' + M.night_from + 'h–' + M.night_to + 'h', '@night', M.night)}${b('Đổi giờ đêm', '@nightpreset')}</div>
+    <div class="ms">Giao diện</div><div class="mr">${b('Tự vẽ trên Kindle', '@ui:native')}${b('Ảnh từ server', '@ui:image', true)}</div>
+    <div class="mr" style="margin-top:14px">${b('Làm mới ngay', '@refresh')}${b('Đóng menu', '@close', true)}${b('Thoát Desk', '@exit')}</div></div>`;
+}
+
+const PAGES = {menu: pageMenu, desk: pageDesk, vocab: pageVocab, focus: pageFocus, quote: pageQuote, calendar: pageCalendar, sleep: pageSleep};
+function draw(st) {
+  S = st;
+  document.body.style.width = S.w + 'px';
+  document.body.style.height = S.h + 'px';
+  document.body.classList.toggle('land', !!S.land);
+  const bare = S.page === 'sleep' || S.page === 'menu';
+  $('app').innerHTML = (bare ? '' : header()) + `<main>${PAGES[S.page]()}</main>`;
+  $('app').style.display = 'contents';
+}
+window.draw = draw;
+if (S) draw(S);
+
+// Tap zones as fractions of the page, read by the server after the fonts have loaded.
+Object.defineProperty(window, '__ZONES', {get() {
+  return [...document.querySelectorAll('[data-act]')].map(e => {
+    const r = e.getBoundingClientRect();
+    return {a: e.dataset.act, x: +(r.left / S.w).toFixed(4), y: +(r.top / S.h).toFixed(4),
+            w: +(r.width / S.w).toFixed(4), h: +(r.height / S.h).toFixed(4)};
+  });
+}});
+</script>
+</body>
+</html>

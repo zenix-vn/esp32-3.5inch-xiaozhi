@@ -1,0 +1,86 @@
+# Danh sách chưa dịch
+
+Sinh tự động từ `res_full.bin` bằng `python tools/list_untranslated.py`, đừng sửa tay.
+
+| Nhóm | Chưa dịch | Phần | Ghi chú |
+|---|---:|---|---|
+| A | 0 | | |
+| B: chỉ có trong từ điển | 28,471 | P029–P123 | Chưa rõ máy có hiện không |
+| T: tên sách, tên chương | 65 | T001 | Xem bên dưới |
+| G: nghĩa cụm từ trong sách | 1,196 | G001 | `build.py` hiện chưa nạp được nhóm này |
+
+Đã dịch trên bản dựng: 8,397 mục. Không có chữ Hán nên không cần dịch: 25 mục.
+
+Danh sách đầy đủ từng từ: [untranslated.csv](untranslated.csv), xếp theo mức xuất hiện trong sách.
+
+## 50 từ gặp nhiều nhất còn chưa dịch
+
+
+
+## Tên sách còn tiếng Trung
+
+- 华研高中词汇念念不忘便携手册
+- Chapter I 新课标3500记号 Unit 4
+- Pass随身记3500词高频乱序版
+- 2021PASS图解速记高中英语短语与句型
+- 思思大王高考单词一笑而过
+- 思思大王高考单词一笑而过（白金版）
+- 核心高频688词汇
+- 核心扩展110词汇
+- 新一代大学英语综合教程1基础篇
+- 新一代大学英语综合教程2基础篇
+- 新视界大学英语综合教程1
+- 新视界大学英语综合教程2
+- 新视界大学英语综合教程3
+- 新视界大学英语综合教程4
+- 新起点大学英语视听说教程3
+- 大学英语四级大纲词汇
+- 四级新大纲词汇表
+- 大学英语六级大纲词汇
+- 六级新大纲词汇表
+- 英语专业八级大纲词汇
+- 新概念英语第一册（新版）
+- 新概念英语第二册（新版）
+- 新概念英语第三册（新版）
+- 新概念英语第四册（新版）
+- 新概念英语青少版入门级A
+- 新概念英语青少版入门级B
+- 2022硕士研究生英语（一）大纲词汇
+- 2022硕士研究生英语（二）大纲词汇
+- 考研英语大纲词汇5500
+- 考研英语词汇大全
+- Unit 23 ab-, ar-, ac- 表加强
+- Unit 23 ad- 表加强
+- Unit 23 com-, con-, co-, col-, cor- 表加强
+- Unit 26 -al, -ial, -ical, -ual 表名词“人，物”
+- Unit 26 -an, -ain, -aire 表名词“人；精通...的人，信仰...的人”
+- Unit 26 -an, -ain, -aire 表名词“物”
+- Unit 26 -ant 表名词“人”
+- Unit 26 -ant 表名词“...物，...剂”
+- Unit 26 -ar 表名词“人，物”
+- Unit 26 -ary, -iliary 表名词“从事...的人”
+- Unit 27 -ate, -iate 表名词“职位，学位”或“事物的总称”
+- Unit 27 -dom 表名词“领域，...界”
+- Unit 27 -el, -et, -let, ette 表名词“人；物；总称”
+- Unit 27 -en, -on 表名词“人，物”或“小”
+- Unit 27 -ent 表名词“...人，...物”
+- Unit 27 -er, -ier, -ee, -eer, -ess, -ter, -ster, -eur 表名词“人；从事...的人；女性，雌性”
+- Unit 27 -er, -ier, -ee, -eer, -ess, -ter, -ster, -eur 表名词“物，动物；机器”
+- Unit 28 -ian, -ician 表名词“...领域的精通者，专家；从事某种职业的人”
+- Unit 28 -ism 表名词“...主义；学术”
+- Unit 29 -ly 表副词“...地”
+- Unit 29 -or, -ior 表名词“人”
+- Unit 29 -or, -ior 表名词“物”
+- Unit 29 -ry, -ery 表“集合名词”
+- Unit 29 -ry, -ery 表名词“...学”
+- Unit 30 -tion, -ation, -ition, -sion, -ion 表名词“物，用品”
+- Unit 30 -work 表名词“物质或材料制作的物品”
+- 基础常见简单词 介词/副词
+- 基础常见简单词 连词
+- 基础常见简单词 代词
+- 基础常见简单词 方向
+- 基础常见简单词 季节
+- 生僻低频简单词
+- 附录 专有名词 国家、地区
+- 附录 考研英语真题词组
+- 附录 易混淆词对

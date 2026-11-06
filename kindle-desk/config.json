@@ -1,0 +1,13 @@
+{
+  "port": 8080,
+  "width": 1264,
+  "height": 1680,
+  "city": "Hà Nội",
+  "latitude": 21.0285,
+  "longitude": 105.8542,
+  "timezone": "Asia/Ho_Chi_Minh",
+  "utc_offset_hours": 7,
+  "card_seconds": 90,
+  "flip_after_seconds": 20,
+  "default_mode": "mixed"
+}

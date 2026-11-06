@@ -579,6 +579,7 @@ static void pageSettings() {
   g = stGroup(c);
   stRow(g, LV_SYMBOL_EDIT, 0x4C8BF5, DL("Hiệu chuẩn cảm ứng", "Recalibrate touch"), "", C_MUTED, askRecalibrate);
   stRow(g, LV_SYMBOL_REFRESH, 0xF2A33A, DL("Khởi động lại", "Restart"), "", C_MUTED, askRestart);
+  stRow(g, LV_SYMBOL_POWER, 0x6C7A99, DL("Tắt máy", "Shut down"), DL("Chạm màn hình để bật", "Touch to turn on"), C_MUTED, askPowerOff);
   stRow(g, LV_SYMBOL_TRASH, 0xE0566E, DL("Khôi phục cài đặt gốc", "Factory reset"), "", C_DANGER, askFactoryReset);
   lv_obj_t *pad = lv_obj_create(c);  // a little room under the last group
   lv_obj_remove_style_all(pad);

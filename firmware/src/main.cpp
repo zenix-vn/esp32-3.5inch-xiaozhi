@@ -422,6 +422,9 @@ static void buildUI() {
 }
 
 void setup() {
+  // Shut down (power.h) holds the backlight and LED pins through deep sleep: let go of them before they are set up.
+  for (int p : {PIN_BL, 4, 16, 17}) gpio_hold_dis((gpio_num_t)p);
+  gpio_deep_sleep_hold_dis();
   Serial.begin(115200);
   i18nLoad();
   cfgLoad();

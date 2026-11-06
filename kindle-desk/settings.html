@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kindle Desk · Cài đặt</title>
+<style>
+  :root { --bg:#f6f6f4; --card:#fff; --ink:#111; --mid:#666; --line:#ddd; --accent:#111; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111; --card:#1b1b1b; --ink:#eee; --mid:#999; --line:#333; --accent:#eee; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,"Segoe UI",sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:20px 16px 90px; }
+  h1 { font-size:24px; margin:8px 0 4px; } p.sub { color:var(--mid); margin:0 0 18px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin:0 0 16px; }
+  h2 { font-size:15px; letter-spacing:.08em; text-transform:uppercase; color:var(--mid); margin:0 0 12px; }
+  label { display:block; margin:10px 0 4px; font-weight:600; font-size:14px; }
+  input[type=text], input[type=number], input[type=date], select, textarea {
+    width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:9px; background:var(--bg); color:var(--ink); font:inherit; }
+  textarea { min-height:140px; font:14px/1.45 ui-monospace,Consolas,monospace; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; } .row > * { flex:1 1 150px; }
+  .chk { display:flex; align-items:center; gap:10px; margin:8px 0; font-weight:400; }
+  .chk input { width:20px; height:20px; }
+  button { font:inherit; padding:9px 16px; border-radius:9px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }
+  button.primary { background:var(--accent); color:var(--bg); border-color:var(--accent); font-weight:700; }
+  .pages li { display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--line); list-style:none; }
+  .pages { padding:0; margin:0; } .pages span { flex:1; }
+  .ev { display:flex; gap:8px; margin:6px 0; } .ev input[type=text] { flex:2; } .ev input[type=date] { flex:1; }
+  .bar { position:fixed; left:0; right:0; bottom:0; background:var(--card); border-top:1px solid var(--line); padding:12px 16px; display:flex; gap:12px; justify-content:center; align-items:center; }
+  #msg { color:var(--mid); } small { color:var(--mid); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Kindle Desk</h1>
+  <p class="sub">Cài đặt được lưu trên server và áp dụng ở lần làm mới tiếp theo của Kindle. Xoay màn hình, tần suất làm mới và chế độ ngủ chỉnh ngay trên Kindle (chạm tên thứ ở góc trên trái).</p>
+
+  <section><h2>Vị trí &amp; thời tiết</h2>
+    <label>Thành phố</label>
+    <div class="row"><input type="text" id="city" placeholder="Hà Nội"><button id="find">Tìm toạ độ</button></div>
+    <div class="row"><div><label>Vĩ độ</label><input type="number" step="any" id="latitude"></div>
+      <div><label>Kinh độ</label><input type="number" step="any" id="longitude"></div></div>
+    <div class="row"><div><label>Múi giờ (IANA)</label><input type="text" id="timezone"></div>
+      <div><label>Nhiệt độ</label><select id="units"><option value="C">°C</option><option value="F">°F</option></select></div></div>
+    <small id="found"></small>
+  </section>
+
+  <section><h2>Hiển thị</h2>
+    <div class="row"><div><label>Giao diện</label><select id="theme"><option value="light">Sáng (nền trắng)</option><option value="dark">Tối (nền đen)</option></select></div>
+      <div><label>Đồng hồ</label><select id="hour12"><option value="false">24 giờ</option><option value="true">12 giờ (SA/CH)</option></select></div></div>
+    <label class="chk"><input type="checkbox" id="show_lunar"> Hiện âm lịch</label>
+    <label>Các trang (chạm chấm tròn hoặc vuốt lên/xuống trên Kindle để chuyển)</label>
+    <ul class="pages" id="pages"></ul>
+  </section>
+
+  <section><h2>Flashcard</h2>
+    <div class="row"><div><label>Chế độ mặc định</label><select id="mode"><option value="en2vi">EN → VI</option><option value="vi2en">VI → EN</option><option value="mixed">Trộn</option></select></div>
+      <div><label>Giây mỗi thẻ</label><input type="number" id="card_seconds" min="20" max="3600"></div>
+      <div><label>Tự lật sau (giây)</label><input type="number" id="flip_after_seconds" min="5"></div></div>
+    <label class="chk"><input type="checkbox" id="shuffle"> Xáo trộn thứ tự (đổi mỗi ngày)</label>
+    <label>Danh sách thẻ — mỗi dòng: <code>english | phiên âm | tiếng Việt | ví dụ EN | ví dụ VI</code></label>
+    <textarea id="cards" spellcheck="false"></textarea>
+  </section>
+
+  <section><h2>Sự kiện đếm ngược</h2><div id="events"></div><button id="addev">+ Thêm sự kiện</button></section>
+
+  <section><h2>Tập trung (Pomodoro)</h2>
+    <div class="row"><div><label>Phút tập trung</label><input type="number" id="pomo_focus" min="1" max="180"></div>
+      <div><label>Phút nghỉ</label><input type="number" id="pomo_break" min="1" max="60"></div></div>
+  </section>
+
+  <section><h2>Trích dẫn riêng</h2>
+    <label>Mỗi dòng: <code>nội dung | tác giả</code> (thêm vào danh sách có sẵn)</label>
+    <textarea id="quotes" spellcheck="false" style="min-height:100px"></textarea>
+  </section>
+</main>
+<div class="bar"><button class="primary" id="save">Lưu</button><span id="msg"></span></div>
+
+<script>
+const K = new URLSearchParams(location.search).get('k') || '';
+const $ = id => document.getElementById(id);
+const PAGE_NAMES = {desk: 'Desk (giờ + thời tiết + flashcard)', calendar: 'Lịch tháng + sự kiện + trăng', focus: 'Tập trung (Pomodoro)', vocab: 'Từ vựng toàn màn hình', quote: 'Trích dẫn'};
+let pages = [], allPages = [];
+
+function renderPages() {
+  const order = [...pages, ...allPages.filter(p => !pages.includes(p))];
+  $('pages').innerHTML = order.map(p => `<li><input type="checkbox" data-p="${p}" ${pages.includes(p) ? 'checked' : ''}><span>${PAGE_NAMES[p] || p}</span>
+    <button data-up="${p}">↑</button><button data-down="${p}">↓</button></li>`).join('');
+}
+$('pages').onclick = e => {
+  const b = e.target;
+  const order = [...$('pages').querySelectorAll('li')].map(li => li.querySelector('input').dataset.p);
+  const checked = new Set([...$('pages').querySelectorAll('input:checked')].map(i => i.dataset.p));
+  const move = (p, d) => { const i = order.indexOf(p), j = i + d; if (j >= 0 && j < order.length) { [order[i], order[j]] = [order[j], order[i]]; } };
+  if (b.dataset.up) move(b.dataset.up, -1); else if (b.dataset.down) move(b.dataset.down, 1); else if (b.type !== 'checkbox') return;
+  pages = order.filter(p => checked.has(p)); allPages = order; renderPages();
+};
+$('pages').onchange = $('pages').onclick;
+
+function addEvent(name = '', date = '') {
+  const d = document.createElement('div'); d.className = 'ev';
+  d.innerHTML = `<input type="text" placeholder="Tên sự kiện" value="${name.replace(/"/g, '&quot;')}"><input type="date" value="${date}"><button>✕</button>`;
+  d.querySelector('button').onclick = () => d.remove();
+  $('events').appendChild(d);
+}
+$('addev').onclick = () => addEvent();
+
+$('find').onclick = async () => {
+  const q = $('city').value.trim(); if (!q) return;
+  $('found').textContent = 'Đang tìm...';
+  try {
+    const r = await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=vi&name=' + encodeURIComponent(q))).json();
+    const c = r.results && r.results[0];
+    if (!c) { $('found').textContent = 'Không tìm thấy.'; return; }
+    $('latitude').value = c.latitude; $('longitude').value = c.longitude; if (c.timezone) $('timezone').value = c.timezone;
+    $('city').value = c.name; $('found').textContent = `${c.name}, ${c.country || ''} (${c.latitude.toFixed(3)}, ${c.longitude.toFixed(3)})`;
+  } catch (e) { $('found').textContent = 'Lỗi tìm kiếm: ' + e; }
+};
+
+const parseLines = (t, n) => t.split('\n').map(l => l.split('|').map(s => s.trim())).filter(p => p[0]);
+
+async function load() {
+  const r = await (await fetch('/api/settings?k=' + encodeURIComponent(K))).json();
+  const s = r.settings; allPages = r.pages; pages = s.pages;
+  for (const k of ['city', 'latitude', 'longitude', 'timezone', 'card_seconds', 'flip_after_seconds', 'pomo_focus', 'pomo_break']) $(k).value = s[k];
+  for (const k of ['units', 'theme', 'mode']) $(k).value = s[k];
+  $('hour12').value = String(s.hour12); $('show_lunar').checked = s.show_lunar; $('shuffle').checked = s.shuffle;
+  $('cards').value = r.cards.map(c => [c.en, c.ipa, c.vi, c.ex_en, c.ex_vi].join(' | ')).join('\n');
+  $('quotes').value = s.quotes.map(q => q.text + ' | ' + q.by).join('\n');
+  s.events.forEach(e => addEvent(e.name, e.date));
+  renderPages();
+}
+
+$('save').onclick = async () => {
+  const num = id => Number($(id).value);
+  const settings = {
+    city: $('city').value, latitude: num('latitude'), longitude: num('longitude'), timezone: $('timezone').value,
+    units: $('units').value, theme: $('theme').value, hour12: $('hour12').value === 'true', show_lunar: $('show_lunar').checked,
+    mode: $('mode').value, shuffle: $('shuffle').checked, card_seconds: num('card_seconds'), flip_after_seconds: num('flip_after_seconds'),
+    pomo_focus: num('pomo_focus'), pomo_break: num('pomo_break'), pages,
+    events: [...$('events').children].map(d => ({name: d.children[0].value, date: d.children[1].value})).filter(e => e.date),
+    quotes: parseLines($('quotes').value).map(p => ({text: p[0], by: p[1] || ''})),
+  };
+  const cards = parseLines($('cards').value).map(p => ({en: p[0], ipa: p[1] || '', vi: p[2] || '', ex_en: p[3] || '', ex_vi: p[4] || ''}));
+  $('msg').textContent = 'Đang lưu...';
+  try {
+    const r = await (await fetch('/api/settings?k=' + encodeURIComponent(K), {method: 'POST', body: JSON.stringify({settings, cards})})).json();
+    $('msg').textContent = r.ok ? 'Đã lưu ✓ — Kindle sẽ cập nhật ở lần làm mới kế tiếp' : 'Lỗi: ' + r.error;
+  } catch (e) { $('msg').textContent = 'Lỗi: ' + e; }
+};
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+{"id": "D30301", "word": "serenity", "ipa": "[sə'renəti]", "meaning_zh": ["n.安详,宁静,尊贵的阁下,平静"], "example_en": "He thought of her serenity as a foil for his intemperance.", "example_zh": "在他看来，她的平静反衬出了他的放纵。", "soft_max_bytes": 138}
+{"id": "D30302", "word": "serf", "ipa": "[sɝf]", "meaning_zh": ["农奴"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30303", "word": "serfdom", "ipa": "[ˈsɚfdəm]", "meaning_zh": ["农奴制"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30304", "word": "sergeant", "ipa": "[ˈsɑːdʒənt]", "meaning_zh": ["n.[军]军士，中士,警官，巡官,高级律师,〈美〉一种地对地导弹"], "example_en": "A technical sergeant hunches in a cubicle.", "example_zh": "一位技术军士在一间小屋里弯腰坐着.", "soft_max_bytes": 196}
+{"id": "D30305", "word": "serial", "ipa": "[ˈsɪəriəl]", "meaning_zh": ["adj.连续的,连载的,顺序排列的,分期偿付的", "n.连载小说,电视连续剧,定期刊物,[军]行军梯队"], "example_en": "After demodulation, receive dates will be sent to PC by CAN bus or the serial port.", "example_zh": "地面接收机负责将数据解调后,通过串口或者CAN总线将接收数据送往上位机软件.", "soft_max_bytes": 331}
+{"id": "D30306", "word": "series of", "ipa": "[ˈsɪriz ʌv]", "meaning_zh": ["系列"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30307", "word": "serif", "ipa": "[ˈsɛrɪf]", "meaning_zh": ["衬线"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30308", "word": "seriousness", "ipa": "[ˈsɪriəsnəs]", "meaning_zh": ["严重性"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30309", "word": "sermon", "ipa": "[ˈsɚmən]", "meaning_zh": ["布道"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30310", "word": "serpent", "ipa": "[ˈsɚpənt]", "meaning_zh": ["蛇"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30311", "word": "serrated", "ipa": "[səˈreɪtɪd]", "meaning_zh": ["adj.边缘呈锯齿状的，有锯齿形边缘的"], "example_en": "The plant has serrated and hairy leaves.", "example_zh": "这棵植物长着锯齿状的毛茸茸的叶子。", "soft_max_bytes": 150}
+{"id": "D30312", "word": "serum", "ipa": "[ˈsɪrəm]", "meaning_zh": ["血清"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30313", "word": "serve ... right", "ipa": "[sɝv raɪt]", "meaning_zh": ["na. 给(某人)该得的待遇", "活该；给应得的待遇；活该，给应得的待遇"], "example_en": "", "example_zh": "", "soft_max_bytes": 132}
+{"id": "D30314", "word": "serve as", "ipa": "[sɝv æz]", "meaning_zh": ["担任"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30315", "word": "serve as something", "ipa": "[sɝv æz ˈsʌmθɪŋ]", "meaning_zh": ["充当某物"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30316", "word": "serve in the army", "ipa": "[sɝv ɪn ðə ˈɑrmɪ]", "meaning_zh": ["在军队服役"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30317", "word": "serve its purpose", "ipa": "[sɚv ɪts ˈpɝpəs]", "meaning_zh": ["达到其目的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30318", "word": "serve out", "ipa": "[sɝv aᴜt]", "meaning_zh": ["提供服务"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30319", "word": "serve the dishes", "ipa": "[sɝv ðə ˈdɪʃɪz]", "meaning_zh": ["上菜"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30320", "word": "serve the people", "ipa": "[sɝv ðə ˈpipl]", "meaning_zh": ["为人民服务"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30321", "word": "serve up", "ipa": "[sɝv ʌp]", "meaning_zh": ["上菜"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30322", "word": "serve up sth.", "ipa": "[sɝv ʌp ˈsʌmθɪŋ]", "meaning_zh": ["提供某物。"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30323", "word": "server", "ipa": "[ˈsɚvɚ]", "meaning_zh": ["服务器"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30324", "word": "service station", "ipa": "[ˈsɚvɪs ˈsteʃən]", "meaning_zh": ["加油站"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30325", "word": "service-oriented", "ipa": "[ˈsɝvɪs ˈɔrɪəntɪd]", "meaning_zh": ["面向服务的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30326", "word": "serviceable", "ipa": "[ˈsɚvɪsəbl]", "meaning_zh": ["可使用的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30327", "word": "serviceman", "ipa": "[ˈsɚvɪsmən]", "meaning_zh": ["军人"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30328", "word": "servile", "ipa": "[ˈsɜ:vaɪl]", "meaning_zh": ["adj.过分屈从的,缺乏独立性的,（似）仆人的,为仆人的"], "example_en": "They said she had a servile attitude to her employer.", "example_zh": "他们说她对她的老板阿谀逢迎。", "soft_max_bytes": 168}
+{"id": "D30329", "word": "servility", "ipa": "[sɜ:'vɪlətɪ]", "meaning_zh": ["n.过分屈从的行为或态度,奴性"], "example_en": "She's a curious mixture of stubbornness and servility.", "example_zh": "她既固执又恭顺，令人捉摸不透。", "soft_max_bytes": 126}
+{"id": "D30330", "word": "servitude", "ipa": "[ˈsɝvətud]", "meaning_zh": ["奴役"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30331", "word": "sesame", "ipa": "[ˈsɛsəmɪ]", "meaning_zh": ["芝麻"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30332", "word": "set ... in motion", "ipa": "[sɛt ɪn ˈmoʃn]", "meaning_zh": ["na. 使动；开动", "发动；掀动；开始动工"], "example_en": "", "example_zh": "", "soft_max_bytes": 75}
+{"id": "D30333", "word": "set ... on fire", "ipa": "[sɛt ɑn faɪr]", "meaning_zh": ["na. 放火；放火烧；使兴奋", "焚烧；使燃烧；纵火"], "example_en": "", "example_zh": "", "soft_max_bytes": 93}
+{"id": "D30334", "word": "set a date for", "ipa": "[sɛt ə det fɔr]", "meaning_zh": ["设置日期"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30335", "word": "set a goal", "ipa": "[sɛt e gol]", "meaning_zh": ["设定目标"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30336", "word": "set a good example to ...", "ipa": "[sɛt ə ɡᴜd ɪgˈzæmpl tu]", "meaning_zh": ["为……树立好榜样；给…树立了好榜样；为……树立榜样"], "example_en": "", "example_zh": "", "soft_max_bytes": 112}
+{"id": "D30337", "word": "set a new world record", "ipa": "[sɛt ə nu wɝld ˈrɛkɚd]", "meaning_zh": ["创造新的世界纪录"], "example_en": "She set a new world record for the high jump.", "example_zh": "她创造了新的跳高世界纪录。", "soft_max_bytes": 94}
+{"id": "D30338", "word": "set a novel in", "ipa": "[sɛt ə ˈnɑvl ɪn]", "meaning_zh": ["写一本小说"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30339", "word": "set a play in", "ipa": "[sɛt ə ple ɪn]", "meaning_zh": ["设置播放"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30340", "word": "set against", "ipa": "[sɛt əˈɡenst]", "meaning_zh": ["设置为反对"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30341", "word": "set an example", "ipa": "[sɛt æn ɪɡˈzæmpl]", "meaning_zh": ["树立榜样"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30342", "word": "set an example to ...", "ipa": "[sɛt ən ɪgˈzæmpl tu]", "meaning_zh": ["v. 给…树立榜样", "为……树立榜样；给……树上榜样；为……榜样"], "example_en": "", "example_zh": "", "soft_max_bytes": 127}
+{"id": "D30343", "word": "set an example to sb.", "ipa": "[sɛt ən ɪgˈzæmpl tu ˈsʌmbɑdɪ]", "meaning_zh": ["为…树立榜样；给某人树立个榜样；为某人树立榜样"], "example_en": "", "example_zh": "", "soft_max_bytes": 103}
+{"id": "D30344", "word": "set apart", "ipa": "[sɛt əˈpɑrt]", "meaning_zh": ["分开"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30345", "word": "set apart from", "ipa": "[sɛt əˈpɑrt frʌm]", "meaning_zh": ["区别于"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30346", "word": "set back", "ipa": "[sɛt bæk]", "meaning_zh": ["使推迟"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30347", "word": "set fire to", "ipa": "[sɛt faɪr tu]", "meaning_zh": ["放火焚烧"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30348", "word": "set fire to something", "ipa": "[sɛt faɪr tu ˈsʌmθɪŋ]", "meaning_zh": ["放火烧东西"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30349", "word": "set foot", "ipa": "[sɛt fut]", "meaning_zh": ["站稳脚跟"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30350", "word": "set foot in", "ipa": "[sɛt fᴜt ɪn]", "meaning_zh": ["涉足"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30351", "word": "set foot in ...", "ipa": "[sɛt fᴜt ɪn]", "meaning_zh": ["na. 进入；“set foot on/in”的变体", "踏进；踏上；涉足"], "example_en": "", "example_zh": "", "soft_max_bytes": 100}
+{"id": "D30352", "word": "set foot on ...", "ipa": "[sɛt fᴜt ɑn]", "meaning_zh": ["na. 踏上；“set foot on/in”的变体", "踏足于；踏上……的土地；登上"], "example_en": "", "example_zh": "", "soft_max_bytes": 127}
+{"id": "D30353", "word": "set forth", "ipa": "[sɛt fɔrθ]", "meaning_zh": ["提出"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30354", "word": "set in", "ipa": "[sɛt ɪn]", "meaning_zh": ["产生"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30355", "word": "set in motion", "ipa": "[sɛt ɪn ˈmoʃn]", "meaning_zh": ["启动"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30356", "word": "set loose", "ipa": "[sɛt lus]", "meaning_zh": ["松开"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30357", "word": "set on", "ipa": "[sɛt ɑn]", "meaning_zh": ["设置为on"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30358", "word": "set on fire", "ipa": "[sɛt ɑn faɪr]", "meaning_zh": ["放火"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30359", "word": "set one's heart on", "ipa": "[sɛt wʌns hɑrt ɑn]", "meaning_zh": ["发自内心"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30360", "word": "set one's mind on", "ipa": "[sɛt wʌnz maɪnd ɑn]", "meaning_zh": ["下定决心"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30361", "word": "set one's mind to", "ipa": "[sɛt wʌnz maɪnd tu]", "meaning_zh": ["下定决心"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30362", "word": "set one's sights towards", "ipa": "[sɛt wʌnz saɪts təˈwɔrdz]", "meaning_zh": ["把目光投向"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30363", "word": "set out for", "ipa": "[sɛt aᴜt fɔr]", "meaning_zh": ["出发时间："], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30364", "word": "set out to do", "ipa": "[sɛt aᴜt tu du]", "meaning_zh": ["着手做"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30365", "word": "set out to do something", "ipa": "[sɛt aᴜt tu du sʌmθɪŋ]", "meaning_zh": ["开始做某事"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30366", "word": "set out to do sth.", "ipa": "[sɛt aᴜt tu du ˈsʌmθɪŋ]", "meaning_zh": ["着手做某事。"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30367", "word": "set sail", "ipa": "[sɛt sel]", "meaning_zh": ["启航"], "example_en": "Set sail in style with Luxury Liner Tycoon! ", "example_zh": "豪华游艇大亨扬帆起航！", "soft_max_bytes": 58}
+{"id": "D30368", "word": "set sail for", "ipa": "[sɛt sel fɔr]", "meaning_zh": ["启航前往"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30369", "word": "set sb. a goal", "ipa": "[sɛt ˈsʌmbədɪ e gol]", "meaning_zh": ["安排某人。a目标"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30370", "word": "set sb. apart", "ipa": "[sɛt ˈsʌmˌbɑdɪ əˈpɑrt]", "meaning_zh": ["使某人与他人区分开"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30371", "word": "set sb. doing sth.", "ipa": "[sɛt ˈsʌmbɑdɪ ˈduɪŋ ˈsʌmθɪŋ]", "meaning_zh": ["安排某人。正在做某事。"], "example_en": "", "example_zh": "", "soft_max_bytes": 49}
+{"id": "D30372", "word": "set sb. free", "ipa": "[sɛt ˈsʌmbədɪ fri]", "meaning_zh": ["释放某人；解放某人；让某人自由"], "example_en": "", "example_zh": "", "soft_max_bytes": 67}
+{"id": "D30373", "word": "set sb. off", "ipa": "[sɛt ˈsʌmbədɪ ɔf]", "meaning_zh": ["使某人开始做"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30374", "word": "set sb. to doing sth.", "ipa": "[sɛt ˈsʌmbɑdɪ tu ˈduɪŋ ˈsʌmθɪŋ]", "meaning_zh": ["安排某人。做某事。"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30375", "word": "set something on fire", "ipa": "[sɛt ˈsʌmθɪŋ ɑn faɪr]", "meaning_zh": ["放火烧东西"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30376", "word": "set sth. apart", "ipa": "[sɛt ˈsʌmθɪŋ əˈpɑrt]", "meaning_zh": ["使…与众不同"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30377", "word": "set sth. aside", "ipa": "", "meaning_zh": ["", "将某事物放在一边；把…腾出；把…放置在一边"], "example_en": "", "example_zh": "", "soft_max_bytes": 96}
+{"id": "D30378", "word": "set sth. to rights", "ipa": "[sɛt ˈsʌmθɪŋ tu raɪts]", "meaning_zh": ["纠正某事"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30379", "word": "set sth. up", "ipa": "[set ˈsʌmθɪŋ ʌp]", "meaning_zh": ["设立；开动；摆放或竖起某物"], "example_en": "", "example_zh": "", "soft_max_bytes": 58}
+{"id": "D30380", "word": "set store by", "ipa": "[sɛt stɔr baɪ]", "meaning_zh": ["设置存储依据"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30381", "word": "set the pace", "ipa": "[sɛt ðə pes]", "meaning_zh": ["设定速度"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30382", "word": "set to", "ipa": "[sɛt tu]", "meaning_zh": ["设置为"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30383", "word": "set up a time", "ipa": "[sɛt ʌp ə taɪm]", "meaning_zh": ["设置时间"], "example_en": "I wanted to set up a time to meet with you.", "example_zh": " 我想约个时间和你见面。", "soft_max_bytes": 69}
+{"id": "D30384", "word": "set up as", "ipa": "[sɛt ʌp æz]", "meaning_zh": ["设置为"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30385", "word": "set up shop", "ipa": "[set ʌp ʃɑp]", "meaning_zh": ["开设店铺"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30386", "word": "set up some kind of kangaroo court", "ipa": "[sɛt ʌp sʌm kaɪnd ɑv ˌkæŋɡəˈru kɔrt]", "meaning_zh": ["建立某种袋鼠法庭"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30387", "word": "set your mind to sth.", "ipa": "[sɛt jᴜr maɪnd tu ˈsʌmθɪŋ]", "meaning_zh": ["下定决心做某事。"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30388", "word": "set yourself a goal", "ipa": "[sɛt jɚˈself e gol]", "meaning_zh": ["为自己设定一个目标"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30389", "word": "set-piece", "ipa": "[sɛt pis]", "meaning_zh": ["固定件"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30390", "word": "set-up", "ipa": "[sɛt ʌp]", "meaning_zh": ["组织"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30391", "word": "setback", "ipa": "[ˈsetbæk]", "meaning_zh": ["n.挫折,阻碍,退步,逆流"], "example_en": "It's the knack a positive for every negative and viewing a setback a challenge.", "example_zh": "幸福的秘诀就是化消极为积极,视挫折为挑战.", "soft_max_bytes": 132}
+{"id": "D30392", "word": "settee", "ipa": "[sɛˈti]", "meaning_zh": ["长沙发"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30393", "word": "setter", "ipa": "[ˈsɛtɚ]", "meaning_zh": ["设置器"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30394", "word": "setting the table", "ipa": "", "meaning_zh": ["", "设置表格"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30395", "word": "settle back", "ipa": "[ˈsɛtl bæk]", "meaning_zh": ["回退"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30396", "word": "settle down to", "ipa": "[ˈsɛtl daᴜn tu]", "meaning_zh": ["安顿下来"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30397", "word": "settle for", "ipa": "[ˈsɛtl fɔr]", "meaning_zh": ["满足于"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30398", "word": "settle in", "ipa": "[ˈsɛtl ɪn]", "meaning_zh": ["安顿下来"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30399", "word": "settle into", "ipa": "[ˈsɛtl ˈɪntu]", "meaning_zh": ["安顿到"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30400", "word": "settle into sth.", "ipa": "[ˈsɛtl ˈɪntu ˈsʌmθɪŋ]", "meaning_zh": ["安顿下来做某事。"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30401", "word": "settle on", "ipa": "[ˈsɛtl ɑn]", "meaning_zh": ["确定"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30402", "word": "settle one's account", "ipa": "[ˈsɛtl wʌns əˈkaᴜnt]", "meaning_zh": ["结清帐目"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30403", "word": "settle up", "ipa": "[ˈsɛtl ʌp]", "meaning_zh": ["结算"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30404", "word": "settle upon", "ipa": "[ˈsɛtl əˈpɑn]", "meaning_zh": ["确定"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30405", "word": "settled", "ipa": "[ˈsetld]", "meaning_zh": ["adj.不变的，稳定的,固定的,妥,停当"], "example_en": "Has that noisy class settled down yet?", "example_zh": "那个吵闹的班安静下来了 吗 ?", "soft_max_bytes": 127}
+{"id": "D30406", "word": "settled into", "ipa": "[ˈsetld ˈɪntu]", "meaning_zh": ["已入驻"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30407", "word": "setup", "ipa": "[ˈsɛtˌʌp]", "meaning_zh": ["安装程序"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30408", "word": "seven o'clock", "ipa": "[ˈsɛvən əˈklɑk]", "meaning_zh": ["七点"], "example_en": "The nurse is released from duty at seven o' clock.", "example_zh": "护士七点钟就下班了。", "soft_max_bytes": 54}
+{"id": "D30409", "word": "seventeenth", "ipa": "[ˌsɛvənˈtinθ]", "meaning_zh": ["第十七"], "example_en": "It's his seventeenth birthday next Friday.", "example_zh": "下周五是他的十七岁生日。", "soft_max_bytes": 67}
+{"id": "D30410", "word": "seventh-grader", "ipa": "[ˈsɛvənθ ˈɡredɚ]", "meaning_zh": ["七年级学生"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30411", "word": "seventieth", "ipa": "[ˈsɛvəntiɪθ]", "meaning_zh": ["第七十"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30412", "word": "sever", "ipa": "[ˈsevə(r)]", "meaning_zh": ["v.切开，割断，切下,断绝，中断"], "example_en": "Sever chest or back pain could signal a heart attack.", "example_zh": "剧烈的胸痛或背痛可能是心脏病发作的信号.", "soft_max_bytes": 150}
+{"id": "D30413", "word": "Severe Acute Respiratory Syndrome", "ipa": "[sɪˈvɪr əˈkjut ˈrespərətɔrɪ ˈsɪndrom]", "meaning_zh": ["严重急性呼吸综合征"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30414", "word": "severe criticism", "ipa": "[sɪˈvɪr ˈkrɪtɪsɪzəm]", "meaning_zh": ["严厉批评"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30415", "word": "severely", "ipa": "[sɪ'vɪə(r)li]", "meaning_zh": ["adv.严格地,严重地,严厉地,严肃地"], "example_en": "The film was severely cut up by many reviewers.", "example_zh": "这部电影受到许多评论者的严厉批评.", "soft_max_bytes": 138}
+{"id": "D30416", "word": "severity", "ipa": "[sɪ'verəti]", "meaning_zh": ["n.严重,严格,严谨,严厉的对待"], "example_en": "The severity of the decree seemed deadly to Tess.", "example_zh": "这种命令里的严厉意味,叫苔丝听来,真是万箭钻心.", "soft_max_bytes": 156}
+{"id": "D30417", "word": "sew presents", "ipa": "[so ˈprɛznts]", "meaning_zh": ["sew礼品"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30418", "word": "sew up", "ipa": "[so ʌp]", "meaning_zh": ["缝合"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30419", "word": "sewage", "ipa": "[ˈsuɪdʒ]", "meaning_zh": ["污水"], "example_en": "We can pollute the air with acids, the rivers with sewage, the seas with oil.", "example_zh": "我们会用酸污染空气，用污水污染河流，用石油污染海洋。", "soft_max_bytes": 126}
+{"id": "D30420", "word": "sewage plant", "ipa": "[ˈsuɪdʒ plænt]", "meaning_zh": ["污水处理厂"], "example_en": "The process of living sewage and oiliness Sewage by Xiji Sewage Treatment Plant of Guangzhou Port is introduced.", "example_zh": "主要介绍了广洲港斥巨资建成的西基污水厂处理生活污水及含油污水的处理工艺。", "soft_max_bytes": 184}
+{"id": "D30421", "word": "sewer", "ipa": "[ˈsuːə(r)]", "meaning_zh": ["n.阴沟，污水管，下水道,裁缝师"], "example_en": "The mobile phone is in the bag, it has rested in sewer.", "example_zh": "手机在包里, 它已经安息在下水道.", "soft_max_bytes": 130}
+{"id": "D30422", "word": "sewerage", "ipa": "[ˈsuərɪdʒ]", "meaning_zh": ["污水处理"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30423", "word": "sewing", "ipa": "[ˈsəʊɪŋ]", "meaning_zh": ["n.缝纫,缝纫机,针线活,缝纫物"], "example_en": "They reinforced a coat by sewing pieces of leather on the elbows.", "example_zh": "他们在外衣肘上缝皮革使衣服更耐穿.", "soft_max_bytes": 130}
+{"id": "D30424", "word": "sewing machine", "ipa": "[ˈsoɪŋ məˈʃin]", "meaning_zh": ["缝纫机"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30425", "word": "sex-biased", "ipa": "[sɛks ˈbaɪəst]", "meaning_zh": ["性别偏见"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30426", "word": "sexism", "ipa": "[ˈsɛkˌsɪzəm]", "meaning_zh": ["性别歧视"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30427", "word": "sexist", "ipa": "[ˈseksɪst]", "meaning_zh": ["性别歧视者"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30428", "word": "sextant", "ipa": "[ˈsekstənt]", "meaning_zh": ["n.（航海用的）六分仪"], "example_en": "Sextant can be used for exploration and navigation.", "example_zh": "六分仪可用于航海和勘探中.", "soft_max_bytes": 99}
+{"id": "D30429", "word": "sexual", "ipa": "[ˈsekʃuəl]", "meaning_zh": ["adj.性的,生殖的,性别的"], "example_en": "He was a person of gross sexual appetites.", "example_zh": "他是个性欲旺盛的人.", "soft_max_bytes": 87}
+{"id": "D30430", "word": "sexuality", "ipa": "[ˌsɛkʃuˈælɪtɪ]", "meaning_zh": ["性欲"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30431", "word": "sexually", "ipa": "['sekʃəlɪ]", "meaning_zh": ["adv.性别上地,按性别地,性欲地,两性之间地"], "example_en": "Some adolescents might be more sexually mature and provocative than others.", "example_zh": "一些青少年可能相比同龄人在性方面更成熟、更具挑逗性。", "soft_max_bytes": 199}
+{"id": "D30432", "word": "sexy", "ipa": "[ˈsɛksɪ]", "meaning_zh": ["性感的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30433", "word": "sh", "ipa": "[ʃ]", "meaning_zh": ["上海"], "example_en": "Sh! Please don't talk! The film starts!", "example_zh": "嘘!请别讲话!电影开始了。", "soft_max_bytes": 61}
+{"id": "D30434", "word": "shack", "ipa": "[ʃæk]", "meaning_zh": ["n.窝棚，简陋的小屋,<俚>无线电收发室,<美>游民,驽马，废马"], "example_en": "Sheep shouldn't sleep in a shack.", "example_zh": "羊群不应该睡在小屋里.", "soft_max_bytes": 163}
+{"id": "D30435", "word": "shackle", "ipa": "[ˈʃækl]", "meaning_zh": ["vt.束缚，加枷锁,妨碍，阻碍,给…上手铐,[电]在…装绝缘器", "n.束缚,羁绊,枷锁,镣铐"], "example_en": "We are all slaves of our pasts that shackle our memories and prescribe our subsequent actions.", "example_zh": "我们全都摆脱不了过去的习惯,它束缚住我们的思维而且指示我们往后的行为.", "soft_max_bytes": 312}
+{"id": "D30436", "word": "shade in", "ipa": "[ʃed ɪn]", "meaning_zh": ["在中添加阴影"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30437", "word": "shade into", "ipa": "[ʃed ˈɪntu]", "meaning_zh": ["遮蔽到"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30438", "word": "shadowland", "ipa": "[ˈʃædolænd]", "meaning_zh": ["阴影地带"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30439", "word": "shadowy", "ipa": "[ˈʃædoɪ]", "meaning_zh": ["阴暗的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30440", "word": "shady", "ipa": "[ˈʃeɪdi]", "meaning_zh": ["adj.背阴的,隐蔽的,名声不好的,可疑的"], "example_en": "Nor shady cypress tree.", "example_zh": "也无须柏树来荫覆.", "soft_max_bytes": 111}
+{"id": "D30441", "word": "shaft", "ipa": "[ʃɑːft]", "meaning_zh": ["n.柄，轴,矛，箭,〈非〉嘲笑,光线", "vt.给…装上杆柄,〈俚〉苛刻的对待"], "example_en": "The clutch disc has a splined hub that fits over splines on the transmission input shaft.", "example_zh": "离合器盘毂花键有超过上传输输入轴花键配合.", "soft_max_bytes": 228}
+{"id": "D30442", "word": "shag", "ipa": "[ʃæɡ]", "meaning_zh": ["沙格"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30443", "word": "shagbark", "ipa": "[ˈʃæɡˌbɑrk]", "meaning_zh": ["沙格巴克"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30444", "word": "shaggy", "ipa": "[ˈʃæɡɪ]", "meaning_zh": ["毛茸茸的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30445", "word": "Shah Jahan", "ipa": "[ʃɑr dʒəˈhæn]", "meaning_zh": ["沙贾汗"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30446", "word": "shake down", "ipa": "[ʃek daᴜn]", "meaning_zh": ["安定下来"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30447", "word": "shake hands with ...", "ipa": "[ʃek hændz wɪθ]", "meaning_zh": ["与…握手；与某人握手；和……握手"], "example_en": "", "example_zh": "", "soft_max_bytes": 72}
+{"id": "D30448", "word": "shake hands with sb.", "ipa": "[ʃek  wɪð  ˈsʌmbɑdɪ]", "meaning_zh": ["与某人握手；和某人握手；与……握手"], "example_en": "", "example_zh": "", "soft_max_bytes": 76}
+{"id": "D30449", "word": "shake off", "ipa": "[ʃek ɔf]", "meaning_zh": ["甩掉"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30450", "word": "shake one's head", "ipa": "[ʃek wʌnz hɛd]", "meaning_zh": ["摇头"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30451", "word": "shake sb. down", "ipa": "[ʃek ˈsʌmbɑdɪ daᴜn]", "meaning_zh": ["摇晃某人。向下"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30452", "word": "shake sb.'s hand", "ipa": "[ʃek sʌmbɑdɪz hænd]", "meaning_zh": ["和某人握手"], "example_en": "In sb.'s hands in the hands of sb.", "example_zh": " 在某人的支配照顾,监护。", "soft_max_bytes": 75}
+{"id": "D30453", "word": "shake the air", "ipa": "[ʃek ðə ɛɚ]", "meaning_zh": ["摇动空气"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30454", "word": "shake up", "ipa": "[ʃek ʌp]", "meaning_zh": ["摇动"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30455", "word": "shakeout", "ipa": "[ˈʃekˌaᴜt]", "meaning_zh": ["摇出"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30456", "word": "Shakespeare", "ipa": "[ˈʃekspɪɚ]", "meaning_zh": ["莎士比亚"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30457", "word": "shaking", "ipa": "[ˈʃeɪkɪŋ]", "meaning_zh": ["n.摇动,挥动,震动,震惊", "v.摇撼( shake的现在分词 ),（使）颤抖,握手,动摇"], "example_en": "The whole house is shaking.", "example_zh": "整座房子都在摇动。", "soft_max_bytes": 178}
+{"id": "D30458", "word": "Shall we ...?", "ipa": "[ʃæl wi]", "meaning_zh": ["我们…好吗；我们去…好吗；要这样吗"], "example_en": "What shall we grow in this alkaline soil?", "example_zh": "我们应该在碱性土壤里种什么？", "soft_max_bytes": 139}
+{"id": "D30459", "word": "sham", "ipa": "[ʃæm]", "meaning_zh": ["n.赝品,假冒,骗子,套,枕套", "vt.假装", "vi.掩饰", "adj.虚假的，假装的"], "example_en": "The information the job must be a sham, the company isn't exist.", "example_zh": "这个工作信息肯定是假的, 这个公司根本就不存在.", "soft_max_bytes": 217}
+{"id": "D30460", "word": "shamble", "ipa": "[ˈʃæmbəl]", "meaning_zh": ["蹒跚"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30461", "word": "shambles", "ipa": "[ˈʃæmblz]", "meaning_zh": ["n.<口>混乱,屠宰场,毁坏（景象）,大屠杀场面", "v.蹒跚而行，拖着脚走，踉跄地走( shamble的第三人称单数)"], "example_en": "No organization would put up its speaker at a shambles like this.", "example_zh": "没有一个组织会把请来做报告的人放在这样一个破烂的地方.", "soft_max_bytes": 319}
+{"id": "D30462", "word": "shamefaced", "ipa": "[ˌʃemˈfest]", "meaning_zh": ["羞耻的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30463", "word": "shameful", "ipa": "[ˈʃemfəl]", "meaning_zh": ["可耻的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30464", "word": "shameless", "ipa": "[ˈʃemlɪs]", "meaning_zh": ["无耻的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30465", "word": "shanghai", "ipa": "[ˌʃæŋˈhaɪ]", "meaning_zh": ["上海"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30466", "word": "Shanghai Museum", "ipa": "[ˌʃæŋˈhaɪ mjuˈziəm]", "meaning_zh": ["上海博物馆"], "example_en": "Do you like the Shanghai Museum?", "example_zh": "你喜欢上海博物馆吗?", "soft_max_bytes": 64}
+{"id": "D30467", "word": "Shannon", "ipa": "[ˈʃænən]", "meaning_zh": ["香农"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30468", "word": "shanty", "ipa": "[ˈʃænti]", "meaning_zh": ["n.简陋的小木屋,铁皮棚屋,船工号子，船歌,下等酒馆"], "example_en": "Pop music can be heard 10 miles away blasting out from the huge tented shanty-town.", "example_zh": "响亮的流行音乐从10英里之外巨大的搭满帐篷的棚户区传来。", "soft_max_bytes": 222}
+{"id": "D30469", "word": "shanty town", "ipa": "[ˈʃæntɪ taᴜn]", "meaning_zh": ["棚户区"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30470", "word": "shantytown", "ipa": "[ˈʃæntɪˌtaᴜn]", "meaning_zh": ["棚户区"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30471", "word": "shape up", "ipa": "[ʃep ʌp]", "meaning_zh": ["塑造形象"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30472", "word": "shaped", "ipa": "[ʃeɪpt]", "meaning_zh": ["adj.合适的,成某种形状的,有计划的,有目标的", "v.成形(shape的过去分词和过去式),发展"], "example_en": "These art objects are beautifully shaped.", "example_zh": "这些工艺品造型优美.", "soft_max_bytes": 204}
+{"id": "D30473", "word": "shapeless", "ipa": "[ˈʃeplɪs]", "meaning_zh": ["不成形的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30474", "word": "shapely", "ipa": "[ˈʃeplɪ]", "meaning_zh": ["匀称的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30475", "word": "shard", "ipa": "[ʃɑ:d]", "meaning_zh": ["n.（玻璃、金属或其他硬物的）尖利的碎片"], "example_en": "Nakatomi conglomerate stole a shard of Akujiki, breaking the hell spawn seal.", "example_zh": "中臣财团就是偷了恶食碎片, 然后破坏了式神的封印.", "soft_max_bytes": 187}
+{"id": "D30476", "word": "share ... with", "ipa": "[ʃɛɚ wɪθ]", "meaning_zh": ["un. 合伙；合住；承担；跟…看法一致", "分享；与…分享；共用"], "example_en": "", "example_zh": "", "soft_max_bytes": 120}
+{"id": "D30477", "word": "share ... with ...", "ipa": "[ʃeɚ wɪð]", "meaning_zh": ["un. 合伙；合住；承担；跟…看法一致", "分享；与…分享；共用"], "example_en": "I have very happy news to share with you.", "example_zh": " 我有很高兴的消息要告诉你。", "soft_max_bytes": 180}
+{"id": "D30478", "word": "share feelings and ideas with", "ipa": "[ʃɛr ˈfilɪŋs ənd aɪˈdɪəz wɪθ]", "meaning_zh": ["与分享感受和想法"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30479", "word": "share in sth.", "ipa": "[ʃɛr ɪn ˈsʌmθɪŋ]", "meaning_zh": ["分享某物。"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30480", "word": "share with", "ipa": "[ʃɛr wɪð]", "meaning_zh": ["和…分享"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30481", "word": "shareholder", "ipa": "[ˈʃeəhəʊldə(r)]", "meaning_zh": ["n.股东,股票持有者"], "example_en": "Shareholder action system comprises shareholder direct action and shareholder derivative action.", "example_zh": "股东诉讼制度包括股东直接诉讼和股东派生诉讼.", "soft_max_bytes": 132}
+{"id": "D30482", "word": "shareholding", "ipa": "[ˈʃɛrholdɪŋ]", "meaning_zh": ["持股情况"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30483", "word": "sharp criticism", "ipa": "[ʃɑrp ˈkrɪtɪsɪzəm]", "meaning_zh": ["尖锐的批评"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30484", "word": "sharpen up", "ipa": "[ˈʃɑrpən ʌp]", "meaning_zh": ["锐化"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30485", "word": "shatter", "ipa": "[ˈʃætə(r)]", "meaning_zh": ["vt.使破碎，使碎裂，砸碎,使…成为泡影,使…痛不欲生,使…散开", "vi.粉碎，损坏，落叶"], "example_en": "Such words simply shatter themselves on the hard fact.", "example_zh": "这种言论在铁的事实面前碰得粉碎.", "soft_max_bytes": 237}
+{"id": "D30486", "word": "shattered", "ipa": "[ˈʃætəd]", "meaning_zh": ["adj.破碎的,极度疲劳的", "v.打碎,破坏，损坏,使心烦意乱(shatter的过去分词)"], "example_en": "What he told me shattered everything.", "example_zh": "他告诉我的情况使一切都成为泡影.", "soft_max_bytes": 210}
+{"id": "D30487", "word": "shave off", "ipa": "[ʃev ɔf]", "meaning_zh": ["剃掉"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30488", "word": "shaving", "ipa": "['ʃeɪvɪŋ]", "meaning_zh": ["n.剃胡子，修面,削,刨花", "v.修面，剃(shave的现在分词)"], "example_en": "Most men hate the bother of shaving.", "example_zh": "大多数男士嫌刮胡子麻烦。", "soft_max_bytes": 156}
+{"id": "D30489", "word": "shawl", "ipa": "[ʃɔːl]", "meaning_zh": ["n.围巾，披肩"], "example_en": "The lady likes to wear the silk shawl.", "example_zh": "那女士喜欢用丝围巾.", "soft_max_bytes": 67}
+{"id": "D30490", "word": "she is", "ipa": "[ʃi ɪz]", "meaning_zh": ["她是"], "example_en": "She is always so surly; she never smiles at anyone.", "example_zh": "她总是那麽个坏脾气，对谁也没有一个笑脸。", "soft_max_bytes": 99}
+{"id": "D30491", "word": "She is ...", "ipa": "[ʃi ɪz]", "meaning_zh": ["她是；是的；她是一名"], "example_en": "She is always so surly; she never smiles at anyone.", "example_zh": " 她总是那麽个坏脾气，对谁也没有一个笑脸。", "soft_max_bytes": 136}
+{"id": "D30492", "word": "She is ... metres tall.", "ipa": "[ʃi ɪz mi:tɚz tɔl]", "meaning_zh": ["她是。。。米高。"], "example_en": "She is tall.", "example_zh": " 她很高.", "soft_max_bytes": 52}
+{"id": "D30493", "word": "She is ... years old.", "ipa": "[ʃi ɪz ˈjɝz old]", "meaning_zh": ["她是。。。岁"], "example_en": "How old is your sister? She is thirteen years old.", "example_zh": " 你的姊妹几岁？她十三岁。", "soft_max_bytes": 82}
+{"id": "D30494", "word": "She is a ...", "ipa": "[ʃi ɪz ə]", "meaning_zh": ["她是一个。。。"], "example_en": "She is a receptionist in a doctor's office.", "example_zh": " 她在一位医生的诊所中担任接待员。", "soft_max_bytes": 105}
+{"id": "D30495", "word": "she'll", "ipa": "[ʃi:l]", "meaning_zh": ["她会的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30496", "word": "she's", "ipa": "[ʃi:z]", "meaning_zh": ["她是"], "example_en": "She has an amused twinkle in her eye(s).", "example_zh": "她高兴得双目熠熠发亮。", "soft_max_bytes": 58}
+{"id": "D30497", "word": "sheaf", "ipa": "[ʃi:f]", "meaning_zh": ["n.捆，束，扎"], "example_en": "He took out a sheaf of papers and leafed through them.", "example_zh": "他拿出一沓报纸，匆匆翻阅了一下。", "soft_max_bytes": 97}
+{"id": "D30498", "word": "shear", "ipa": "[ʃɪə(r)]", "meaning_zh": ["vt.剪羊毛,切断,剪切,剥夺", "vi.剪切,修剪,穿越,[力]切变"], "example_en": "An elastoplastic shear strength reduction FEM is used to analyze the stability of excavation slope.", "example_zh": "用强度折减有限元方法对开挖边坡的稳定性进行了较为全面的研究.", "soft_max_bytes": 235}
+{"id": "D30499", "word": "shearer", "ipa": "[ˈʃɪrə]", "meaning_zh": ["采煤机"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30500", "word": "sheath", "ipa": "[ʃi:θ]", "meaning_zh": ["n.护套,鞘,叶鞘,紧身装"], "example_en": "Ship Power Cable with PVC Insulation & Sheath.", "example_zh": "聚氯乙烯绝缘 和 护套船用控制电缆.", "soft_max_bytes": 115}
+{"id": "D30501", "word": "shed blood", "ipa": "[ʃɛd blʌd]", "meaning_zh": ["流血"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30502", "word": "shed light on", "ipa": "[ʃed laɪt ɑn]", "meaning_zh": ["阐明"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30503", "word": "shed light upon", "ipa": "[ʃed laɪt əˈpɑn]", "meaning_zh": ["阐明"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30504", "word": "sheen", "ipa": "[ʃi:n]", "meaning_zh": ["n.光泽，光辉,华服,有光泽的纺织物"], "example_en": "Sometimes the water spread like a sheen over the pebbly bed.", "example_zh": "有时河水泛流在圆石子的河床上,晶莹发光.", "soft_max_bytes": 153}
+{"id": "D30505", "word": "sheepish", "ipa": "[ˈʃipɪʃ]", "meaning_zh": ["羞怯的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30506", "word": "sheepishly", "ipa": "[ˈʃipɪʃlɪ]", "meaning_zh": ["羞怯地"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30507", "word": "sheer", "ipa": "[ʃɪə(r)]", "meaning_zh": ["adv.完全地，全然,垂直地，陡峭地", "adj.完全的，全然的,极薄的,陡峭的,绝对的"], "example_en": "Out of sheer boredom I would pick up a book and read on and on.", "example_zh": "在百无聊赖中,随手抓过一本书来,读下去.", "soft_max_bytes": 231}
+{"id": "D30508", "word": "sheerly", "ipa": "[ˈʃɪrlɪ]", "meaning_zh": ["希利"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30509", "word": "sheet music", "ipa": "[ʃit ˈmjuzɪk]", "meaning_zh": ["乐谱"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30510", "word": "sheik", "ipa": "[ʃik]", "meaning_zh": ["酋长"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30511", "word": "sheikh", "ipa": "[ʃek]", "meaning_zh": ["酋长"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30512", "word": "Shelley", "ipa": "[ˈʃɛlɪ]", "meaning_zh": ["雪莱"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30513", "word": "shellfish", "ipa": "[ˈʃelfɪʃ]", "meaning_zh": ["n.贝类动物,甲壳类动物,甲壳类（食物）"], "example_en": "A selfish shellfish smelt a stale fish.", "example_zh": "自私的贝类嗅了嗅不新鲜的鱼味.", "soft_max_bytes": 142}
+{"id": "D30514", "word": "shelter people", "ipa": "[ˈʃɛltɚ ˈpipl]", "meaning_zh": ["庇护所人员"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30515", "word": "sheltered", "ipa": "[ˈʃeltəd]", "meaning_zh": ["adj.受庇护的,免税的,（尤指为病弱者）提供食宿的,提供抚养方便的", "v.庇护( shelter的过去式和过去分词)"], "example_en": "British industry was sheltered from foreign competition by protective tariffs.", "example_zh": "保护性关税使英国工业免受国际竞争影响.", "soft_max_bytes": 283}
+{"id": "D30516", "word": "shelve", "ipa": "[ʃelv]", "meaning_zh": ["vt.将（书等）放置在架子上,将…搁在一边,装搁架于,罢免", "vi.（陆地）逐渐倾斜"], "example_en": "People shelve the out - of - fashion moral icon and espouse the philosophy of egoism.", "example_zh": "搁置了人民的时尚图标和拥护道德哲学的利己主义.", "soft_max_bytes": 255}
+{"id": "D30517", "word": "shepherd", "ipa": "[ˈʃepəd]", "meaning_zh": ["n.牧羊人，羊倌,牧师,指导者", "vt.带领，引导,牧（羊），放牧,照看"], "example_en": "During the night in the outside Bethlehem shepherd was guarding their sheep.", "example_zh": "夜间,在伯利恒的野外,牧羊人正在看守着羊群.", "soft_max_bytes": 217}
+{"id": "D30518", "word": "Sherri", "ipa": "[ˈʃɛrɪ]", "meaning_zh": ["雪莉"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30519", "word": "sherry", "ipa": "[ˈʃɛrɪ]", "meaning_zh": ["雪利酒"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30520", "word": "Shetland Islands", "ipa": "[ˈʃɛtlənd ˈɑɪlənds]", "meaning_zh": ["设得兰群岛"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30521", "word": "Shh!", "ipa": "[ʃ]", "meaning_zh": ["嘘！"], "example_en": "Shh, I sense danger may be near.", "example_zh": "安静,我感到危险就在附近。", "soft_max_bytes": 64}
+{"id": "D30522", "word": "shield", "ipa": "[ʃiːld]", "meaning_zh": ["n.盾,护罩,盾形奖牌,保护人", "vt.保护,掩护,庇护,给…加防护罩"], "example_en": "Can the brightest brooch shield me from reproach? Can the purest diamond purify my name?", "example_zh": "华丽的胸针难道能为我抵挡流言蜚语? 无暇的钻石难道能洗清我的罪名?", "soft_max_bytes": 256}
+{"id": "D30523", "word": "shield ... from ...", "ipa": "[ʃild frʌm]", "meaning_zh": ["v. 掩护", "使免遭；防止；庇护使免遭"], "example_en": "", "example_zh": "", "soft_max_bytes": 69}
+{"id": "D30524", "word": "shift for oneself", "ipa": "[ʃɪft fɔr wʌnˈsɛlf]", "meaning_zh": ["自行转移"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30525", "word": "shift gears on the wrong side", "ipa": "[ʃɪft ɡɪɚs ɑn ðə rɔŋ saɪd]", "meaning_zh": ["换档错误"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30526", "word": "shift one's ground", "ipa": "[ʃɪft wʌnz ɡraᴜnd]", "meaning_zh": ["改变立场"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30527", "word": "shifter", "ipa": "[ˈʃɪftɚ]", "meaning_zh": ["换档杆"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30528", "word": "shiftless", "ipa": "[ˈʃɪftləs]", "meaning_zh": ["adj.懒惰的，得过且过的，没出息的"], "example_en": "The other has been lazy and shiftless.", "example_zh": "另一个懒惰成性,碌碌无为.", "soft_max_bytes": 121}
+{"id": "D30529", "word": "shilling", "ipa": "[ˈʃɪlɪŋ]", "meaning_zh": ["n.先令（英国1971年以前的货币单位，为一镑的二十分之一）"], "example_en": "He handed each of them a shilling.", "example_zh": "他给了每人一个先令.", "soft_max_bytes": 159}
+{"id": "D30530", "word": "shimmer", "ipa": "[ˈʃɪmə(r)]", "meaning_zh": ["vi.闪烁，发微光", "n.微光,闪光"], "example_en": "The colours that shimmer across its surface are unbelievable.", "example_zh": "海面上泛着微光,闪烁着神奇的色彩.", "soft_max_bytes": 126}
+{"id": "D30531", "word": "shimmy", "ipa": "[ˈʃɪmɪ]", "meaning_zh": ["摆振"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30532", "word": "shin", "ipa": "[ʃɪn]", "meaning_zh": ["申"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30533", "word": "shine a light on", "ipa": "[ʃaɪn ə laɪt ɑn]", "meaning_zh": ["照亮"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30534", "word": "shined", "ipa": "[ʃaɪnd]", "meaning_zh": ["闪亮的"], "example_en": "He does not shine in science.", "example_zh": "他在理科学科方面并不出众。", "soft_max_bytes": 72}
+{"id": "D30535", "word": "shingle", "ipa": "[ˈʃɪŋgl]", "meaning_zh": ["n.鹅卵石,木瓦板,小招牌"], "example_en": "She sighed slightly as she sat on shingle in the sunshine.", "example_zh": "阳光下,他坐在屋瓦上轻声地叹气.", "soft_max_bytes": 112}
+{"id": "D30536", "word": "shining", "ipa": "['ʃaɪnɪŋ]", "meaning_zh": ["adj.光亮的,华丽的", "v.发光( shine的现在分词)"], "example_en": "The Ariane space-rocket project has had a shining success.", "example_zh": "阿里安航天火箭项目取得了辉煌的成功。", "soft_max_bytes": 163}
+{"id": "D30537", "word": "shipboard", "ipa": "[ˈʃɪpbɔrd]", "meaning_zh": ["船上"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30538", "word": "Shipley", "ipa": "[ˈʃɪplɪ]", "meaning_zh": ["希普利"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30539", "word": "shipmate", "ipa": "[ˈʃɪpˌmet]", "meaning_zh": ["船友"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30540", "word": "shipment", "ipa": "[ˈʃɪpmənt]", "meaning_zh": ["n.装运,载货量,装货，装载的货物"], "example_en": "With so many back order on hand, we can not promise any shipment before October.", "example_zh": "由于手头上的过期订单那么多, 所以我们无法答应十月之前装运.", "soft_max_bytes": 190}
+{"id": "D30541", "word": "shipping", "ipa": "[ˈʃɪpɪŋ]", "meaning_zh": ["n.[船]船舶,船舶总数,航运，海运,运送", "v.运送，乘船(ship的ing形式)"], "example_en": "Banks, firms and shipping lines mixed up with Iran have been warned.", "example_zh": "与伊有所往来的银行 、 公司以及船队,已经得到警告.", "soft_max_bytes": 232}
+{"id": "D30542", "word": "shipwreck", "ipa": "[ˈʃɪpˌrɛk]", "meaning_zh": ["沉船事故"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30543", "word": "shipwrecked", "ipa": "[ˈʃɪprekt]", "meaning_zh": ["失事船只"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30544", "word": "shipwright", "ipa": "[ˈʃɪpˌraɪt]", "meaning_zh": ["n.造船者，修船者"], "example_en": "His dream is to be a shipwright.", "example_zh": "他的梦想是成为一名造船者。", "soft_max_bytes": 93}
+{"id": "D30545", "word": "shipyard", "ipa": "[ˈʃɪpjɑrd]", "meaning_zh": ["造船厂"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30546", "word": "Shirin", "ipa": "[ˈʃɪrɪn]", "meaning_zh": ["西林"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30547", "word": "shirk", "ipa": "[ʃɜ:k]", "meaning_zh": ["vt.& vi.逃避（工作），偷懒"], "example_en": "It is dishonorable to shirk military service.", "example_zh": "逃避兵役是可耻的.", "soft_max_bytes": 90}
+{"id": "D30548", "word": "Shirley Temple", "ipa": "[ˈʃɝlɪ ˈtɛmpl]", "meaning_zh": ["雪莉·坦普尔"], "example_en": "Who is Shirley Temple?", "example_zh": "坦普尔是谁？", "soft_max_bytes": 52}
+{"id": "D30549", "word": "shirt pocket", "ipa": "[ʃɝt ˈpɑkɪt]", "meaning_zh": ["衬衫口袋"], "example_en": "He took a pack of cigarettes from his shirt pocket.", "example_zh": "他从衬衣口袋里取出一包纸烟。", "soft_max_bytes": 81}
+{"id": "D30550", "word": "shirttail", "ipa": "[ˈʃɝtˌtel]", "meaning_zh": ["衬衫下摆"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30551", "word": "shit", "ipa": "[ʃɪt]", "meaning_zh": ["该死的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30552", "word": "shivery", "ipa": "[ˈʃɪvərɪ]", "meaning_zh": ["颤抖"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30553", "word": "Shoa", "ipa": "[ˈʃoə]", "meaning_zh": ["肖阿"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30554", "word": "shoal", "ipa": "[ʃəʊl]", "meaning_zh": ["n.浅滩，沙洲,潜在的危险,鱼群,大量"], "example_en": "The shoal ( or bank ) and shoal facies are important types of carbonate deposits.", "example_zh": "滩或滩相是碳酸盐沈积中的重要类型,常见的有生物碎屑滩和鲕粒滩.", "soft_max_bytes": 204}
+{"id": "D30555", "word": "shock absorber", "ipa": "[ʃɑk əbˈsɔbɚ]", "meaning_zh": ["减震器"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30556", "word": "shock-absorbent", "ipa": "[ʃɑk əbˈsɔrbənt]", "meaning_zh": ["减震器"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30557", "word": "shockingly", "ipa": "[ˈʃɑkɪŋlɪ]", "meaning_zh": ["令人震惊的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30558", "word": "shockproof", "ipa": "[ˈʃɑkpruf]", "meaning_zh": ["防震的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30559", "word": "shockwave", "ipa": "[ʃɑkwev]", "meaning_zh": ["冲击波"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30560", "word": "shoddy", "ipa": "[ˈʃɒdi]", "meaning_zh": ["adj.劣质的,假冒的,卑劣的"], "example_en": "We rap the manufacturers on their knuckles if the toy is shoddy.", "example_zh": "如果玩具质量低劣，我们会痛斥制造商。", "soft_max_bytes": 130}
+{"id": "D30561", "word": "shoe-box", "ipa": "[ʃu bɑks]", "meaning_zh": ["鞋盒"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30562", "word": "shoelace", "ipa": "[ˈʃuˌles]", "meaning_zh": ["鞋带"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30563", "word": "shoemaker", "ipa": "[ˈʃuˌmekɚ]", "meaning_zh": ["鞋匠"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30564", "word": "shoeshine", "ipa": "[ˈʃuˌʃaɪn]", "meaning_zh": ["擦鞋"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30565", "word": "shoestring", "ipa": "[ˈʃuˌstrɪŋ]", "meaning_zh": ["小本经营"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30566", "word": "Shonda", "ipa": "[ˈʃɑndə]", "meaning_zh": ["珊达"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30567", "word": "shoo", "ipa": "", "meaning_zh": ["", "嘘"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30568", "word": "shoot a look at sb.", "ipa": "[ʃut e lᴜk æt ˈsʌmbɑdɪ]", "meaning_zh": ["看某人一眼。"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30569", "word": "shoot down", "ipa": "[ʃut daᴜn]", "meaning_zh": ["击落"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30570", "word": "shoot past", "ipa": "[ʃut pæst]", "meaning_zh": ["射门过去"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30571", "word": "shoot sb. a look", "ipa": "[ʃut ˈsʌmbɑdɪ e lᴜk]", "meaning_zh": ["向某人开枪。看一眼"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30572", "word": "shoot the breeze", "ipa": "[ʃut ðə briz]", "meaning_zh": ["轻举妄动"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30573", "word": "shoot through", "ipa": "[ʃut θru]", "meaning_zh": ["射穿"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30574", "word": "shoot up", "ipa": "[ʃut ʌp]", "meaning_zh": ["迅速成长"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30575", "word": "shoot-out", "ipa": "[ʃut aᴜt]", "meaning_zh": ["枪战"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30576", "word": "shop around", "ipa": "[ʃɑp əˈraᴜnd]", "meaning_zh": ["四处逛逛"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30577", "word": "shop assistant", "ipa": "[ʃɑp əˈsɪstənt]", "meaning_zh": ["售货员"], "example_en": "He is a shop assistant.", "example_zh": "他是一名售货员。", "soft_max_bytes": 49}
+{"id": "D30578", "word": "shop for clothes", "ipa": "[ʃɑp fɔr kloðz]", "meaning_zh": ["选购衣服"], "example_en": "They go into a shop for clothes.", "example_zh": "他们走进一家商店买衣服。", "soft_max_bytes": 72}
+{"id": "D30579", "word": "shop steward", "ipa": "[ʃɑp ˈstuəd]", "meaning_zh": ["工会代表"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30580", "word": "shopaholic", "ipa": "[ˌʃɑpəˈhɔlɪk]", "meaning_zh": ["购物狂"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30581", "word": "shopaholism", "ipa": "[ˌʃɑpəˈholɪzəm]", "meaning_zh": ["购物狂"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30582", "word": "shoplift", "ipa": "[ˈʃɒplɪft]", "meaning_zh": ["商店偷窃"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30583", "word": "shoplifting", "ipa": "[ˈʃɑplɪftɪŋ]", "meaning_zh": ["入店行窃"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30584", "word": "shopping bag", "ipa": "[ˈʃɑpɪŋ bæɡ]", "meaning_zh": ["购物袋"], "example_en": "My shopping bag broke and everything tumbled out.", "example_zh": "我的购物袋破了，东西纷纷都掉了出来。", "soft_max_bytes": 94}
+{"id": "D30585", "word": "shoreline", "ipa": "[ˈʃɔrlaɪn]", "meaning_zh": ["海岸线"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30586", "word": "short circuit", "ipa": "[ʃɔrt ˈsɝkɪt]", "meaning_zh": ["短路"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30587", "word": "short cut", "ipa": "[ʃɔrt kʌt]", "meaning_zh": ["捷径"], "example_en": "There is a short cut to heaven from everywhere.", "example_zh": "通往天堂的捷径无处无之。", "soft_max_bytes": 63}
+{"id": "D30588", "word": "short of", "ipa": "[ʃɔrt ʌv]", "meaning_zh": ["缺少"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30589", "word": "short of clothing", "ipa": "[ʃɔrt ɑv ˈkloðɪŋ]", "meaning_zh": ["缺少衣物"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30590", "word": "short of food", "ipa": "[ʃɔrt ɑv fud]", "meaning_zh": ["缺少食物"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30591", "word": "short of money", "ipa": "[ʃɔrt əv ˈmʌnɪ]", "meaning_zh": ["资金短缺"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30592", "word": "short out", "ipa": "[ʃɔrt aᴜt]", "meaning_zh": ["短路，短路"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30593", "word": "short pants", "ipa": "", "meaning_zh": ["", "短裤"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30594", "word": "short race", "ipa": "[ʃɔrt res]", "meaning_zh": ["短跑比赛"], "example_en": "Perseverance is not a long race, it is many short races one after anther.", "example_zh": "坚持并非长跑竞赛,而是一次又一次的短跑冲刺。", "soft_max_bytes": 114}
+{"id": "D30595", "word": "short temper", "ipa": "[ʃɔrt ˈtɛmpɚ]", "meaning_zh": ["脾气暴躁"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30596", "word": "short weight", "ipa": "[ʃɔrt wet]", "meaning_zh": ["短重，短重"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30597", "word": "short-circuit", "ipa": "[ˈʃɔrtˈsəkɪt]", "meaning_zh": ["短路"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30598", "word": "short-cut", "ipa": "[ʃɔrtkʌt]", "meaning_zh": ["捷径"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30599", "word": "short-lived", "ipa": "[ˈʃɔrtˈlaɪvd]", "meaning_zh": ["短命的"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}
+{"id": "D30600", "word": "short-wave", "ipa": "[ˈʃɔtwˈev]", "meaning_zh": ["短波"], "example_en": "", "example_zh": "", "soft_max_bytes": 48}

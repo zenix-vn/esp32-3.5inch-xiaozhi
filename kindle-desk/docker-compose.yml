@@ -1,0 +1,13 @@
+# Desk only: HTTPS is terminated by the host web server (OpenLiteSpeed/nginx) and proxied to 127.0.0.1:8095.
+# On a dedicated box with free ports 80/443, use docker-compose.caddy.yml instead (adds Caddy + auto HTTPS).
+services:
+  desk:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:8095:8080"
+    volumes:
+      - ./cards.json:/app/cards.json:ro
+      - ./config.json:/app/config.json:ro
+      - ./data:/app/data   # settings.json + edited cards.json (written by /settings)

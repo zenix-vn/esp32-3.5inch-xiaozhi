@@ -1,0 +1,9 @@
+#!/bin/sh
+# Name: Kindle Desk
+# Author: kindle-desk
+# Icon: /mnt/us/koreader/resources/koreader.png
+# DontUseFBInk
+
+# Ask the Kindle Desk plugin to open itself, then start KOReader like KOReader.sh does.
+touch /mnt/us/koreader/settings/kindle_desk.autostart
+nohup /mnt/us/koreader/koreader.sh --kual >/dev/null 2>&1 &
